@@ -15,6 +15,10 @@ public class Board {
 
     private Tile[][] gameBoard;
 
+    /*
+     * This class acts as a mediator between the tiles and meeples to keep track
+     * of which tiles have a meeple placed on them, and on which section.
+     */
     private class MeeplePosition {
 
         private Tile tile = null;
@@ -39,6 +43,8 @@ public class Board {
         /**
          * @return the isPlaced
          */
+        //TODO meepleposition object only exists if the meeple is placed,
+        // so this is not needed.
         public boolean isPlaced() {
             return isPlaced;
         }
@@ -129,8 +135,9 @@ public class Board {
         Tile right = this.gameBoard[yPos][xPos + 1];
         Tile left = this.gameBoard[yPos][xPos - 1];
 
-        boolean adjacent = (top != null) || (bottom != null) || (right != null)
-            || (left != null);
+        boolean adjacent =
+            (top != null) || (bottom != null) || (right != null)
+                || (left != null);
 
         // Check that the adjacent tiles sides' match.
         boolean topMatches = (top == null);
@@ -154,7 +161,8 @@ public class Board {
             leftMatches = true;
         }
 
-        boolean sidesMatch = (topMatches && bottomMatches && rightMatches && leftMatches);
+        boolean sidesMatch =
+            (topMatches && bottomMatches && rightMatches && leftMatches);
 
         // Return our answer.
         return (free && adjacent && sidesMatch);
@@ -176,11 +184,13 @@ public class Board {
      *         tried to place meeple on tile they didn't just place. 3: Player
      *         didn't play on a new feature.
      */
+    //@TODO should this be returning int err?
     public int placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
         int yTile) {
         // First we need to check the correctness of the input x & y.
-        boolean correctTile = (xBoard == aPlayer.getLastTilePlacedXPos() && yBoard == aPlayer
-            .getLastTilePlacedYPos());
+        boolean correctTile =
+            (xBoard == aPlayer.getLastTilePlacedXPos() && yBoard == aPlayer
+                .getLastTilePlacedYPos());
 
         // Next we check that the tile type is not already taken.
         boolean newFeature = this.isNewFeature(xBoard, yBoard, xTile, yTile);
@@ -192,8 +202,8 @@ public class Board {
 
             for (int i = 0; i < meeples.length; i++) {
                 if (this.meeplePlacement.get(meeples[i]) == null) {
-                    MeeplePosition mp = new MeeplePosition(theTile, xTile,
-                        yTile);
+                    MeeplePosition mp =
+                        new MeeplePosition(theTile, xTile, yTile);
                     this.meeplePlacement.put(meeples[i], mp);
                     return 0;
                 }
@@ -270,8 +280,8 @@ public class Board {
         TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
         // Add to an array. And run through adding each to toSearch.
-        int[][] neighborTiles = this.getTilePosNeighbors(xBoard, yBoard, xTile,
-            yTile);
+        int[][] neighborTiles =
+            this.getTilePosNeighbors(xBoard, yBoard, xTile, yTile);
 
         for (int i = 0; i < neighborTiles.length; i++) {
             // Check the tile is not null.
@@ -289,8 +299,8 @@ public class Board {
                 toAdd = toAdd.substring(0, toAdd.length() - 1);
 
                 // Check that the tile has the same tile type.
-                TileType tileType = tile.getTileType(neighborTiles[i][2],
-                    neighborTiles[i][3]);
+                TileType tileType =
+                    tile.getTileType(neighborTiles[i][2], neighborTiles[i][3]);
 
                 // Check the tile is not already in searched or toSearch.
                 if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -343,7 +353,7 @@ public class Board {
             Meeple m = iter.next();
             MeeplePosition mp = this.meeplePlacement.get(m);
 
-            if (mp.getTile() == aTile && mp.getxTile() == xTile
+            if (mp != null && mp.getTile() == aTile && mp.getxTile() == xTile
                 && mp.getyTile() == yTile) {
                 return m;
             }
@@ -361,13 +371,14 @@ public class Board {
     private int getTileXPos(Tile aTile) {
         for (int i = 0; i < this.gameBoard.length; i++) {
             for (int j = 0; j < this.gameBoard[i].length; j++) {
-                if (this.gameBoard[i][j] == aTile) {
+                if (this.gameBoard[i][j] != null
+                    && this.gameBoard[i][j] == aTile) {
                     return j;
                 }
             }
         }
 
-        // Just because we have to.
+        // The tile is not placed on the board.
         return -1;
     }
 
@@ -380,13 +391,14 @@ public class Board {
     private int getTileYPos(Tile aTile) {
         for (int i = 0; i < this.gameBoard.length; i++) {
             for (int j = 0; j < this.gameBoard[i].length; j++) {
-                if (this.gameBoard[i][j] == aTile) {
+                if (this.gameBoard[i][j] != null
+                    && this.gameBoard[i][j] == aTile) {
                     return i;
                 }
             }
         }
 
-        // Just because we have to.
+        // The tile is not placed on the board.
         return -1;
     }
 
@@ -410,8 +422,8 @@ public class Board {
                 // Check to see if it is attached to a cloister.
                 Tile tile = mp.getTile();
 
-                TileType tileType = tile.getTileType(mp.getxTile(),
-                    mp.getyTile());
+                TileType tileType =
+                    tile.getTileType(mp.getxTile(), mp.getyTile());
 
                 // If it is attached to a cloister.
                 if (tileType == TileType.CLOISTER) {
@@ -428,8 +440,9 @@ public class Board {
                     Tile wTile = gameBoard[tileXPos - 1][tileYPos];
                     Tile nwTile = gameBoard[tileXPos - 1][tileYPos - 1];
 
-                    Tile[] neighborTiles = { nTile, neTile, eTile, seTile,
-                            sTile, swTile, wTile, nwTile };
+                    Tile[] neighborTiles =
+                        { nTile, neTile, eTile, seTile, sTile, swTile, wTile,
+                                nwTile };
 
                     int numNeighborTiles = 0;
 
@@ -588,8 +601,8 @@ public class Board {
                 // Check to see if it is attached to a correct tile.
                 Tile tile = mp.getTile();
 
-                TileType tileType = tile.getTileType(mp.getxTile(),
-                    mp.getyTile());
+                TileType tileType =
+                    tile.getTileType(mp.getxTile(), mp.getyTile());
 
                 // If it is attached to a correct tile.
                 if (tileType == scoreTileType) {
@@ -618,8 +631,8 @@ public class Board {
                     // We are scoring if the feature is complete and
                     // the game is not over, or if the game is over.
                     if (hasGameEnded || (!nullTileFound && !hasGameEnded)) {
-                        ArrayList<Player> scoringPlayers = this
-                            .getFeatureScorers(players, meeplesOnFeature);
+                        ArrayList<Player> scoringPlayers =
+                            this.getFeatureScorers(players, meeplesOnFeature);
 
                         // Remove the meeples from the board.
                         for (int k = 0; k < meeplesOnFeature.size(); k++) {
@@ -691,8 +704,8 @@ public class Board {
         TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
         // Add to an array. And run through adding each to toSearch.
-        int[][] neighborTiles = this.getTilePosNeighbors(xBoard, yBoard, xTile,
-            yTile);
+        int[][] neighborTiles =
+            this.getTilePosNeighbors(xBoard, yBoard, xTile, yTile);
 
         for (int i = 0; i < neighborTiles.length; i++) {
             // Check the tile is not null.
@@ -710,8 +723,8 @@ public class Board {
                 toAdd = toAdd.substring(0, toAdd.length() - 1);
 
                 // Check that the tile has the same tile type.
-                TileType tileType = tile.getTileType(neighborTiles[i][2],
-                    neighborTiles[i][3]);
+                TileType tileType =
+                    tile.getTileType(neighborTiles[i][2], neighborTiles[i][3]);
 
                 // Check the tile is not already in searched or toSearch.
                 if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -795,8 +808,8 @@ public class Board {
             if (mp.isPlaced()) {
                 Tile tile = mp.getTile();
 
-                TileType tileType = tile.getTileType(mp.getxTile(),
-                    mp.getyTile());
+                TileType tileType =
+                    tile.getTileType(mp.getxTile(), mp.getyTile());
 
                 if (tileType == TileType.FIELD) {
                     // Init search.
@@ -816,8 +829,8 @@ public class Board {
                     // Score multiplier.
                     int multiplier = 3;
 
-                    ArrayList<Player> scoringPlayers = this.getFeatureScorers(
-                        players, meeplesOnFeature);
+                    ArrayList<Player> scoringPlayers =
+                        this.getFeatureScorers(players, meeplesOnFeature);
 
                     // Remove the meeples from the board.
                     for (int k = 0; k < meeplesOnFeature.size(); k++) {
@@ -871,8 +884,8 @@ public class Board {
                     for (int l = 0; l < tile.getTop().length; l++) {
                         if (tile.getTileType(l, k) == TileType.CITY) {
                             // Board x, board y, tile x, tile y.
-                            String currentTile = j + "," + i + "," + l + ","
-                                + k;
+                            String currentTile =
+                                j + "," + i + "," + l + "," + k;
 
                             for (int m = 0; m < cities.size(); m++) {
                                 if (cities.get(m).contains(currentTile)) {
@@ -949,8 +962,8 @@ public class Board {
         TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
         // Add neighbors to an array. And run through adding each to toSearch.
-        int[][] neighborTiles = this.getTilePosNeighbors(xBoard, yBoard, xTile,
-            yTile);
+        int[][] neighborTiles =
+            this.getTilePosNeighbors(xBoard, yBoard, xTile, yTile);
 
         // Add valid neighbors of position to toSearch map.
         // A neighbor is valid if it is in neither map,
@@ -971,8 +984,8 @@ public class Board {
                 toAdd = toAdd.substring(0, toAdd.length() - 1);
 
                 // Check that the tile has the same tile type.
-                TileType tileType = tile.getTileType(neighborTiles[i][2],
-                    neighborTiles[i][3]);
+                TileType tileType =
+                    tile.getTileType(neighborTiles[i][2], neighborTiles[i][3]);
 
                 // Check the tile is not already in searched or toSearch.
                 if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -1042,8 +1055,8 @@ public class Board {
         searched.add(tilePosition);
 
         // Get the neighbor tile positions.
-        int[][] neighborTiles = this.getTilePosNeighbors(xBoard, yBoard, xTile,
-            yTile);
+        int[][] neighborTiles =
+            this.getTilePosNeighbors(xBoard, yBoard, xTile, yTile);
 
         // Add valid neighbors of position to toSearch map.
         // A neighbor is valid if it is in neither map, and is a field.
@@ -1064,8 +1077,8 @@ public class Board {
                 toAdd = toAdd.substring(0, toAdd.length() - 1);
 
                 // Check that the tile has the same tile type.
-                TileType tileType = tile.getTileType(neighborTiles[i][2],
-                    neighborTiles[i][3]);
+                TileType tileType =
+                    tile.getTileType(neighborTiles[i][2], neighborTiles[i][3]);
 
                 // Add the tile to be searched if it is also a field.
                 if (tileType == TileType.FIELD) {
@@ -1174,8 +1187,8 @@ public class Board {
             swStr[0]--;
         }
 
-        int[][] neighborTiles = { nStr, neStr, eStr, seStr, sStr, swStr, wStr,
-                nwStr };
+        int[][] neighborTiles =
+            { nStr, neStr, eStr, seStr, sStr, swStr, wStr, nwStr };
 
         return neighborTiles;
     }

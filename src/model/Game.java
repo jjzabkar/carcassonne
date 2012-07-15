@@ -82,7 +82,7 @@ public class Game {
      *            scoring during the game.
      */
     public void scoreCloisters(boolean hasGameEnded) {
-        this.gameBoard.scoreCities(this.players, hasGameEnded);
+        this.gameBoard.scoreCloisters(this.players, hasGameEnded);
     }
 
     /**
