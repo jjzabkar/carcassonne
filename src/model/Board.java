@@ -109,6 +109,13 @@ public class Board {
             this.gameBoard[yPos][xPos] = tileToPlace;
             aPlayer.setCurrentTile(null);
             aPlayer.setLastTilePlacedPos(xPos, yPos);
+
+            // UI code.
+            tileToPlace.setTilex(xPos * tileToPlace.getTileTypeSize()
+                * tileToPlace.getTop().length);
+
+            tileToPlace.setTiley(yPos * tileToPlace.getTileTypeSize()
+                * tileToPlace.getTop().length);
         }
     }
 

@@ -24,6 +24,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.Game;
+import model.Player;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -214,14 +215,15 @@ public class GameUI extends JFrame implements ActionListener {
         this.audioSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
         this.audioSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        this.windowedResolutionDropDown = new JComboBox<String>(
-            this.windowedResolutions);
+        this.windowedResolutionDropDown =
+            new JComboBox<String>(this.windowedResolutions);
 
         this.windowedResolutionDropDown.setSelectedItem("800 x 600");
         this.windowedResolutionDropDown.setActionCommand("changeResolution");
         this.windowedResolutionDropDown.addActionListener(this);
 
-        this.windowedModeDropDown = new JComboBox<String>(this.windowedSettings);
+        this.windowedModeDropDown =
+            new JComboBox<String>(this.windowedSettings);
 
         this.windowedModeDropDown.setSelectedItem("Windowed");
         this.windowedModeDropDown.setActionCommand("changeWindowedMode");
@@ -236,8 +238,8 @@ public class GameUI extends JFrame implements ActionListener {
         this.volumeSliderLabel.setHorizontalTextPosition(JLabel.CENTER);
         this.volumeSliderLabel.setHorizontalAlignment(JLabel.RIGHT);
 
-        this.volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100,
-            this.currentVolume);
+        this.volumeSlider =
+            new JSlider(JSlider.HORIZONTAL, 0, 100, this.currentVolume);
 
         this.volumeSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -250,8 +252,8 @@ public class GameUI extends JFrame implements ActionListener {
         this.volumeContainer.add(this.volumeSlider, BorderLayout.WEST);
         this.volumeContainer.add(this.volumeSliderLabel, BorderLayout.EAST);
 
-        this.soundToggleButton = new JButton("Music: "
-            + (this.currentSoundEnabled ? "ON" : "OFF"));
+        this.soundToggleButton =
+            new JButton("Music: " + (this.currentSoundEnabled ? "ON" : "OFF"));
 
         this.soundToggleButton.setVerticalTextPosition(AbstractButton.CENTER);
         this.soundToggleButton.setHorizontalTextPosition(AbstractButton.CENTER);
@@ -349,6 +351,15 @@ public class GameUI extends JFrame implements ActionListener {
             this.setContentPane(this.gameContentPane);
             this.revalidate();
             this.repaint();
+
+            game = new Game(4);
+
+            Player p = game.getPlayers()[0];
+            game.drawTile(p);
+
+            this.gameBoardWindow.add(p.getCurrentTile());
+
+            game.placeTile(p, 2, 2);
 
             // Play a game!
             /*

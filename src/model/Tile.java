@@ -1,11 +1,16 @@
 package model;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
+import ui.DrawableInterface;
+
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
  * @version 1.0
  * @since 2012-06-08
  */
-public class Tile {
+public class Tile implements DrawableInterface {
     // A tile is stored as a 7x7 matrix, where the corner cells are null.
     // (Would be 5x5 but some tiles need more space.)
     // ie.
@@ -36,6 +41,11 @@ public class Tile {
     protected TileType[][] tile;
     private String identifier = "";
     private int orientation = 0;
+
+    // UI variables.
+    private int tilex;
+    private int tiley;
+    private final int tileTypeSize = 10;
 
     private Tile() {
         // Create the tile array.
@@ -181,6 +191,66 @@ public class Tile {
 
     public int getOrientation() {
         return this.orientation;
+    }
+
+    public int getTilex() {
+        return tilex;
+    }
+
+    public int getTiley() {
+        return tiley;
+    }
+
+    public int getTileTypeSize() {
+        return tileTypeSize;
+    }
+
+    public void setTilex(int tilex) {
+        this.tilex = tilex;
+    }
+
+    public void setTiley(int tiley) {
+        this.tiley = tiley;
+    }
+
+    @Override
+    public void draw(Graphics g) {
+
+        Color tileTypeColor = Color.black;
+
+        for (int i = 0; i < this.tile.length; i++) {
+            for (int j = 0; j < this.tile[i].length; j++) {
+
+                if (tile[i][j] != null) {
+
+                    switch (tile[i][j]) {
+                        case CLOISTER:
+                            tileTypeColor = Color.yellow;
+                            break;
+                        case CITY:
+                            tileTypeColor = Color.orange;
+                            break;
+                        case ROAD:
+                            tileTypeColor = Color.gray;
+                            break;
+                        case RIVER:
+                            tileTypeColor = Color.blue;
+                            break;
+                        case FIELD:
+                            tileTypeColor = Color.green;
+                            break;
+                    }
+
+                } else {
+
+                    tileTypeColor = Color.black;
+                }
+
+                g.setColor(tileTypeColor);
+                g.fillRect(this.tilex + j * this.tileTypeSize, this.tiley + i
+                    * this.tileTypeSize, this.tileTypeSize, this.tileTypeSize);
+            }
+        }
     }
 
 }
