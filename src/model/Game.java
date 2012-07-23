@@ -24,8 +24,8 @@ public class Game {
      */
     private void initPlayers(int numPlayers) {
         this.players = new Player[numPlayers];
-        Color[] colors = { Color.BLACK, Color.BLUE, Color.YELLOW, Color.RED,
-                Color.GREEN };
+        Color[] colors =
+            { Color.BLACK, Color.BLUE, Color.YELLOW, Color.RED, Color.GREEN };
 
         for (int i = 0; i < numPlayers; i++) {
             this.players[i] = new Player(colors[i]);
@@ -56,9 +56,11 @@ public class Game {
      * @param aPlayer The player which is placing the tile.
      * @param xPos The x position on the game board to place the tile.
      * @param yPos The y position on the game board to place the tile.
+     * @return a non-zero integer if the tile could not be placed, zero
+     *         otherwise.
      */
-    public void placeTile(Player aPlayer, int xPos, int yPos) {
-        this.gameBoard.placeTile(aPlayer, xPos, yPos);
+    public int placeTile(Player aPlayer, int xPos, int yPos) {
+        return this.gameBoard.placeTile(aPlayer, xPos, yPos);
     }
 
     /**

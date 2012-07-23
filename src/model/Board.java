@@ -101,8 +101,10 @@ public class Board {
      * @param aPlayer The player which is placing the tile.
      * @param xPos The x position on the game board to place the tile.
      * @param yPos The y position on the game board to place the tile.
+     * @return a non-zero integer if the tile could not be placed, zero
+     *         otherwise.
      */
-    public void placeTile(Player aPlayer, int xPos, int yPos) {
+    public int placeTile(Player aPlayer, int xPos, int yPos) {
         Tile tileToPlace = aPlayer.getCurrentTile();
 
         if (tileToPlace != null && this.isTilePosValid(tileToPlace, xPos, yPos)) {
@@ -116,7 +118,11 @@ public class Board {
 
             tileToPlace.setTiley(yPos * tileToPlace.getTileTypeSize()
                 * tileToPlace.getTop().length);
+
+            return 0;
         }
+
+        return 1;
     }
 
     /**
@@ -171,8 +177,19 @@ public class Board {
         boolean sidesMatch =
             (topMatches && bottomMatches && rightMatches && leftMatches);
 
+        boolean firstPlay = true;
+
+        // Check if there has already been a tile placed on the board.
+        for (int i = 0; i < this.gameBoard.length; i++) {
+            for (int j = 0; j < this.gameBoard[i].length; j++) {
+                if (this.gameBoard[j][i] != null) {
+                    firstPlay = false;
+                }
+            }
+        }
+
         // Return our answer.
-        return (free && adjacent && sidesMatch);
+        return (free && adjacent && sidesMatch) || firstPlay;
     }
 
     /**

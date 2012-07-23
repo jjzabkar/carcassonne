@@ -25,6 +25,7 @@ import javax.swing.event.ChangeListener;
 
 import model.Game;
 import model.Player;
+import model.Tile;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -352,14 +353,17 @@ public class GameUI extends JFrame implements ActionListener {
             this.revalidate();
             this.repaint();
 
+            int err = 0;
+
             game = new Game(4);
 
             Player p = game.getPlayers()[0];
             game.drawTile(p);
-
-            this.gameBoardWindow.add(p.getCurrentTile());
-
-            game.placeTile(p, 2, 2);
+            Tile tileToPlace = p.getCurrentTile();
+            err = game.placeTile(p, 1, 1);
+            if (err == 0) {
+                this.gameBoardWindow.add(tileToPlace);
+            }
 
             // Play a game!
             /*

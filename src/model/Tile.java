@@ -247,8 +247,9 @@ public class Tile implements DrawableInterface {
                 }
 
                 g.setColor(tileTypeColor);
-                g.fillRect(this.tilex + j * this.tileTypeSize, this.tiley + i
-                    * this.tileTypeSize, this.tileTypeSize, this.tileTypeSize);
+                g.fillRect(this.tilex + (j * this.tileTypeSize), this.tiley
+                    + (i * this.tileTypeSize), this.tileTypeSize,
+                    this.tileTypeSize);
             }
         }
     }
