@@ -113,11 +113,8 @@ public class Board {
             aPlayer.setLastTilePlacedPos(xPos, yPos);
 
             // UI code.
-            tileToPlace.setTilex(xPos * tileToPlace.getTileTypeSize()
-                * tileToPlace.getTop().length);
-
-            tileToPlace.setTiley(yPos * tileToPlace.getTileTypeSize()
-                * tileToPlace.getTop().length);
+            tileToPlace.setTilex(xPos * Tile.tileTypeSize * Tile.tileSize);
+            tileToPlace.setTiley(yPos * Tile.tileTypeSize * Tile.tileSize);
 
             return 0;
         }

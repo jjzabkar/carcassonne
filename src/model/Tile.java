@@ -45,17 +45,22 @@ public class Tile implements DrawableInterface {
     // UI variables.
     private int tilex;
     private int tiley;
-    private final int tileTypeSize = 10;
+
+    // Denotes the width of a tileType element when drawn by the ui.
+    public static final int tileTypeSize = 10;
+
+    // Denotes the height & width of a tile (it's square!).
+    public static final int tileSize = 7;
 
     private Tile() {
         // Create the tile array.
-        this.tile = new TileType[7][7];
+        this.tile = new TileType[tileSize][tileSize];
 
         // Set the corners.
         this.tile[0][0] = null;
-        this.tile[0][6] = null;
-        this.tile[6][0] = null;
-        this.tile[6][6] = null;
+        this.tile[0][tileSize - 1] = null;
+        this.tile[tileSize - 1][0] = null;
+        this.tile[tileSize - 1][tileSize - 1] = null;
     }
 
     /**
@@ -67,12 +72,12 @@ public class Tile implements DrawableInterface {
     public Tile(char[][] theTile, String identifier) {
         this();
 
-        if (theTile.length != 7) {
+        if (theTile.length != tileSize) {
             throw new IllegalArgumentException("Tile size must be 7x7.");
         }
 
         for (int i = 0; i < theTile.length; i++) {
-            if (theTile[i].length != 7) {
+            if (theTile[i].length != tileSize) {
                 throw new IllegalArgumentException("Tile size must be 7x7.");
             }
 
@@ -124,11 +129,11 @@ public class Tile implements DrawableInterface {
      * Rotate the tile counter-clockwise by 90 degrees.
      */
     public void rotateCounterClockwise() {
-        TileType[][] ret = new TileType[7][7];
+        TileType[][] ret = new TileType[tileSize][tileSize];
 
         for (int i = 0; i < this.tile.length; i++) {
             for (int j = 0; j < this.tile[i].length; j++) {
-                ret[i][j] = this.tile[j][7 - i - 1];
+                ret[i][j] = this.tile[j][tileSize - i - 1];
             }
         }
 
@@ -140,11 +145,11 @@ public class Tile implements DrawableInterface {
      * Rotate the tile clockwise by 90 degrees.
      */
     public void rotateClockwise() {
-        TileType[][] ret = new TileType[7][7];
+        TileType[][] ret = new TileType[tileSize][tileSize];
 
         for (int i = 0; i < this.tile.length; i++) {
             for (int j = 0; j < this.tile[i].length; j++) {
-                ret[i][j] = this.tile[7 - j - 1][i];
+                ret[i][j] = this.tile[tileSize - j - 1][i];
             }
         }
 
@@ -158,23 +163,23 @@ public class Tile implements DrawableInterface {
     }
 
     public TileType[] getRight() {
-        TileType[] right = new TileType[7];
+        TileType[] right = new TileType[tileSize];
 
-        for (int i = 0; i < 7; i++) {
-            right[i] = this.tile[i][6];
+        for (int i = 0; i < tileSize; i++) {
+            right[i] = this.tile[i][tileSize - 1];
         }
 
         return right;
     }
 
     public TileType[] getBottom() {
-        return this.tile[6];
+        return this.tile[tileSize - 1];
     }
 
     public TileType[] getLeft() {
-        TileType[] left = new TileType[7];
+        TileType[] left = new TileType[tileSize];
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < tileSize; i++) {
             left[i] = this.tile[i][0];
         }
 
@@ -199,10 +204,6 @@ public class Tile implements DrawableInterface {
 
     public int getTiley() {
         return tiley;
-    }
-
-    public int getTileTypeSize() {
-        return tileTypeSize;
     }
 
     public void setTilex(int tilex) {
@@ -247,9 +248,8 @@ public class Tile implements DrawableInterface {
                 }
 
                 g.setColor(tileTypeColor);
-                g.fillRect(this.tilex + (j * this.tileTypeSize), this.tiley
-                    + (i * this.tileTypeSize), this.tileTypeSize,
-                    this.tileTypeSize);
+                g.fillRect(this.tilex + (j * tileTypeSize), this.tiley
+                    + (i * tileTypeSize), tileTypeSize, tileTypeSize);
             }
         }
     }

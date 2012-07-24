@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -55,40 +56,15 @@ public class GameUI extends JFrame implements ActionListener {
     private int currentVolume = 25;
     private boolean currentSoundEnabled = false;
 
-    // Title screen variables.
+    // Main JPanels which are to be swapped as the frame content.
     private JPanel titleScreenContentPane;
-
-    private JLabel titleLabel;
-
-    private JPanel titleContainer;
-    private JButton singleplayerButton;
-    private JButton multiplayerButton;
-    private JButton optionsButton;
-    private JButton exitButton;
-
-    // Options screen variables.
     private JPanel optionsScreenContentPane;
-
-    private JLabel optionsLabel;
-
-    private JPanel optionsContainer;
-    private JLabel videoSettingsLabel;
-    private JLabel audioSettingsLabel;
-    private JComboBox<String> windowedResolutionDropDown;
-    private JComboBox<String> windowedModeDropDown;
-
-    private JPanel volumeContainer;
-    private JSlider volumeSlider;
-    private JLabel volumeSliderLabel;
-
-    private JButton soundToggleButton;
-    private JButton backButton;
-
-    // Game screen variables.
     private JPanel gameContentPane;
 
+    // And other ui elements which need to be declared globally.
+    private JComboBox<String> windowedResolutionDropDown;
+    private JLabel volumeSliderLabel;
     private JCanvas gameBoardWindow;
-    private JPanel infoWindow;
 
     public GameUI() {
         // Initialize game menus.
@@ -127,44 +103,44 @@ public class GameUI extends JFrame implements ActionListener {
     private void initTitleScreen() {
         this.titleScreenContentPane = new JPanel(new BorderLayout());
 
-        this.titleLabel = new JLabel("Carcassonne");
-        this.titleLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        this.titleLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.titleLabel.setHorizontalAlignment(JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Carcassonne");
+        titleLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        titleLabel.setHorizontalTextPosition(JLabel.CENTER);
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        this.singleplayerButton = new JButton("Singleplayer");
-        this.singleplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.singleplayerButton
-            .setHorizontalTextPosition(AbstractButton.CENTER);
-        this.singleplayerButton.setMnemonic(KeyEvent.VK_S);
-        this.singleplayerButton.setActionCommand("startSingleplayerGame");
-        this.singleplayerButton.addActionListener(this);
+        JButton singleplayerButton = new JButton("Singleplayer");
+        singleplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
+        singleplayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        singleplayerButton.setMnemonic(KeyEvent.VK_S);
+        singleplayerButton.setActionCommand("startSingleplayerGame");
+        singleplayerButton.addActionListener(this);
 
-        this.multiplayerButton = new JButton("Multiplayer");
-        this.multiplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.multiplayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
-        this.multiplayerButton.setMnemonic(KeyEvent.VK_M);
-        this.multiplayerButton.setActionCommand("startMultiplayerGame");
-        this.multiplayerButton.addActionListener(this);
+        JButton multiplayerButton = new JButton("Multiplayer");
+        multiplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
+        multiplayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        multiplayerButton.setMnemonic(KeyEvent.VK_M);
+        multiplayerButton.setActionCommand("startMultiplayerGame");
+        multiplayerButton.addActionListener(this);
+
         //TODO
-        this.multiplayerButton.setEnabled(false);
+        multiplayerButton.setEnabled(false);
 
-        this.optionsButton = new JButton("Options");
-        this.optionsButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.optionsButton.setHorizontalTextPosition(AbstractButton.CENTER);
-        this.optionsButton.setMnemonic(KeyEvent.VK_O);
-        this.optionsButton.setActionCommand("showOptionsScreen");
-        this.optionsButton.addActionListener(this);
+        JButton optionsButton = new JButton("Options");
+        optionsButton.setVerticalTextPosition(AbstractButton.CENTER);
+        optionsButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        optionsButton.setMnemonic(KeyEvent.VK_O);
+        optionsButton.setActionCommand("showOptionsScreen");
+        optionsButton.addActionListener(this);
 
-        this.exitButton = new JButton("Quit Game");
-        this.exitButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.exitButton.setHorizontalTextPosition(AbstractButton.CENTER);
-        this.exitButton.setMnemonic(KeyEvent.VK_Q);
-        this.exitButton.setActionCommand("exitGame");
-        this.exitButton.addActionListener(this);
+        JButton exitButton = new JButton("Quit Game");
+        exitButton.setVerticalTextPosition(AbstractButton.CENTER);
+        exitButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        exitButton.setMnemonic(KeyEvent.VK_Q);
+        exitButton.setActionCommand("exitGame");
+        exitButton.addActionListener(this);
 
         // After creating the components, place them on the title screen.
-        this.titleContainer = new JPanel(new GridBagLayout());
+        JPanel titleContainer = new JPanel(new GridBagLayout());
 
         GridBagConstraints gc = new GridBagConstraints();
         gc.insets = new Insets(2, 2, 2, 2);
@@ -175,74 +151,72 @@ public class GameUI extends JFrame implements ActionListener {
         gc.gridheight = 1;
         gc.fill = GridBagConstraints.HORIZONTAL;
 
-        this.titleContainer.add(this.singleplayerButton, gc);
+        titleContainer.add(singleplayerButton, gc);
 
         gc.gridy = 1;
 
-        this.titleContainer.add(this.multiplayerButton, gc);
+        titleContainer.add(multiplayerButton, gc);
 
         gc.gridy = 2;
         gc.gridwidth = 1;
         gc.fill = GridBagConstraints.NONE;
         gc.insets = new Insets(2, 2, 20, 2);
 
-        this.titleContainer.add(this.optionsButton, gc);
+        titleContainer.add(optionsButton, gc);
 
         gc.gridx = 1;
 
-        this.titleContainer.add(this.exitButton, gc);
+        titleContainer.add(exitButton, gc);
 
-        this.titleScreenContentPane.add(this.titleLabel,
-            BorderLayout.PAGE_START);
-        this.titleScreenContentPane.add(this.titleContainer,
-            BorderLayout.PAGE_END);
+        this.titleScreenContentPane.add(titleLabel, BorderLayout.PAGE_START);
+        this.titleScreenContentPane.add(titleContainer, BorderLayout.PAGE_END);
     }
 
     private void initOptionsScreen() {
         this.optionsScreenContentPane = new JPanel(new BorderLayout());
 
-        this.optionsLabel = new JLabel("Options");
-        this.optionsLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        this.optionsLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.optionsLabel.setHorizontalAlignment(JLabel.CENTER);
+        JLabel optionsLabel = new JLabel("Options");
+        optionsLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        optionsLabel.setHorizontalTextPosition(JLabel.CENTER);
+        optionsLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        this.videoSettingsLabel = new JLabel("Video");
-        this.videoSettingsLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        this.videoSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.videoSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
+        JLabel videoSettingsLabel = new JLabel("Video");
+        videoSettingsLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        videoSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
+        videoSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        this.audioSettingsLabel = new JLabel("Sound");
-        this.audioSettingsLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        this.audioSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.audioSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
+        JLabel audioSettingsLabel = new JLabel("Sound");
+        audioSettingsLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        audioSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
+        audioSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        this.windowedResolutionDropDown =
+        windowedResolutionDropDown =
             new JComboBox<String>(this.windowedResolutions);
 
-        this.windowedResolutionDropDown.setSelectedItem("800 x 600");
-        this.windowedResolutionDropDown.setActionCommand("changeResolution");
-        this.windowedResolutionDropDown.addActionListener(this);
+        windowedResolutionDropDown.setSelectedItem("800 x 600");
+        windowedResolutionDropDown.setActionCommand("changeResolution");
+        windowedResolutionDropDown.addActionListener(this);
 
-        this.windowedModeDropDown =
+        JComboBox<String> windowedModeDropDown =
             new JComboBox<String>(this.windowedSettings);
 
-        this.windowedModeDropDown.setSelectedItem("Windowed");
-        this.windowedModeDropDown.setActionCommand("changeWindowedMode");
-        this.windowedModeDropDown.addActionListener(this);
+        windowedModeDropDown.setSelectedItem("Windowed");
+        windowedModeDropDown.setActionCommand("changeWindowedMode");
+        windowedModeDropDown.addActionListener(this);
 
         //TODO MUSIC
-        this.volumeContainer = new JPanel(new BorderLayout());
-        this.volumeContainer.setPreferredSize(new Dimension(240, 20));
+        JPanel volumeContainer = new JPanel(new BorderLayout());
+        volumeContainer.setPreferredSize(new Dimension(240, 20));
 
-        this.volumeSliderLabel = new JLabel(this.currentVolume + "%");
-        this.volumeSliderLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        this.volumeSliderLabel.setHorizontalTextPosition(JLabel.CENTER);
-        this.volumeSliderLabel.setHorizontalAlignment(JLabel.RIGHT);
+        volumeSliderLabel = new JLabel(this.currentVolume + "%");
+        volumeSliderLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        volumeSliderLabel.setHorizontalTextPosition(JLabel.CENTER);
+        volumeSliderLabel.setHorizontalAlignment(JLabel.RIGHT);
 
-        this.volumeSlider =
+        JSlider volumeSlider =
             new JSlider(JSlider.HORIZONTAL, 0, 100, this.currentVolume);
 
-        this.volumeSlider.addChangeListener(new ChangeListener() {
+        volumeSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 JSlider s = (JSlider) e.getSource();
                 volumeSliderLabel.setText(s.getValue() + "%");
@@ -250,27 +224,27 @@ public class GameUI extends JFrame implements ActionListener {
         });
 
         // Sub-placement of volume slider and label in the volume container.
-        this.volumeContainer.add(this.volumeSlider, BorderLayout.WEST);
-        this.volumeContainer.add(this.volumeSliderLabel, BorderLayout.EAST);
+        volumeContainer.add(volumeSlider, BorderLayout.WEST);
+        volumeContainer.add(volumeSliderLabel, BorderLayout.EAST);
 
-        this.soundToggleButton =
+        JButton soundToggleButton =
             new JButton("Music: " + (this.currentSoundEnabled ? "ON" : "OFF"));
 
-        this.soundToggleButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.soundToggleButton.setHorizontalTextPosition(AbstractButton.CENTER);
-        this.soundToggleButton.setMnemonic(KeyEvent.VK_M);
-        this.soundToggleButton.setActionCommand("toggleSound");
-        this.soundToggleButton.addActionListener(this);
+        soundToggleButton.setVerticalTextPosition(AbstractButton.CENTER);
+        soundToggleButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        soundToggleButton.setMnemonic(KeyEvent.VK_M);
+        soundToggleButton.setActionCommand("toggleSound");
+        soundToggleButton.addActionListener(this);
 
-        this.backButton = new JButton("Back");
-        this.backButton.setVerticalTextPosition(AbstractButton.CENTER);
-        this.backButton.setHorizontalTextPosition(AbstractButton.CENTER);
-        this.backButton.setMnemonic(KeyEvent.VK_B);
-        this.backButton.setActionCommand("showTitleScreen");
-        this.backButton.addActionListener(this);
+        JButton backButton = new JButton("Back");
+        backButton.setVerticalTextPosition(AbstractButton.CENTER);
+        backButton.setHorizontalTextPosition(AbstractButton.CENTER);
+        backButton.setMnemonic(KeyEvent.VK_B);
+        backButton.setActionCommand("showTitleScreen");
+        backButton.addActionListener(this);
 
         // Now, place the created components in the container. 
-        this.optionsContainer = new JPanel(new GridBagLayout());
+        JPanel optionsContainer = new JPanel(new GridBagLayout());
 
         GridBagConstraints gc = new GridBagConstraints();
         gc.insets = new Insets(2, 2, 2, 2);
@@ -280,39 +254,39 @@ public class GameUI extends JFrame implements ActionListener {
         gc.gridwidth = 1;
         gc.gridheight = 1;
 
-        this.optionsContainer.add(this.videoSettingsLabel);
+        optionsContainer.add(videoSettingsLabel);
 
         gc.gridx = 1;
 
-        this.optionsContainer.add(this.audioSettingsLabel);
+        optionsContainer.add(audioSettingsLabel);
 
         gc.gridx = 0;
         gc.gridy = 1;
         gc.fill = GridBagConstraints.HORIZONTAL;
 
-        this.optionsContainer.add(this.windowedResolutionDropDown, gc);
+        optionsContainer.add(windowedResolutionDropDown, gc);
 
         gc.gridy = 2;
 
-        this.optionsContainer.add(this.windowedModeDropDown, gc);
+        optionsContainer.add(windowedModeDropDown, gc);
 
         gc.gridx = 1;
         gc.gridy = 1;
 
-        this.optionsContainer.add(this.volumeContainer, gc);
+        optionsContainer.add(volumeContainer, gc);
 
         gc.gridy = 2;
 
-        this.optionsContainer.add(this.soundToggleButton, gc);
+        optionsContainer.add(soundToggleButton, gc);
 
         gc.gridy = 3;
         gc.insets = new Insets(2, 2, 20, 2);
 
-        this.optionsContainer.add(this.backButton, gc);
+        optionsContainer.add(backButton, gc);
 
-        this.optionsScreenContentPane.add(this.optionsLabel,
-            BorderLayout.PAGE_START);
-        this.optionsScreenContentPane.add(this.optionsContainer,
+        this.optionsScreenContentPane
+            .add(optionsLabel, BorderLayout.PAGE_START);
+        this.optionsScreenContentPane.add(optionsContainer,
             BorderLayout.PAGE_END);
     }
 
@@ -323,25 +297,61 @@ public class GameUI extends JFrame implements ActionListener {
         this.gameBoardWindow.setBorder(BorderFactory
             .createLineBorder(Color.BLACK));
 
-        this.infoWindow = new JPanel();
-        this.infoWindow.setPreferredSize(new Dimension(200, 600));
-        this.infoWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        JPanel infoContainer = new JPanel(new BorderLayout());
+        infoContainer.setPreferredSize(new Dimension(200, 600));
+        infoContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+        JPanel scoreInfoWindow = new JPanel(new GridBagLayout());
+        scoreInfoWindow.setPreferredSize(new Dimension((int) infoContainer
+            .getPreferredSize().getWidth(), (int) infoContainer
+            .getPreferredSize().getHeight() * 1 / 3));
+        scoreInfoWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        JPanel controlsWindow = new JPanel(new GridBagLayout());
+        controlsWindow.setPreferredSize(new Dimension((int) infoContainer
+            .getPreferredSize().getWidth(), (int) infoContainer
+            .getPreferredSize().getHeight() * 2 / 3));
+        controlsWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        // Fill in the info window controls.
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.insets = new Insets(2, 2, 2, 2);
+
+        gc.gridx = 0;
+        gc.gridy = 0;
+        gc.gridwidth = 1;
+        gc.gridheight = 1;
+        gc.fill = GridBagConstraints.NONE;
+
+        JButton zoomInButton = new JButton("Zoom In");
+        JButton zoomOutButton = new JButton("Zoom Out");
+
+        JButton panRightButton = new JButton("Pan Right");
+        JButton panLeftButton = new JButton("Pan Left");
+        JButton panUpButton = new JButton("Pan Up");
+        JButton panDownButton = new JButton("Pan Down");
+
+        JButton rotateCWButton = new JButton("Rotate Clockwise");
+        JButton rotateCCWButton = new JButton("Rotate Counter-Clockwise");
+
+        ImageIcon drawTileButtonImage = new ImageIcon("tile-back.png");
+        JButton drawTileButton = new JButton(drawTileButtonImage);
+
+        JPanel currentTilePanel = new JPanel();
+        currentTilePanel.setPreferredSize(new Dimension(Tile.tileSize
+            * Tile.tileTypeSize, Tile.tileSize * Tile.tileTypeSize));
+
+        // Add everything to everything in the info container.
         this.gameContentPane.add(this.gameBoardWindow, BorderLayout.CENTER);
-        this.gameContentPane.add(this.infoWindow, BorderLayout.EAST);
+        this.gameContentPane.add(infoContainer, BorderLayout.EAST);
+        infoContainer.add(scoreInfoWindow, BorderLayout.NORTH);
+        infoContainer.add(controlsWindow, BorderLayout.SOUTH);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (this.getContentPane() == this.titleScreenContentPane) {
-            titleScreenActionPerformed(e);
-        } else if (this.getContentPane() == this.optionsScreenContentPane) {
-            optionsScreenActionPerformed(e);
-        }
 
-    }
-
-    private void titleScreenActionPerformed(ActionEvent e) {
+        // Main screen.
         if ("showOptionsScreen".equals(e.getActionCommand())) {
             this.setContentPane(this.optionsScreenContentPane);
             this.revalidate();
@@ -392,9 +402,8 @@ public class GameUI extends JFrame implements ActionListener {
         } else if ("startMultiplayerGame".equals(e.getActionCommand())) {
             //TODO
         }
-    }
 
-    private void optionsScreenActionPerformed(ActionEvent e) {
+        // Options screen.
         if ("showTitleScreen".equals(e.getActionCommand())) {
             this.setContentPane(this.titleScreenContentPane);
             this.revalidate();
