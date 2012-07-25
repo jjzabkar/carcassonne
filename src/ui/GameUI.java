@@ -435,6 +435,9 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
             int err = 0;
 
+            // Each turn begins with a player drawing a tile from the draw
+            // pile. Here we allow a player to draw the tile, and after they
+            // have we draw it to the screen on the current tile panel.
             if ("drawTile".equals(e.getActionCommand()) && gameState == 0) {
                 Player p = game.getPlayers()[0];
                 game.drawTile(p);
@@ -448,19 +451,6 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                 gameState++;
 
             }
-
-            // gameState == 1 is placing the tile on the board; it is handled
-            // by the mouselistener onclick
-
-            /*
-            Player p = game.getPlayers()[0];
-            game.drawTile(p);
-            Tile tileToPlace = p.getCurrentTile();
-            err = game.placeTile(p, 1, 1);
-            if (err == 0) {
-                this.gameBoardWindow.add(tileToPlace);
-            }
-            */
 
             // Play a game!
             /*
@@ -576,19 +566,23 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
 
+        // Detect if there has been a mouse click on the board canvas object.
         if (e.getComponent() == this.gameBoardWindow) {
 
             int err = 0;
 
+            // We'll do some click calculations outside of the state-specific
+            // checks to prevent code duplication. First get the clicked
+            // position, and then convert it to a tile location.
             int xPos = e.getX();
             int yPos = e.getY();
 
-            // convert clicked position to a tile location, and call an action?
             int tileXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
             int tileYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
 
+            // Check that the proper game state is selected. Here we are
+            // looking for the tile placement state.
             if (gameState == 1) {
 
                 // Place the tile.
@@ -611,6 +605,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                 }
 
             }
+
+            // Here we are looking for the meeple placement state.
+            //TODO: replace gamestate as an enum
+            if (gameState == 2) {
+
+            }
+
         }
 
     }
@@ -630,10 +631,6 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
     }
-
-    // need to transpose mouse click on canvas to xBoard, yBoard, xTile, yTile
-    // function to draw gameboard wrt/ panning & zooming
-    // function to draw the gameboard
 
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
