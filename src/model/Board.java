@@ -2,6 +2,7 @@ package model;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -155,19 +156,23 @@ public class Board {
         boolean rightMatches = (right == null);
         boolean leftMatches = (left == null);
 
-        if (top != null && top.getBottom() == tileToPlace.getTop()) {
+        if (top != null
+            && Arrays.deepEquals(top.getBottom(), tileToPlace.getTop())) {
             topMatches = true;
         }
 
-        if (bottom != null && bottom.getTop() == tileToPlace.getBottom()) {
+        if (bottom != null
+            && Arrays.deepEquals(bottom.getTop(), tileToPlace.getBottom())) {
             bottomMatches = true;
         }
 
-        if (right != null && right.getLeft() == tileToPlace.getLeft()) {
+        if (right != null
+            && Arrays.deepEquals(right.getLeft(), tileToPlace.getRight())) {
             rightMatches = true;
         }
 
-        if (left != null && left.getRight() == tileToPlace.getRight()) {
+        if (left != null
+            && Arrays.deepEquals(left.getRight(), tileToPlace.getLeft())) {
             leftMatches = true;
         }
 

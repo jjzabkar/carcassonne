@@ -46,10 +46,10 @@ public class Tile implements DrawableInterface {
     private int tilex;
     private int tiley;
 
-    // Denotes the width of a tileType element when drawn by the ui.
+    /** Denotes the width of a tileType element when drawn by the ui. **/
     public static final int tileTypeSize = 10;
 
-    // Denotes the height & width of a tile (it's square!).
+    /** Denotes the height & width of a tile (it's square!). **/
     public static final int tileSize = 7;
 
     private Tile() {

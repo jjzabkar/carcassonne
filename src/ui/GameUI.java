@@ -12,6 +12,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractButton;
@@ -21,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -35,7 +38,7 @@ import model.Tile;
  * @version 1.0
  * @since 2012-06-28
  */
-public class GameUI extends JFrame implements ActionListener {
+public class GameUI extends JFrame implements ActionListener, MouseListener {
     private static final long serialVersionUID = 1L;
     private Game game;
     private Boolean gameStarted = false;
@@ -301,6 +304,9 @@ public class GameUI extends JFrame implements ActionListener {
         this.gameBoardWindow.setBorder(BorderFactory
             .createLineBorder(Color.BLACK));
 
+        // Add mouse listener for game window.
+        this.gameBoardWindow.addMouseListener(this);
+
         JPanel infoContainer = new JPanel(new BorderLayout());
         infoContainer.setPreferredSize(new Dimension(200, 600));
         infoContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -443,6 +449,9 @@ public class GameUI extends JFrame implements ActionListener {
 
             }
 
+            // gameState == 1 is placing the tile on the board; it is handled
+            // by the mouselistener onclick
+
             /*
             Player p = game.getPlayers()[0];
             game.drawTile(p);
@@ -563,6 +572,63 @@ public class GameUI extends JFrame implements ActionListener {
 
         }
 
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+
+        if (e.getComponent() == this.gameBoardWindow) {
+
+            int err = 0;
+
+            int xPos = e.getX();
+            int yPos = e.getY();
+
+            // convert clicked position to a tile location, and call an action?
+            int tileXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
+            int tileYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
+
+            if (gameState == 1) {
+
+                // Place the tile.
+                Player p = game.getPlayers()[0];
+                Tile tileToPlace = p.getCurrentTile();
+                err = game.placeTile(p, tileXPos, tileYPos);
+
+                // If no error draw the tile on the gameboard and remove it
+                // from the currentTile area.
+                if (err == 0) {
+                    this.gameBoardWindow.add(tileToPlace);
+                    this.currentTilePanel.clear();
+                    this.gameBoardWindow.repaint();
+                    this.currentTilePanel.repaint();
+
+                    gameState = 0;
+                    //gameState++;
+                } else {
+                    JOptionPane.showMessageDialog(this, "Can't");
+                }
+
+            }
+        }
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 
     // need to transpose mouse click on canvas to xBoard, yBoard, xTile, yTile
