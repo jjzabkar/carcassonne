@@ -3,6 +3,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -11,6 +12,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -36,6 +38,7 @@ import model.Tile;
 public class GameUI extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
     private Game game;
+    private Boolean gameStarted = false;
 
     // Each menu screen (and the game screen) is contained within their own
     // JPanel's, which are set as the frame content pane when appropriate.
@@ -65,6 +68,7 @@ public class GameUI extends JFrame implements ActionListener {
     private JComboBox<String> windowedResolutionDropDown;
     private JLabel volumeSliderLabel;
     private JCanvas gameBoardWindow;
+    private JCanvas currentTilePanel;
 
     public GameUI() {
         // Initialize game menus.
@@ -301,17 +305,75 @@ public class GameUI extends JFrame implements ActionListener {
         infoContainer.setPreferredSize(new Dimension(200, 600));
         infoContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+        // Top part of the info window has the score information.
         JPanel scoreInfoWindow = new JPanel(new GridBagLayout());
         scoreInfoWindow.setPreferredSize(new Dimension((int) infoContainer
             .getPreferredSize().getWidth(), (int) infoContainer
             .getPreferredSize().getHeight() * 1 / 3));
         scoreInfoWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+        // Bottom part of the info window has the controls.
         JPanel controlsWindow = new JPanel(new GridBagLayout());
         controlsWindow.setPreferredSize(new Dimension((int) infoContainer
             .getPreferredSize().getWidth(), (int) infoContainer
             .getPreferredSize().getHeight() * 2 / 3));
         controlsWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        // Zooming
+        JButton zoomInButton = new JButton("+");
+        zoomInButton.setActionCommand("zoomIn");
+        zoomInButton.addActionListener(this);
+
+        JButton zoomOutButton = new JButton("-");
+        zoomOutButton.setActionCommand("zoomOut");
+        zoomOutButton.addActionListener(this);
+
+        // Panning
+        JButton panRightButton = new JButton(">");
+        panRightButton.setActionCommand("panRight");
+        panRightButton.addActionListener(this);
+
+        JButton panLeftButton = new JButton("<");
+        panLeftButton.setActionCommand("panLeft");
+        panLeftButton.addActionListener(this);
+
+        JButton panUpButton = new JButton("^");
+        panUpButton.setActionCommand("panUp");
+        panUpButton.addActionListener(this);
+
+        JButton panDownButton = new JButton("v");
+        panDownButton.setActionCommand("panDown");
+        panDownButton.addActionListener(this);
+
+        // Tile Rotation
+        JButton rotateCWButton = new JButton("--\\");
+        rotateCWButton.setActionCommand("rotateCW");
+        rotateCWButton.addActionListener(this);
+
+        JButton rotateCCWButton = new JButton("/--");
+        rotateCCWButton.setActionCommand("rotateCCW");
+        rotateCCWButton.addActionListener(this);
+
+        // Draw Pile
+        ImageIcon drawTileImageIcon = new ImageIcon("tile-back.png");
+        Image drawTileImage = drawTileImageIcon.getImage();
+        BufferedImage drawTileBI =
+            new BufferedImage(70, 70, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = drawTileBI.createGraphics();
+        g.drawImage(drawTileImage, 0, 0, 70, 70, null);
+        ImageIcon drawTileButtonImage = new ImageIcon(drawTileBI);
+
+        JButton drawTileButton = new JButton(drawTileButtonImage);
+        drawTileButton.setPreferredSize(new Dimension(controlsWindow
+            .getPreferredSize().width * 2 / 3, controlsWindow
+            .getPreferredSize().height * 2 / 7));
+        drawTileButton.setActionCommand("drawTile");
+        drawTileButton.addActionListener(this);
+
+        // Current Tile
+        currentTilePanel = new JCanvas();
+        currentTilePanel.setPreferredSize(new Dimension(Tile.tileSize
+            * Tile.tileTypeSize, Tile.tileSize * Tile.tileTypeSize));
 
         // Fill in the info window controls.
         GridBagConstraints gc = new GridBagConstraints();
@@ -319,27 +381,36 @@ public class GameUI extends JFrame implements ActionListener {
 
         gc.gridx = 0;
         gc.gridy = 0;
+        gc.gridwidth = 2;
+        gc.gridheight = 2;
+        gc.fill = GridBagConstraints.NONE;
+        controlsWindow.add(drawTileButton, gc);
+        gc.gridx = 2;
+        gc.gridy = 0;
         gc.gridwidth = 1;
         gc.gridheight = 1;
-        gc.fill = GridBagConstraints.NONE;
-
-        JButton zoomInButton = new JButton("Zoom In");
-        JButton zoomOutButton = new JButton("Zoom Out");
-
-        JButton panRightButton = new JButton("Pan Right");
-        JButton panLeftButton = new JButton("Pan Left");
-        JButton panUpButton = new JButton("Pan Up");
-        JButton panDownButton = new JButton("Pan Down");
-
-        JButton rotateCWButton = new JButton("Rotate Clockwise");
-        JButton rotateCCWButton = new JButton("Rotate Counter-Clockwise");
-
-        ImageIcon drawTileButtonImage = new ImageIcon("tile-back.png");
-        JButton drawTileButton = new JButton(drawTileButtonImage);
-
-        JPanel currentTilePanel = new JPanel();
-        currentTilePanel.setPreferredSize(new Dimension(Tile.tileSize
-            * Tile.tileTypeSize, Tile.tileSize * Tile.tileTypeSize));
+        controlsWindow.add(zoomInButton, gc);
+        gc.gridy = 1;
+        controlsWindow.add(zoomOutButton, gc);
+        gc.gridx = 0;
+        gc.gridy = 2;
+        controlsWindow.add(panLeftButton, gc);
+        gc.gridx = 1;
+        controlsWindow.add(panUpButton, gc);
+        gc.gridx = 2;
+        controlsWindow.add(panRightButton, gc);
+        gc.gridx = 0;
+        gc.gridy = 3;
+        controlsWindow.add(rotateCCWButton, gc);
+        gc.gridx = 1;
+        controlsWindow.add(panDownButton, gc);
+        gc.gridx = 2;
+        controlsWindow.add(rotateCWButton, gc);
+        gc.gridx = 0;
+        gc.gridy = 4;
+        gc.gridwidth = 3;
+        gc.gridheight = 3;
+        controlsWindow.add(currentTilePanel, gc);
 
         // Add everything to everything in the info container.
         this.gameContentPane.add(this.gameBoardWindow, BorderLayout.CENTER);
@@ -348,8 +419,66 @@ public class GameUI extends JFrame implements ActionListener {
         infoContainer.add(controlsWindow, BorderLayout.SOUTH);
     }
 
+    private int gameState = 0;
+
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        // Actions for gameplay.
+        if (gameStarted) {
+
+            int err = 0;
+
+            if ("drawTile".equals(e.getActionCommand()) && gameState == 0) {
+                Player p = game.getPlayers()[0];
+                game.drawTile(p);
+                Tile tileToPlace = p.getCurrentTile();
+
+                tileToPlace.setTilex(0);
+                tileToPlace.setTiley(0);
+                this.currentTilePanel.add(tileToPlace);
+                this.currentTilePanel.repaint();
+
+                gameState++;
+
+            }
+
+            /*
+            Player p = game.getPlayers()[0];
+            game.drawTile(p);
+            Tile tileToPlace = p.getCurrentTile();
+            err = game.placeTile(p, 1, 1);
+            if (err == 0) {
+                this.gameBoardWindow.add(tileToPlace);
+            }
+            */
+
+            // Play a game!
+            /*
+            game = new Game(4);
+            
+            while (!isDrawPileEmpty())
+            {
+                for (int i = 0; i > 0; i = (i + 1) % game.getNumPlayers())
+                {
+                    Player p = game.getPlayers()[i];
+                    game.drawTile(p);
+                    game.placeTile(p, xPos, yPos);
+                    game.placeMeeple(p, xBoard, yBoard, xTile, yTile);
+                
+                    game.scoreCities(false);
+                    game.scoreCloisters(false);
+                    game.scoreRoads(false);
+                }
+            }
+            
+            game.scoreCities(true);
+            game.scoreCloisters(true);
+            game.scoreRoads(true);
+            game.scoreFields();
+            */
+
+        }
 
         // Main screen.
         if ("showOptionsScreen".equals(e.getActionCommand())) {
@@ -362,43 +491,8 @@ public class GameUI extends JFrame implements ActionListener {
             this.setContentPane(this.gameContentPane);
             this.revalidate();
             this.repaint();
-
-            int err = 0;
-
-            game = new Game(4);
-
-            Player p = game.getPlayers()[0];
-            game.drawTile(p);
-            Tile tileToPlace = p.getCurrentTile();
-            err = game.placeTile(p, 1, 1);
-            if (err == 0) {
-                this.gameBoardWindow.add(tileToPlace);
-            }
-
-            // Play a game!
-            /*
-            game = new Game(4);
-            
-            while (!isDrawPileEmpty())
-            {
-            	for (int i = 0; i > 0; i = (i + 1) % game.getNumPlayers())
-            	{
-            		Player p = game.getPlayers()[i];
-            		game.drawTile(p);
-            		game.placeTile(p, xPos, yPos);
-            		game.placeMeeple(p, xBoard, yBoard, xTile, yTile);
-            	
-            		game.scoreCities(false);
-            		game.scoreCloisters(false);
-            		game.scoreRoads(false);
-            	}
-            }
-            
-            game.scoreCities(true);
-            game.scoreCloisters(true);
-            game.scoreRoads(true);
-            game.scoreFields();
-            */
+            this.gameStarted = true;
+            this.game = new Game(4);
         } else if ("startMultiplayerGame".equals(e.getActionCommand())) {
             //TODO
         }
