@@ -325,7 +325,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
             .getPreferredSize().getHeight() * 2 / 3));
         controlsWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        // Zooming
+        // Zooming.
         JButton zoomInButton = new JButton("+");
         zoomInButton.setActionCommand("zoomIn");
         zoomInButton.addActionListener(this);
@@ -334,7 +334,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         zoomOutButton.setActionCommand("zoomOut");
         zoomOutButton.addActionListener(this);
 
-        // Panning
+        // Panning.
         JButton panRightButton = new JButton(">");
         panRightButton.setActionCommand("panRight");
         panRightButton.addActionListener(this);
@@ -351,7 +351,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         panDownButton.setActionCommand("panDown");
         panDownButton.addActionListener(this);
 
-        // Tile Rotation
+        // Tile Rotation.
         JButton rotateCWButton = new JButton("--\\");
         rotateCWButton.setActionCommand("rotateCW");
         rotateCWButton.addActionListener(this);
@@ -360,7 +360,10 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         rotateCCWButton.setActionCommand("rotateCCW");
         rotateCCWButton.addActionListener(this);
 
-        // Draw Pile
+        // Draw Pile.
+        // We make the draw icon the same size as a tile (currently).
+        // We set the height of the draw icon container according to how much
+        // space it should take up in the layout.
         ImageIcon drawTileImageIcon = new ImageIcon("tile-back.png");
         Image drawTileImage = drawTileImageIcon.getImage();
         BufferedImage drawTileBI =
@@ -372,14 +375,21 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         JButton drawTileButton = new JButton(drawTileButtonImage);
         drawTileButton.setPreferredSize(new Dimension(controlsWindow
             .getPreferredSize().width * 2 / 3, controlsWindow
-            .getPreferredSize().height * 2 / 7));
+            .getPreferredSize().height * 2 / 8));
         drawTileButton.setActionCommand("drawTile");
         drawTileButton.addActionListener(this);
 
-        // Current Tile
+        // Current Tile.
         currentTilePanel = new JCanvas();
         currentTilePanel.setPreferredSize(new Dimension(Tile.tileSize
             * Tile.tileTypeSize, Tile.tileSize * Tile.tileTypeSize));
+
+        // End turn button.
+        // Action for this button should only be allowed to let the player
+        // skip placing their meeple.
+        JButton endTurnButton = new JButton("End my turn");
+        endTurnButton.setActionCommand("endTurn");
+        endTurnButton.addActionListener(this);
 
         // Fill in the info window controls.
         GridBagConstraints gc = new GridBagConstraints();
@@ -417,6 +427,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         gc.gridwidth = 3;
         gc.gridheight = 3;
         controlsWindow.add(currentTilePanel, gc);
+        gc.gridx = 0;
+        gc.gridy = 7;
+        gc.gridwidth = 3;
+        gc.gridheight = 1;
+        controlsWindow.add(endTurnButton, gc);
 
         // Add everything to everything in the info container.
         this.gameContentPane.add(this.gameBoardWindow, BorderLayout.CENTER);
