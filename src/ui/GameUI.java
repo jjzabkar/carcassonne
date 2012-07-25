@@ -40,7 +40,7 @@ import model.Tile;
  */
 public class GameUI extends JFrame implements ActionListener, MouseListener {
     private static final long serialVersionUID = 1L;
-    private Game game;
+    private Game game = null;
     private Boolean gameStarted = false;
 
     // Each menu screen (and the game screen) is contained within their own
@@ -441,6 +441,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
     }
 
     private int gameState = 0;
+    private Player currentPlayer;
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -448,15 +449,35 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         // Actions for gameplay.
         if (gameStarted) {
 
+            // Handle some of the commands to do with ui things.
+
+            // Event handlers for tile rotation.
+            if ("rotateCW".equals(e.getActionCommand())
+                && currentPlayer.getCurrentTile() != null) {
+
+                currentPlayer.getCurrentTile().rotateClockwise();
+                this.currentTilePanel.repaint();
+            }
+
+            if ("rotateCCW".equals(e.getActionCommand())
+                && currentPlayer.getCurrentTile() != null) {
+
+                currentPlayer.getCurrentTile().rotateCounterClockwise();
+                this.currentTilePanel.repaint();
+            }
+
             int err = 0;
 
             // Each turn begins with a player drawing a tile from the draw
             // pile. Here we allow a player to draw the tile, and after they
             // have we draw it to the screen on the current tile panel.
             if ("drawTile".equals(e.getActionCommand()) && gameState == 0) {
-                Player p = game.getPlayers()[0];
-                game.drawTile(p);
-                Tile tileToPlace = p.getCurrentTile();
+
+                // Get the next player. TODO
+                currentPlayer = game.getPlayers()[0];
+
+                game.drawTile(currentPlayer);
+                Tile tileToPlace = currentPlayer.getCurrentTile();
 
                 tileToPlace.setTilex(0);
                 tileToPlace.setTiley(0);
@@ -601,9 +622,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
             if (gameState == 1) {
 
                 // Place the tile.
-                Player p = game.getPlayers()[0];
-                Tile tileToPlace = p.getCurrentTile();
-                err = game.placeTile(p, tileXPos, tileYPos);
+                Tile tileToPlace = currentPlayer.getCurrentTile();
+                err = game.placeTile(currentPlayer, tileXPos, tileYPos);
 
                 // If no error draw the tile on the gameboard and remove it
                 // from the currentTile area.
@@ -616,7 +636,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                     gameState = 0;
                     //gameState++;
                 } else {
-                    JOptionPane.showMessageDialog(this, "Can't");
+                    JOptionPane.showMessageDialog(this,
+                        "Can't place tile there.");
                 }
 
             }
