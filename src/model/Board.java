@@ -348,13 +348,10 @@ public class Board {
 
         // If there are still tiles in toSearch then continue searching.
         if (!toSearch.isEmpty()) {
-            isNewFeatureRecursive(searched, toSearch);
+            return isNewFeatureRecursive(searched, toSearch);
         } else {
             return true;
         }
-
-        // Just because we have to.
-        return false;
 
     }
 
