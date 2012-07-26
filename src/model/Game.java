@@ -123,4 +123,9 @@ public class Game {
         return this.players.length;
     }
 
+    // Pass this off to the gameboard as it keeps track of positioning.
+    public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
+        return this.gameBoard.getMeeple(xBoard, yBoard, xTile, yTile);
+    }
+
 }

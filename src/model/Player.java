@@ -74,22 +74,4 @@ public class Player {
         this.lastTilePlacedPos = new Point(xPos, yPos);
     }
 
-    public Meeple getMeeple(int boardXPos, int boardYPos, int tileXPos,
-        int tileYPos) {
-
-        for (int i = 0; i < this.meeples.length; i++) {
-            if ((meeples[i].getTilex() == (boardXPos * Tile.tileSize * Tile.tileTypeSize)
-                + tileXPos)
-                && (meeples[i].getTiley() == (boardYPos * Tile.tileSize * Tile.tileTypeSize)
-                    + tileYPos)) {
-
-                return meeples[i];
-
-            }
-        }
-
-        return null;
-
-    }
-
 }

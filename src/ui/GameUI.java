@@ -30,6 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.Game;
+import model.Meeple;
 import model.Player;
 import model.Tile;
 
@@ -619,13 +620,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
             // 10 each. Then the player has clicked 52 / 5*10 = 1st tile.
             // Our array is zero-indexed, so this is correct. Otherwise we'd
             // get the mathematical ceiling.
-            int boardXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
-            int boardYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
+            int xBoard = xPos / (Tile.tileTypeSize * Tile.tileSize);
+            int yBoard = yPos / (Tile.tileTypeSize * Tile.tileSize);
 
-            int tileXPos =
+            int xTile =
                 (xPos % (Tile.tileTypeSize * Tile.tileSize))
                     / Tile.tileTypeSize;
-            int tileYPos =
+            int yTile =
                 (yPos % (Tile.tileTypeSize * Tile.tileSize))
                     / Tile.tileTypeSize;
 
@@ -635,7 +636,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
                 // Place the tile.
                 Tile tileToPlace = currentPlayer.getCurrentTile();
-                err = game.placeTile(currentPlayer, boardXPos, boardYPos);
+                err = game.placeTile(currentPlayer, xBoard, yBoard);
 
                 // If no error draw the tile on the gameboard and remove it
                 // from the currentTile area.
@@ -660,12 +661,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
                 // Place the meeple.
                 err =
-                    game.placeMeeple(currentPlayer, boardXPos, boardYPos,
-                        tileXPos, tileYPos);
+                    game.placeMeeple(currentPlayer, xBoard, yBoard, xTile,
+                        yTile);
 
                 if (err == 0) {
-                    this.gameBoardWindow.add(currentPlayer.getMeeple(boardXPos,
-                        boardYPos, tileXPos, tileYPos));
+                    Meeple m =
+                        this.game.getMeeple(xBoard, yBoard, xTile, yTile);
+                    this.gameBoardWindow.add(m);
                     this.gameBoardWindow.repaint();
 
                     gameState = 0;

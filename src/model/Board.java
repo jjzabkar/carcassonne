@@ -236,10 +236,10 @@ public class Board {
                     // UI code.
                     meeples[i]
                         .setTilex((xBoard * Tile.tileTypeSize * Tile.tileSize)
-                            + xTile);
+                            + (xTile * Tile.tileTypeSize));
                     meeples[i]
                         .setTiley((yBoard * Tile.tileTypeSize * Tile.tileSize)
-                            + yTile);
+                            + (yTile * Tile.tileTypeSize));
 
                     return 0;
                 }
@@ -393,6 +393,13 @@ public class Board {
         }
 
         return null;
+    }
+
+    // Helper function allows the game to get a meeple so that it can be added
+    // to the ui canvas component.
+    public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
+        Tile theTile = this.gameBoard[yBoard][xBoard];
+        return getMeeple(theTile, xTile, yTile);
     }
 
     /**
