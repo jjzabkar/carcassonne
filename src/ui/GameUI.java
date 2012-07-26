@@ -479,8 +479,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                 game.drawTile(currentPlayer);
                 Tile tileToPlace = currentPlayer.getCurrentTile();
 
-                tileToPlace.setTilex(0);
-                tileToPlace.setTiley(0);
+                tileToPlace.setBoardx(0);
+                tileToPlace.setBoardy(0);
                 this.currentTilePanel.add(tileToPlace);
                 this.currentTilePanel.repaint();
 
@@ -622,8 +622,12 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
             int boardXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
             int boardYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
 
-            int tileXPos = xPos % (Tile.tileTypeSize * Tile.tileSize);
-            int tileYPos = yPos % (Tile.tileTypeSize * Tile.tileSize);
+            int tileXPos =
+                (xPos % (Tile.tileTypeSize * Tile.tileSize))
+                    / Tile.tileTypeSize;
+            int tileYPos =
+                (yPos % (Tile.tileTypeSize * Tile.tileSize))
+                    / Tile.tileTypeSize;
 
             // Check that the proper game state is selected. Here we are
             // looking for the tile placement state.
@@ -647,6 +651,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                     JOptionPane.showMessageDialog(this,
                         "Can't place tile there.");
                 }
+
+                return;
             }
 
             // Here we are looking for the meeple placement state.
@@ -658,16 +664,22 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                         tileXPos, tileYPos);
 
                 if (err == 0) {
-                    //this.gameBoardWindow.add(currentPlayer.getMeeple(x,y,x,y));
-                    //this.gameBoardWindow.repaint();
+                    this.gameBoardWindow.add(currentPlayer.getMeeple(boardXPos,
+                        boardYPos, tileXPos, tileYPos));
+                    this.gameBoardWindow.repaint();
 
                     gameState = 0;
-                    //this.score();
+
+                    this.game.scoreCloisters(false);
+                    this.game.scoreRoads(false);
+                    this.game.scoreCities(false);
                 } else {
                     //TODO: better error handling
                     JOptionPane.showMessageDialog(this,
                         "Can't place meeple there");
                 }
+
+                return;
             }
 
         }

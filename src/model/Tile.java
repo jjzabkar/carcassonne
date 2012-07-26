@@ -43,8 +43,8 @@ public class Tile implements DrawableInterface {
     private int orientation = 0;
 
     // UI variables.
-    private int tilex;
-    private int tiley;
+    private int boardx;
+    private int boardy;
 
     /** Denotes the width of a tileType element when drawn by the ui. **/
     public static final int tileTypeSize = 10;
@@ -201,20 +201,20 @@ public class Tile implements DrawableInterface {
         return this.orientation;
     }
 
-    public int getTilex() {
-        return tilex;
+    public int getBoardx() {
+        return boardx;
     }
 
-    public int getTiley() {
-        return tiley;
+    public int getBoardy() {
+        return boardy;
     }
 
-    public void setTilex(int tilex) {
-        this.tilex = tilex;
+    public void setBoardx(int tilex) {
+        this.boardx = tilex;
     }
 
-    public void setTiley(int tiley) {
-        this.tiley = tiley;
+    public void setBoardy(int tiley) {
+        this.boardy = tiley;
     }
 
     @Override
@@ -251,7 +251,7 @@ public class Tile implements DrawableInterface {
                 }
 
                 g.setColor(tileTypeColor);
-                g.fillRect(this.tilex + (j * tileTypeSize), this.tiley
+                g.fillRect(this.boardx + (j * tileTypeSize), this.boardy
                     + (i * tileTypeSize), tileTypeSize, tileTypeSize);
             }
         }
