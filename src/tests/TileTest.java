@@ -82,4 +82,5 @@ public class TileTest {
 
         assertTrue(theSame);
     }
+
 }
