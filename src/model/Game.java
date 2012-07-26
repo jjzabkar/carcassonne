@@ -71,10 +71,13 @@ public class Game {
      * @param yBoard The y position the meeple is to be placed on the board.
      * @param xTile The x position on the tile to place the meeple.
      * @param yTile The y position on the tile to place the meeple.
+     * @return a non-zero integer if the meeple could not be placed, zero
+     *         otherwise.
      */
-    public void placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
+    public int placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
         int yTile) {
-        this.gameBoard.placeMeeple(aPlayer, xBoard, yBoard, xTile, yTile);
+        return this.gameBoard
+            .placeMeeple(aPlayer, xBoard, yBoard, xTile, yTile);
     }
 
     /**

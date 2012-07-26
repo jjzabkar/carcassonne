@@ -210,7 +210,6 @@ public class Board {
      *         tried to place meeple on tile they didn't just place. 3: Player
      *         didn't play on a new feature.
      */
-    //@TODO should this be returning int err?
     public int placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
         int yTile) {
         // First we need to check the correctness of the input x & y.

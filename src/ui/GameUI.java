@@ -614,8 +614,16 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
             int xPos = e.getX();
             int yPos = e.getY();
 
-            int tileXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
-            int tileYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
+            // Example:
+            // x click is 52, with each tile having 5 TileType's at size
+            // 10 each. Then the player has clicked 52 / 5*10 = 1st tile.
+            // Our array is zero-indexed, so this is correct. Otherwise we'd
+            // get the mathematical ceiling.
+            int boardXPos = xPos / (Tile.tileTypeSize * Tile.tileSize);
+            int boardYPos = yPos / (Tile.tileTypeSize * Tile.tileSize);
+
+            int tileXPos = xPos % (Tile.tileTypeSize * Tile.tileSize);
+            int tileYPos = yPos % (Tile.tileTypeSize * Tile.tileSize);
 
             // Check that the proper game state is selected. Here we are
             // looking for the tile placement state.
@@ -623,7 +631,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
                 // Place the tile.
                 Tile tileToPlace = currentPlayer.getCurrentTile();
-                err = game.placeTile(currentPlayer, tileXPos, tileYPos);
+                err = game.placeTile(currentPlayer, boardXPos, boardYPos);
 
                 // If no error draw the tile on the gameboard and remove it
                 // from the currentTile area.
@@ -633,19 +641,33 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                     this.gameBoardWindow.repaint();
                     this.currentTilePanel.repaint();
 
-                    gameState = 0;
-                    //gameState++;
+                    gameState++;
                 } else {
+                    //TODO: better error handling
                     JOptionPane.showMessageDialog(this,
                         "Can't place tile there.");
                 }
-
             }
 
             // Here we are looking for the meeple placement state.
-            //TODO: replace gamestate as an enum
             if (gameState == 2) {
 
+                // Place the meeple.
+                err =
+                    game.placeMeeple(currentPlayer, boardXPos, boardYPos,
+                        tileXPos, tileYPos);
+
+                if (err == 0) {
+                    //this.gameBoardWindow.add(currentPlayer.getMeeple(x,y,x,y));
+                    //this.gameBoardWindow.repaint();
+
+                    gameState = 0;
+                    //this.score();
+                } else {
+                    //TODO: better error handling
+                    JOptionPane.showMessageDialog(this,
+                        "Can't place meeple there");
+                }
             }
 
         }
