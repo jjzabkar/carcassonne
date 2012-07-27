@@ -346,13 +346,13 @@ public class Board {
             }
         }
 
-        // If there are still tiles in toSearch then continue searching.
-        if (!toSearch.isEmpty()) {
-            return isNewFeatureRecursive(searched, toSearch);
-        } else {
+        // If toSearch is empty then we are done. We have found that this is
+        // indeed a new feature.
+        if (toSearch.isEmpty()) {
             return true;
         }
 
+        return isNewFeatureRecursive(searched, toSearch);
     }
 
     /**
@@ -1177,13 +1177,9 @@ public class Board {
     private int[][] getTilePosNeighbors(int xBoard, int yBoard, int xTile,
         int yTile) {
         int[] nStr = { xBoard, yBoard, xTile, (yTile - 1) };
-        int[] neStr = { xBoard, yBoard, (xTile + 1), (yTile - 1) };
         int[] eStr = { xBoard, yBoard, (xTile + 1), yTile };
-        int[] seStr = { xBoard, yBoard, (xTile + 1), (yTile + 1) };
         int[] sStr = { xBoard, yBoard, xTile, (yTile + 1) };
-        int[] swStr = { xBoard, yBoard, (xTile - 1), (yTile + 1) };
         int[] wStr = { xBoard, yBoard, (xTile - 1), yTile };
-        int[] nwStr = { xBoard, yBoard, (xTile - 1), (yTile - 1) };
 
         // Catch any across-tiles conditions.
         // If yTile == 6 then we set it to 0 and increment yBoard.
@@ -1192,43 +1188,26 @@ public class Board {
         // If xTile == 0 then we set it to 6 and decrement xBoard.
         // Only for those which we are adding or subtracting from.
         if (yTile == 6) {
-            seStr[3] = 0;
-            seStr[1]++;
             sStr[3] = 0;
             sStr[1]++;
-            swStr[3] = 0;
-            swStr[1]++;
         }
 
         if (yTile == 0) {
-            neStr[3] = 6;
-            neStr[1]--;
             nStr[3] = 6;
             nStr[1]--;
-            nwStr[3] = 6;
-            nwStr[1]--;
         }
 
         if (xTile == 6) {
-            neStr[2] = 0;
-            neStr[0]++;
             eStr[2] = 0;
             eStr[0]++;
-            seStr[2] = 0;
-            seStr[0]++;
         }
 
         if (xTile == 0) {
-            nwStr[2] = 6;
-            nwStr[0]--;
             wStr[2] = 6;
             wStr[0]--;
-            swStr[2] = 6;
-            swStr[0]--;
         }
 
-        int[][] neighborTiles =
-            { nStr, neStr, eStr, seStr, sStr, swStr, wStr, nwStr };
+        int[][] neighborTiles = { nStr, eStr, sStr, wStr };
 
         return neighborTiles;
     }
