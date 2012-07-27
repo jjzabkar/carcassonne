@@ -8,17 +8,28 @@
 	<property name="docs.dir" location="docs" />
 	<property name="dist.dir" location="dist" />
 
+	<property name="emma.instr.dir" location="emma-instr" />
+	<property name="emma.report.dir" location="emma-report" />
 	<property name="test.report.dir" location="tests" />
 	
 	<property name="name.jar" value="Carcassonne.jar" />
 	<property name="main.class" value="ui.GameUI" />
 
-	<path id="class.path">
+	<path id="build.class.path">
+        <pathelement location="${build.dir}" />
+	</path>
+		
+	<path id="lib.class.path">
 		<fileset dir="${lib.dir}">
-			<include name="*.jar" />
+			<include name="**/*.jar" />
+			<exclude name="emma/emma*.jar"/>
 		</fileset>
-		<pathelement location="${build.dir}" />
-		<pathelement location="${java.class.path}" />
+	</path>
+
+	<path id="emma.class.path">
+		<fileset dir="${lib.dir}">
+		   <include name="emma/emma*.jar"/>
+		</fileset>
 	</path>
 
 	<target name="clean">
@@ -26,41 +37,96 @@
 		<mkdir dir="${docs.dir}" />
 		<mkdir dir="${test.report.dir}" />
 		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${emma.instr.dir}"/>
+        <mkdir dir="${emma.report.dir}"/>
 		<delete includeemptydirs="true">
 			<fileset dir="${build.dir}/" includes="**/*" />
 			<fileset dir="${docs.dir}/" includes="**/*" />
 			<fileset dir="${test.report.dir}/" includes="**/*" />
 			<fileset dir="${dist.dir}/" includes="**/*.jar" />
+            <fileset dir="${emma.instr.dir}/" includes="**/*" />
+			<fileset dir="${emma.report.dir}/" includes="**/*" />
 			<fileset dir="." includes="*log*" casesensitive="no" />
 		</delete>
 	</target>
 
-	<target name="compile" depends="clean">
-		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${build.dir}">
-			<classpath refid="class.path" />
+	<target name="compile">
+		<javac
+			  debug="on"
+			  includeantruntime="false"
+			  srcdir="${src.dir}"
+			  destdir="${build.dir}">
+			<classpath>
+				<path refid="build.class.path" />
+			    <path refid="lib.class.path" />
+			</classpath>
 		</javac>
 	</target>
+	
+    <target name="emma.enable">
+    	<taskdef
+    		resource="emma_ant.properties"
+    		classpathref="emma.class.path" />
+    </target>
+	
+    <target name="emma.instrument">
+        <emma>
+            <instr
+             instrpath="${build.dir}"
+             destdir="${emma.instr.dir}"
+             metadatafile="${emma.report.dir}/metadata.emma"
+             merge="true">
+                <filter excludes="*Test*" />
+            </instr>
+        </emma>
+    </target>
 
-	<target name="junit" depends="compile">
-		<junit printsummary="on" fork="true" haltonfailure="yes">
-			<classpath refid="class.path" />
+	<target name="junit">
+		<junit
+			printsummary="on"
+			fork="true"
+			haltonfailure="no"
+			haltonerror="no">
+			
+			<classpath>
+                <path refid="emma.class.path" />
+                <pathelement location="${emma.instr.dir}" />
+			    <path refid="lib.class.path" />
+			</classpath>
+			
+			<jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=false" />
+			
 			<formatter type="xml" />
+			
 			<batchtest todir="${test.report.dir}">
 				<fileset dir="${src.dir}">
 					<include name="**/*Test*.java" />
 					<exclude name="**/AllTests.java" />
 				</fileset>
 			</batchtest>
+			
 		</junit>
 	</target>
 
-	<target name="docs" depends="compile">
+    <target name="emma.report">
+        <emma>
+           <report sourcepath="${src.dir}" depth="method">
+                <fileset dir="${emma.report.dir}">
+                    <include name="*.emma" />
+                </fileset>
+                <xml outfile="${emma.report.dir}/coverage.xml" />
+           </report>
+        </emma>
+    </target>
+
+	<target name="docs">
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}">
 			<excludepackage name="tests" />
 		</javadoc>
 	</target>
 
-	<target name="jar" depends="compile">
+	<target name="jar">
 		<jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
 			excludes="**/tests/**">
 			<manifest>
@@ -69,8 +135,7 @@
 		</jar>
 	</target>
 
-	<target name="all" depends="clean, compile, junit, docs, jar" />
-	<target name="no-docs" depends="clean, compile, junit, jar" />
 	<target name="main" depends="clean, compile, junit" />
+	<target name="emma" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report" />
 
 </project>
