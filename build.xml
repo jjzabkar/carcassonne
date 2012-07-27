@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="Carcassonne" default="main" basedir=".">
 
-	<property name="src.dir" location="src" />
-	<property name="build.dir" location="bin" />
+	<property name="src.dir" location="${basedir}/src" />
+	<property name="build.dir" location="${basedir}/bin" />
 
-	<property name="lib.dir" location="lib" />
-	<property name="docs.dir" location="docs" />
-	<property name="dist.dir" location="dist" />
+	<property name="lib.dir" location="${basedir}/lib" />
+	<property name="docs.dir" location="${basedir}/docs" />
+	<property name="dist.dir" location="${basedir}/dist" />
 
-	<property name="emma.instr.dir" location="emma-instr" />
-	<property name="emma.report.dir" location="emma-report" />
-	<property name="test.report.dir" location="tests" />
+	<property name="emma.instr.dir" location="${basedir}/emma-instr" />
+	<property name="emma.report.dir" location="${basedir}/emma-report" />
+	<property name="test.report.dir" location="${basedir}/tests" />
 	
 	<property name="name.jar" value="Carcassonne.jar" />
 	<property name="main.class" value="ui.GameUI" />
@@ -64,17 +64,19 @@
 	</target>
 	
     <target name="emma.enable">
+    	<property name="emma.enabled" value="true" />
     	<taskdef
     		resource="emma_ant.properties"
     		classpathref="emma.class.path" />
     </target>
 	
     <target name="emma.instrument">
-        <emma>
+        <emma enabled="${emma.enabled}">
             <instr
              instrpath="${build.dir}"
              destdir="${emma.instr.dir}"
              metadatafile="${emma.report.dir}/metadata.emma"
+             mode="copy"
              merge="true">
                 <filter excludes="*Test*" />
             </instr>
@@ -85,17 +87,22 @@
 		<junit
 			printsummary="on"
 			fork="true"
-			haltonfailure="no"
-			haltonerror="no">
+			forkmode="once"
+			haltonfailure="yes"
+			haltonerror="yes">
 			
+			<!--
 			<classpath>
+                <path refid="lib.class.path" />
                 <path refid="emma.class.path" />
                 <pathelement location="${emma.instr.dir}" />
-			    <path refid="lib.class.path" />
 			</classpath>
+			-->
 			
-			<jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
-			<jvmarg value="-Demma.coverage.out.merge=false" />
+			<classpath>
+				<path refid="lib.class.path" />
+				<path refid="build.class.path" />
+			</classpath>
 			
 			<formatter type="xml" />
 			
@@ -106,11 +113,16 @@
 				</fileset>
 			</batchtest>
 			
+			<!--
+	         <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
+	         <jvmarg value="-Demma.coverage.out.merge=false" />
+	         -->
+			
 		</junit>
 	</target>
 
     <target name="emma.report">
-        <emma>
+        <emma enabled="${emma.enabled}">
            <report sourcepath="${src.dir}" depth="method">
                 <fileset dir="${emma.report.dir}">
                     <include name="*.emma" />
