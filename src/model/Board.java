@@ -117,8 +117,8 @@ public class Board {
 			aPlayer.setLastTilePlacedPos(xPos, yPos);
 
 			// UI code.
-			tileToPlace.setBoardx(xPos * Tile.tileTypeSize * Tile.tileSize);
-			tileToPlace.setBoardy(yPos * Tile.tileTypeSize * Tile.tileSize);
+			tileToPlace.setx(xPos * Tile.tileTypeSize * Tile.tileSize);
+			tileToPlace.sety(yPos * Tile.tileTypeSize * Tile.tileSize);
 
 			return 0;
 		}

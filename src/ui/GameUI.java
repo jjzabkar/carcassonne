@@ -480,8 +480,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				game.drawTile(currentPlayer);
 				Tile tileToPlace = currentPlayer.getCurrentTile();
 
-				tileToPlace.setBoardx(0);
-				tileToPlace.setBoardy(0);
+				tileToPlace.setx(0);
+				tileToPlace.sety(0);
 				this.currentTilePanel.add(tileToPlace);
 				this.currentTilePanel.repaint();
 

@@ -43,8 +43,8 @@ public class Tile implements DrawableInterface {
 	private int orientation = 0;
 
 	// UI variables.
-	private int boardx;
-	private int boardy;
+	private int xPos;
+	private int yPos;
 
 	/** Denotes the width of a tileType element when drawn by the ui. **/
 	public static final int tileTypeSize = 10;
@@ -130,22 +130,6 @@ public class Tile implements DrawableInterface {
 	}
 
 	/**
-	 * Rotate the tile counter-clockwise by 90 degrees.
-	 */
-	public void rotateCounterClockwise() {
-		TileType[][] ret = new TileType[tileSize][tileSize];
-
-		for (int i = 0; i < this.tile.length; i++) {
-			for (int j = 0; j < this.tile[i].length; j++) {
-				ret[i][j] = this.tile[j][tileSize - i - 1];
-			}
-		}
-
-		this.tile = ret;
-		this.orientation = (this.orientation - 1) % 4;
-	}
-
-	/**
 	 * Rotate the tile clockwise by 90 degrees.
 	 */
 	public void rotateClockwise() {
@@ -159,6 +143,24 @@ public class Tile implements DrawableInterface {
 
 		this.tile = ret;
 		this.orientation = (this.orientation + 1) % 4;
+	}
+
+	/**
+	 * Rotate the tile counter-clockwise by 90 degrees.
+	 */
+	public void rotateCounterClockwise() {
+		TileType[][] ret = new TileType[tileSize][tileSize];
+
+		for (int i = 0; i < this.tile.length; i++) {
+			for (int j = 0; j < this.tile[i].length; j++) {
+				ret[i][j] = this.tile[j][tileSize - i - 1];
+			}
+		}
+
+		this.tile = ret;
+		// Modulus of a negative number doesn't work, so add 4.
+		// This gives us (-1 + 4) = 3.
+		this.orientation = (this.orientation + 3) % 4;
 	}
 
 	// Accessor Methods
@@ -202,20 +204,20 @@ public class Tile implements DrawableInterface {
 		return this.orientation;
 	}
 
-	public int getBoardx() {
-		return boardx;
+	public int getx() {
+		return xPos;
 	}
 
-	public int getBoardy() {
-		return boardy;
+	public int gety() {
+		return yPos;
 	}
 
-	public void setBoardx(int tilex) {
-		this.boardx = tilex;
+	public void setx(int tilex) {
+		this.xPos = tilex;
 	}
 
-	public void setBoardy(int tiley) {
-		this.boardy = tiley;
+	public void sety(int tiley) {
+		this.yPos = tiley;
 	}
 
 	@Override
@@ -254,7 +256,7 @@ public class Tile implements DrawableInterface {
 				}
 
 				g.setColor(tileTypeColor);
-				g.fillRect(this.boardx + (j * tileTypeSize), this.boardy
+				g.fillRect(this.xPos + (j * tileTypeSize), this.yPos
 						+ (i * tileTypeSize), tileTypeSize, tileTypeSize);
 			}
 		}
