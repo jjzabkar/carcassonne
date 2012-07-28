@@ -95,6 +95,7 @@
                 <path refid="lib.class.path" />
                 <path refid="emma.class.path" />
                 <pathelement location="${emma.instr.dir}" />
+            	<!-- Add uninstrumented classes, just for the junit classes. -->
             	<pathelement location="${build.dir}" />
             </classpath>
             
