@@ -13,6 +13,7 @@ public class Game {
 	private Player[] players;
 
 	public Game(int numPlayers) {
+		// TODO input checking on number of players
 		// Initialize the players.
 		this.initPlayers(numPlayers);
 	}

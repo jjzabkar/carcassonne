@@ -20,7 +20,7 @@ public class Meeple implements DrawableInterface {
 
 	public Meeple(Color aColor) {
 		// TODO: some other means to differentiate meeple and tile color
-		this.color = aColor.darker().darker().darker();
+		this.color = aColor.brighter().brighter().brighter();
 	}
 
 	public Color getColor() {

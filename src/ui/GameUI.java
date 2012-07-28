@@ -30,6 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.Game;
+import model.GameState;
 import model.Meeple;
 import model.Player;
 import model.Tile;
@@ -42,7 +43,6 @@ import model.Tile;
 public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private static final long serialVersionUID = 1L;
 	private Game game = null;
-	private Boolean gameStarted = false;
 
 	// Each menu screen (and the game screen) is contained within their own
 	// JPanel's, which are set as the frame content pane when appropriate.
@@ -439,16 +439,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		infoContainer.add(controlsWindow, BorderLayout.SOUTH);
 	}
 
-	private int gameState = 0;
+	private GameState gameState = null;
 	private Player currentPlayer;
+	private int currentPlayerIdx = 0;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		// Actions for gameplay.
-		if (gameStarted) {
-
-			// Handle some of the commands to do with ui things.
+		if (this.gameState != null) {
 
 			// Event handlers for tile rotation.
 			if ("rotateCW".equals(e.getActionCommand())
@@ -465,15 +464,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				this.currentTilePanel.repaint();
 			}
 
-			// int err = 0;
+			// If the game has just started then transition to the first 'real'
+			// game state. We choose the first player to play and start.
+			if (this.gameState == GameState.GAME_START) {
+				this.gameState = GameState.DRAW_TILE;
+				currentPlayer = game.getPlayers()[currentPlayerIdx];
+			}
 
 			// Each turn begins with a player drawing a tile from the draw
 			// pile. Here we allow a player to draw the tile, and after they
 			// have we draw it to the screen on the current tile panel.
-			if ("drawTile".equals(e.getActionCommand()) && gameState == 0) {
-
-				// Get the next player. TODO
-				currentPlayer = game.getPlayers()[0];
+			if ("drawTile".equals(e.getActionCommand())
+					&& gameState == GameState.DRAW_TILE) {
 
 				game.drawTile(currentPlayer);
 				Tile tileToPlace = currentPlayer.getCurrentTile();
@@ -483,25 +485,9 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				this.currentTilePanel.add(tileToPlace);
 				this.currentTilePanel.repaint();
 
-				gameState++;
+				gameState = GameState.PLACE_TILE;
 
 			}
-
-			// Play a game!
-			/*
-			 * game = new Game(4);
-			 * 
-			 * while (!isDrawPileEmpty()) { for (int i = 0; i > 0; i = (i + 1) %
-			 * game.getNumPlayers()) { Player p = game.getPlayers()[i];
-			 * game.drawTile(p); game.placeTile(p, xPos, yPos);
-			 * game.placeMeeple(p, xBoard, yBoard, xTile, yTile);
-			 * 
-			 * game.scoreCities(false); game.scoreCloisters(false);
-			 * game.scoreRoads(false); } }
-			 * 
-			 * game.scoreCities(true); game.scoreCloisters(true);
-			 * game.scoreRoads(true); game.scoreFields();
-			 */
 
 		}
 
@@ -510,14 +496,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			this.setContentPane(this.optionsScreenContentPane);
 			this.validate();
 			this.repaint();
+
 		} else if ("exitGame".equals(e.getActionCommand())) {
 			System.exit(0);
+
 		} else if ("startSingleplayerGame".equals(e.getActionCommand())) {
 			this.setContentPane(this.gameContentPane);
 			this.validate();
 			this.repaint();
-			this.gameStarted = true;
+			this.gameState = GameState.GAME_START;
+			// TODO pass in number of players
 			this.game = new Game(4);
+
 		} else if ("startMultiplayerGame".equals(e.getActionCommand())) {
 			// TODO
 		}
@@ -527,6 +517,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			this.setContentPane(this.titleScreenContentPane);
 			this.validate();
 			this.repaint();
+
 		} else if ("changeWindowedMode".equals(e.getActionCommand())) {
 			// Get the users selection.
 			JComboBox cb = (JComboBox) e.getSource();
@@ -544,6 +535,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 				// Disable the resolution setting.
 				this.windowedResolutionDropDown.setEnabled(false);
+
 			} else if (!"Fullscreen".equals(mode)) {
 				this.dispose();
 				this.setUndecorated("Borderless Window".equals(mode));
@@ -574,6 +566,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 			this.setSize(width, height);
 			this.currentWindowedResolution = new Dimension(width, height);
+
 		} else if ("toggleSound".equals(e.getActionCommand())) {
 			JButton b = (JButton) e.getSource();
 
@@ -619,7 +612,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 			// Check that the proper game state is selected. Here we are
 			// looking for the tile placement state.
-			if (gameState == 1) {
+			if (gameState == GameState.PLACE_TILE) {
 
 				// Place the tile.
 				Tile tileToPlace = currentPlayer.getCurrentTile();
@@ -633,7 +626,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 					this.gameBoardWindow.repaint();
 					this.currentTilePanel.repaint();
 
-					gameState++;
+					gameState = GameState.PLACE_MEEPLE;
 				} else {
 					// TODO: better error handling
 					JOptionPane.showMessageDialog(this,
@@ -644,23 +637,46 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			}
 
 			// Here we are looking for the meeple placement state.
-			if (gameState == 2) {
+			if (gameState == GameState.PLACE_MEEPLE) {
 
 				// Place the meeple.
 				err = game.placeMeeple(currentPlayer, xBoard, yBoard, xTile,
 						yTile);
 
 				if (err == 0) {
-					Meeple m = this.game
-							.getMeeple(xBoard, yBoard, xTile, yTile);
+					Meeple m = game.getMeeple(xBoard, yBoard, xTile, yTile);
 					this.gameBoardWindow.add(m);
 					this.gameBoardWindow.repaint();
 
-					gameState = 0;
+					gameState = GameState.SCORE_PLAYERS;
 
 					this.game.scoreCloisters(false);
 					this.game.scoreRoads(false);
 					this.game.scoreCities(false);
+
+					// After scoring in-game events, check if the draw pile is
+					// empty. If so then we want to do end game scoring, and
+					// then end the game.
+					if (this.game.isDrawPileEmpty()) {
+						gameState = GameState.GAME_END;
+
+						this.game.scoreCloisters(true);
+						this.game.scoreRoads(true);
+						this.game.scoreCities(true);
+						this.game.scoreFields();
+
+						// TODO: some shiny end-game notification or
+						// what-have-you
+
+					} else {
+						// If not then we set the correct game state and advance
+						// gameplay to the next player.
+						gameState = GameState.DRAW_TILE;
+						currentPlayerIdx++;
+						currentPlayer = game.getPlayers()[currentPlayerIdx
+								% game.getNumPlayers()];
+					}
+
 				} else {
 					// TODO: better error handling
 					JOptionPane.showMessageDialog(this,
