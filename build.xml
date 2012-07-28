@@ -1,125 +1,117 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project name="Carcassonne" default="main" basedir=".">
 
-	<property name="src.dir" location="${basedir}/src" />
-	<property name="build.dir" location="${basedir}/bin" />
+    <property name="src.dir" location="${basedir}/src" />
+    <property name="build.dir" location="${basedir}/bin" />
 
-	<property name="lib.dir" location="${basedir}/lib" />
-	<property name="docs.dir" location="${basedir}/docs" />
-	<property name="dist.dir" location="${basedir}/dist" />
+    <property name="lib.dir" location="${basedir}/lib" />
+    <property name="docs.dir" location="${basedir}/docs" />
+    <property name="dist.dir" location="${basedir}/dist" />
 
-	<property name="emma.instr.dir" location="${basedir}/emma-instr" />
-	<property name="emma.report.dir" location="${basedir}/emma-report" />
-	<property name="test.report.dir" location="${basedir}/tests" />
-	
-	<property name="name.jar" value="Carcassonne.jar" />
-	<property name="main.class" value="ui.GameUI" />
+    <property name="emma.instr.dir" location="${basedir}/emma-instr" />
+    <property name="emma.report.dir" location="${basedir}/emma-report" />
+    <property name="test.report.dir" location="${basedir}/tests" />
+    
+    <property name="name.jar" value="Carcassonne.jar" />
+    <property name="main.class" value="ui.GameUI" />
 
-	<path id="build.class.path">
+    <path id="build.class.path">
         <pathelement location="${build.dir}" />
-	</path>
-		
-	<path id="lib.class.path">
-		<fileset dir="${lib.dir}">
-			<include name="**/*.jar" />
-			<exclude name="emma/emma*.jar"/>
-		</fileset>
-	</path>
+    </path>
+        
+    <path id="lib.class.path">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+            <exclude name="emma/emma*.jar"/>
+        </fileset>
+    </path>
 
-	<path id="emma.class.path">
-		<fileset dir="${lib.dir}">
-		   <include name="emma/emma*.jar"/>
-		</fileset>
-	</path>
+    <path id="emma.class.path">
+        <fileset dir="${lib.dir}">
+           <include name="emma/emma*.jar"/>
+        </fileset>
+    </path>
 
-	<target name="clean">
-		<mkdir dir="${build.dir}" />
-		<mkdir dir="${docs.dir}" />
-		<mkdir dir="${test.report.dir}" />
-		<mkdir dir="${dist.dir}" />
-		<mkdir dir="${emma.instr.dir}"/>
+    <target name="clean">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${docs.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${emma.instr.dir}"/>
         <mkdir dir="${emma.report.dir}"/>
-		<delete includeemptydirs="true">
-			<fileset dir="${build.dir}/" includes="**/*" />
-			<fileset dir="${docs.dir}/" includes="**/*" />
-			<fileset dir="${test.report.dir}/" includes="**/*" />
-			<fileset dir="${dist.dir}/" includes="**/*.jar" />
+        <mkdir dir="${test.report.dir}" />
+        <delete includeemptydirs="true">
+            <fileset dir="${build.dir}/" includes="**/*" />
+            <fileset dir="${docs.dir}/" includes="**/*" />
+            <fileset dir="${dist.dir}/" includes="**/*.jar" />
             <fileset dir="${emma.instr.dir}/" includes="**/*" />
-			<fileset dir="${emma.report.dir}/" includes="**/*" />
-			<fileset dir="." includes="*log*" casesensitive="no" />
-		</delete>
-	</target>
-
-	<target name="compile">
-		<javac
-			  debug="on"
-			  includeantruntime="false"
-			  srcdir="${src.dir}"
-			  destdir="${build.dir}">
-			<classpath>
-				<path refid="build.class.path" />
-			    <path refid="lib.class.path" />
-			</classpath>
-		</javac>
-	</target>
-	
-    <target name="emma.enable">
-    	<property name="emma.enabled" value="true" />
-    	<taskdef
-    		resource="emma_ant.properties"
-    		classpathref="emma.class.path" />
+            <fileset dir="${emma.report.dir}/" includes="**/*" />
+            <fileset dir="${test.report.dir}/" includes="**/*" />
+            <fileset dir="." includes="*log*" casesensitive="no" />
+        </delete>
     </target>
-	
+
+    <target name="compile">
+        <javac
+            debug="on"
+            includeantruntime="false"
+            srcdir="${src.dir}"
+            destdir="${build.dir}">
+            <classpath>
+                <path refid="build.class.path" />
+                <path refid="lib.class.path" />
+            </classpath>
+        </javac>
+    </target>
+    
+    <target name="emma.enable">
+        <property name="emma.enabled" value="true" />
+        <taskdef
+            resource="emma_ant.properties"
+            classpathref="emma.class.path" />
+    </target>
+    
     <target name="emma.instrument">
         <emma enabled="${emma.enabled}">
             <instr
-             instrpath="${build.dir}"
-             destdir="${emma.instr.dir}"
-             metadatafile="${emma.report.dir}/metadata.emma"
-             mode="copy"
-             merge="true">
+                instrpath="${build.dir}"
+                destdir="${emma.instr.dir}"
+                metadatafile="${emma.report.dir}/metadata.emma"
+                mode="copy"
+                merge="true">
                 <filter excludes="*Test*" />
             </instr>
         </emma>
     </target>
 
-	<target name="junit">
-		<junit
-			printsummary="on"
-			fork="true"
-			forkmode="once"
-			haltonfailure="yes"
-			haltonerror="yes">
-			
-			<!--
-			<classpath>
+    <target name="junit">
+        <junit
+            printsummary="on"
+            fork="true"
+            forkmode="once"
+            haltonfailure="yes"
+            haltonerror="yes">
+            
+            <classpath>
                 <path refid="lib.class.path" />
                 <path refid="emma.class.path" />
                 <pathelement location="${emma.instr.dir}" />
-			</classpath>
-			-->
-			
-			<classpath>
-				<path refid="lib.class.path" />
-				<path refid="build.class.path" />
-			</classpath>
-			
-			<formatter type="xml" />
-			
-			<batchtest todir="${test.report.dir}">
-				<fileset dir="${src.dir}">
-					<include name="**/*Test*.java" />
-					<exclude name="**/AllTests.java" />
-				</fileset>
-			</batchtest>
-			
-			<!--
-	         <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
-	         <jvmarg value="-Demma.coverage.out.merge=false" />
-	         -->
-			
-		</junit>
-	</target>
+            	<pathelement location="${build.dir}" />
+            </classpath>
+            
+            <formatter type="xml" />
+            
+            <batchtest todir="${test.report.dir}">
+                <fileset dir="${src.dir}">
+                    <include name="**/*Test*.java" />
+                    <exclude name="**/AllTests.java" />
+                </fileset>
+            </batchtest>
+            
+             <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
+             <jvmarg value="-Demma.coverage.out.merge=true" />
+            
+        </junit>
+    </target>
 
     <target name="emma.report">
         <emma enabled="${emma.enabled}">
@@ -132,22 +124,22 @@
         </emma>
     </target>
 
-	<target name="docs">
-		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}">
-			<excludepackage name="tests" />
-		</javadoc>
-	</target>
+    <target name="docs">
+        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}">
+            <excludepackage name="tests" />
+        </javadoc>
+    </target>
 
-	<target name="jar">
-		<jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
-			excludes="**/tests/**">
-			<manifest>
-				<attribute name="Main-Class" value="${main.class}" />
-			</manifest>
-		</jar>
-	</target>
+    <target name="jar">
+        <jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
+            excludes="**/tests/**">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}" />
+            </manifest>
+        </jar>
+    </target>
 
-	<target name="main" depends="clean, compile, junit" />
-	<target name="emma" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report" />
+    <target name="main" depends="clean, compile, junit" />
+    <target name="emma" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report" />
 
 </project>

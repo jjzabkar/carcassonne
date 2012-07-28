@@ -69,7 +69,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
     private JPanel gameContentPane;
 
     // And other ui elements which need to be declared globally.
-    private JComboBox<String> windowedResolutionDropDown;
+    private JComboBox windowedResolutionDropDown;
     private JLabel volumeSliderLabel;
     private JCanvas gameBoardWindow;
     private JCanvas currentTilePanel;
@@ -198,15 +198,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         audioSettingsLabel.setHorizontalTextPosition(JLabel.CENTER);
         audioSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
 
-        windowedResolutionDropDown =
-            new JComboBox<String>(this.windowedResolutions);
+        windowedResolutionDropDown = new JComboBox(this.windowedResolutions);
 
         windowedResolutionDropDown.setSelectedItem("800 x 600");
         windowedResolutionDropDown.setActionCommand("changeResolution");
         windowedResolutionDropDown.addActionListener(this);
 
-        JComboBox<String> windowedModeDropDown =
-            new JComboBox<String>(this.windowedSettings);
+        JComboBox windowedModeDropDown = new JComboBox(this.windowedSettings);
 
         windowedModeDropDown.setSelectedItem("Windowed");
         windowedModeDropDown.setActionCommand("changeWindowedMode");
@@ -467,7 +465,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
                 this.currentTilePanel.repaint();
             }
 
-            int err = 0;
+            //int err = 0;
 
             // Each turn begins with a player drawing a tile from the draw
             // pile. Here we allow a player to draw the tile, and after they
@@ -519,13 +517,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         // Main screen.
         if ("showOptionsScreen".equals(e.getActionCommand())) {
             this.setContentPane(this.optionsScreenContentPane);
-            this.revalidate();
+            this.validate();
             this.repaint();
         } else if ("exitGame".equals(e.getActionCommand())) {
             System.exit(0);
         } else if ("startSingleplayerGame".equals(e.getActionCommand())) {
             this.setContentPane(this.gameContentPane);
-            this.revalidate();
+            this.validate();
             this.repaint();
             this.gameStarted = true;
             this.game = new Game(4);
@@ -536,11 +534,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
         // Options screen.
         if ("showTitleScreen".equals(e.getActionCommand())) {
             this.setContentPane(this.titleScreenContentPane);
-            this.revalidate();
+            this.validate();
             this.repaint();
         } else if ("changeWindowedMode".equals(e.getActionCommand())) {
             // Get the users selection.
-            JComboBox<String> cb = (JComboBox<String>) e.getSource();
+            JComboBox cb = (JComboBox) e.getSource();
             String mode = (String) cb.getSelectedItem();
 
             if ("Fullscreen".equals(mode)
@@ -575,7 +573,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
         } else if ("changeResolution".equals(e.getActionCommand())
             && this.currentWindowedMode != "Fullscreen") {
-            JComboBox<String> cb = (JComboBox<String>) e.getSource();
+            JComboBox cb = (JComboBox) e.getSource();
             String res = (String) cb.getSelectedItem();
 
             String[] resArray = res.split(" ");
