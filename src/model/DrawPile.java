@@ -12,6 +12,16 @@ import java.util.Random;
 public class DrawPile {
 
 	private ArrayList<Tile> tiles = new ArrayList<Tile>();
+	private boolean firstTurn = true;
+
+	private char[][] firstDrawnTile = new char[][] {
+			{ 'x', 'C', 'C', 'C', 'C', 'C', 'x' },
+			{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+			{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+			{ 'R', 'R', 'R', 'R', 'R', 'R', 'R' },
+			{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+			{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+			{ 'x', 'F', 'F', 'F', 'F', 'F', 'x' } };
 
 	public DrawPile() {
 		this.initDrawPile();
@@ -214,17 +224,10 @@ public class DrawPile {
 			this.tiles.add(new Tile(tile, "CS"));
 		}
 
-		// city road (5)
-		tile = new char[][] { { 'x', 'C', 'C', 'C', 'C', 'C', 'x' },
-				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
-				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
-				{ 'R', 'R', 'R', 'R', 'R', 'R', 'R' },
-				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
-				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
-				{ 'x', 'F', 'F', 'F', 'F', 'F', 'x' } };
-
+		// city road (3 + 1)
+		// The fifth city-road is drawn out on the first draw.
 		for (int i = 0; i < 3; i++) {
-			this.tiles.add(new Tile(tile, "CR"));
+			this.tiles.add(new Tile(firstDrawnTile, "CR"));
 		}
 
 		// city road bend [2] (3)
@@ -288,15 +291,27 @@ public class DrawPile {
 	 * 
 	 * @param aPlayer
 	 *            The player which receives the tile.
+	 * @return a non-zero integer if there are no tiles left in the pile, zero
+	 *         otherwise.
 	 */
-	public void draw(Player aPlayer) {
-		// TODO: return value & checking on ui
-		if (!this.tiles.isEmpty()) {
+	public int draw(Player aPlayer) {
+
+		if (this.tiles.isEmpty()) {
+			return 1;
+		}
+
+		if (firstTurn) {
+			aPlayer.setCurrentTile(new Tile(firstDrawnTile, "CR"));
+			this.firstTurn = false;
+
+		} else {
 			aPlayer.setCurrentTile(this.tiles.remove(0));
 		}
 
 		// For now, let's just re-shuffle the tiles after every draw.
 		Collections.shuffle(this.tiles, new Random(System.nanoTime()));
+
+		return 0;
 	}
 
 	/**
