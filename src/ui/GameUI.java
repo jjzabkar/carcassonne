@@ -464,6 +464,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				this.currentTilePanel.repaint();
 			}
 
+			// Allow a player to end their turn if they don't want to place a
+			// meeple.
+			if ("endTurn".equals(e.getActionCommand())
+					&& this.gameState == GameState.PLACE_MEEPLE) {
+				this.gameState = GameState.DRAW_TILE;
+				this.endTurn();
+			}
+
 			// If the game has just started then transition to the first 'real'
 			// game state. We choose the first player to play and start.
 			if (this.gameState == GameState.GAME_START) {
@@ -672,9 +680,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 						// If not then we set the correct game state and advance
 						// gameplay to the next player.
 						gameState = GameState.DRAW_TILE;
-						currentPlayerIdx++;
-						currentPlayer = game.getPlayers()[currentPlayerIdx
-								% game.getNumPlayers()];
+						this.endTurn();
 					}
 
 				} else {
@@ -688,6 +694,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 		}
 
+	}
+
+	private void endTurn() {
+		currentPlayerIdx = (currentPlayerIdx + 1) % game.getNumPlayers();
+		currentPlayer = game.getPlayers()[currentPlayerIdx];
 	}
 
 	@Override
