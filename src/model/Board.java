@@ -116,10 +116,6 @@ public class Board {
 			aPlayer.setCurrentTile(null);
 			aPlayer.setLastTilePlacedPos(xPos, yPos);
 
-			// UI code.
-			tileToPlace.setx(xPos * Tile.tileTypeSize * Tile.tileSize);
-			tileToPlace.sety(yPos * Tile.tileTypeSize * Tile.tileSize);
-
 			return 0;
 		}
 
@@ -235,19 +231,13 @@ public class Board {
 
 			// TODO: better selection of meeple to allow the correct one to
 			// be selected and draw?
+			MeeplePosition mp;
+
 			for (int i = 0; i < meeples.length; i++) {
 				if (this.meeplePlacement.get(meeples[i]) == null) {
-					MeeplePosition mp = new MeeplePosition(theTile, xTile,
-							yTile);
-					this.meeplePlacement.put(meeples[i], mp);
 
-					// UI code.
-					meeples[i]
-							.getx((xBoard * Tile.tileTypeSize * Tile.tileSize)
-									+ (xTile * Tile.tileTypeSize));
-					meeples[i]
-							.gety((yBoard * Tile.tileTypeSize * Tile.tileSize)
-									+ (yTile * Tile.tileTypeSize));
+					mp = new MeeplePosition(theTile, xTile, yTile);
+					this.meeplePlacement.put(meeples[i], mp);
 
 					return 0;
 				}

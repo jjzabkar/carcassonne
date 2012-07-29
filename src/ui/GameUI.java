@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -66,6 +67,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	// Main JPanels which are to be swapped as the frame content.
 	private JPanel titleScreenContentPane;
 	private JPanel optionsScreenContentPane;
+	private JPanel gameLobbyContentPane;
 	private JPanel gameContentPane;
 
 	// And other ui elements which need to be declared globally.
@@ -73,12 +75,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private JLabel volumeSliderLabel;
 	private JCanvas gameBoardWindow;
 	private JCanvas currentTilePanel;
+	private JTextField numPlayersTextField;
 
 	public GameUI() {
 		// Initialize game menus.
+		// The game screen is initialized after we get the game parameters from
+		// the user as we can then create the players list for scoring.
 		this.initTitleScreen();
 		this.initOptionsScreen();
-		this.initGameScreen();
+		this.initLobbyScreen();
 
 		// Set the title bar and icon.
 		this.setTitle(title);
@@ -100,13 +105,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		this.setLocationRelativeTo(null);
 	}
 
-	// State machine for menus
+	// State machine for menus:
 	//
-	// title -> quit <------------------|
-	// |<---> Single Player --------->|
-	// |<---> Multiplayer ----------->| | video (resolution, windowed)
-	// |<---> Multiplayer (Online) -->| | sound (%)
-	// |<---> options <---------------->| music (on/off)
+	// title -> quit <------------------|<--------------|
+	// |<-----> Multiplayer <-----> Game Lobby -----> Playing!
+	// |
+	// |
+	// | | sound (%)
+	// |<-----> options <---------------->| music (on/off)
+	// | video (resolution, windowed)
 
 	private void initTitleScreen() {
 		this.titleScreenContentPane = new JPanel(new BorderLayout());
@@ -116,22 +123,12 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
 
-		JButton singleplayerButton = new JButton("Singleplayer");
-		singleplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
-		singleplayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
-		singleplayerButton.setMnemonic(KeyEvent.VK_S);
-		singleplayerButton.setActionCommand("startSingleplayerGame");
-		singleplayerButton.addActionListener(this);
-
-		JButton multiplayerButton = new JButton("Multiplayer");
-		multiplayerButton.setVerticalTextPosition(AbstractButton.CENTER);
-		multiplayerButton.setHorizontalTextPosition(AbstractButton.CENTER);
-		multiplayerButton.setMnemonic(KeyEvent.VK_M);
-		multiplayerButton.setActionCommand("startMultiplayerGame");
-		multiplayerButton.addActionListener(this);
-
-		// TODO
-		multiplayerButton.setEnabled(false);
+		JButton playButton = new JButton("Multiplayer");
+		playButton.setVerticalTextPosition(AbstractButton.CENTER);
+		playButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		playButton.setMnemonic(KeyEvent.VK_M);
+		playButton.setActionCommand("startLobby");
+		playButton.addActionListener(this);
 
 		JButton optionsButton = new JButton("Options");
 		optionsButton.setVerticalTextPosition(AbstractButton.CENTER);
@@ -158,22 +155,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		gc.gridwidth = 2;
 		gc.gridheight = 1;
 		gc.fill = GridBagConstraints.HORIZONTAL;
-
-		titleContainer.add(singleplayerButton, gc);
-
+		titleContainer.add(playButton, gc);
 		gc.gridy = 1;
-
-		titleContainer.add(multiplayerButton, gc);
-
-		gc.gridy = 2;
 		gc.gridwidth = 1;
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(2, 2, 20, 2);
-
 		titleContainer.add(optionsButton, gc);
-
 		gc.gridx = 1;
-
 		titleContainer.add(exitButton, gc);
 
 		this.titleScreenContentPane.add(titleLabel, BorderLayout.PAGE_START);
@@ -259,35 +247,22 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		gc.gridy = 0;
 		gc.gridwidth = 1;
 		gc.gridheight = 1;
-
 		optionsContainer.add(videoSettingsLabel);
-
 		gc.gridx = 1;
-
 		optionsContainer.add(audioSettingsLabel);
-
 		gc.gridx = 0;
 		gc.gridy = 1;
 		gc.fill = GridBagConstraints.HORIZONTAL;
-
 		optionsContainer.add(windowedResolutionDropDown, gc);
-
 		gc.gridy = 2;
-
 		optionsContainer.add(windowedModeDropDown, gc);
-
 		gc.gridx = 1;
 		gc.gridy = 1;
-
 		optionsContainer.add(volumeContainer, gc);
-
 		gc.gridy = 2;
-
 		optionsContainer.add(soundToggleButton, gc);
-
 		gc.gridy = 3;
 		gc.insets = new Insets(2, 2, 20, 2);
-
 		optionsContainer.add(backButton, gc);
 
 		this.optionsScreenContentPane
@@ -296,17 +271,48 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				BorderLayout.PAGE_END);
 	}
 
+	// Allow the players to choose colors, pick how many of them are playing.
+	private void initLobbyScreen() {
+		// TODO: improve this screen!
+		this.gameLobbyContentPane = new JPanel(new BorderLayout());
+
+		// number of players input
+		numPlayersTextField = new JTextField("3", 2);
+		numPlayersTextField.addActionListener(this);
+
+		// Back button
+		JButton backButton = new JButton("Back");
+		backButton.setVerticalTextPosition(AbstractButton.CENTER);
+		backButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		backButton.setMnemonic(KeyEvent.VK_B);
+		backButton.setActionCommand("showTitleScreen");
+		backButton.addActionListener(this);
+
+		// Start game button
+		JButton startButton = new JButton("Start Game");
+		startButton.setVerticalTextPosition(AbstractButton.CENTER);
+		startButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		startButton.setMnemonic(KeyEvent.VK_S);
+		startButton.setActionCommand("startGame");
+		startButton.addActionListener(this);
+
+		this.gameLobbyContentPane.add(backButton, BorderLayout.PAGE_START);
+		this.gameLobbyContentPane.add(numPlayersTextField, BorderLayout.CENTER);
+		this.gameLobbyContentPane.add(startButton, BorderLayout.PAGE_END);
+	}
+
 	private void initGameScreen() {
 		this.gameContentPane = new JPanel(new BorderLayout());
 
 		this.gameBoardWindow = new JCanvas();
-		this.gameBoardWindow.setBorder(BorderFactory
-				.createLineBorder(Color.BLACK));
+		gameBoardWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 		// Add mouse listener for game window.
 		this.gameBoardWindow.addMouseListener(this);
 
 		JPanel infoContainer = new JPanel(new BorderLayout());
+		GridBagConstraints gc;
+
 		infoContainer.setPreferredSize(new Dimension(200, 600));
 		infoContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
@@ -316,6 +322,25 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				.getPreferredSize().getWidth(), (int) infoContainer
 				.getPreferredSize().getHeight() * 1 / 3));
 		scoreInfoWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+		// Create the player scoring list.
+		gc = new GridBagConstraints();
+		gc.insets = new Insets(2, 2, 2, 2);
+		gc.gridx = 0;
+		gc.gridy = 0;
+
+		for (int i = 0; i < this.game.getNumPlayers(); i++) {
+			JLabel playerName = new JLabel("Player " + (i + 1) + ":");
+			JLabel playerScore = new JLabel(""
+					+ this.game.getPlayers()[i].getScore());
+
+			scoreInfoWindow.add(playerName, gc);
+			gc.gridx++;
+			scoreInfoWindow.add(playerScore, gc);
+			gc.gridy++;
+			gc.gridx = 0;
+
+		}
 
 		// Bottom part of the info window has the controls.
 		JPanel controlsWindow = new JPanel(new GridBagLayout());
@@ -391,7 +416,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		endTurnButton.addActionListener(this);
 
 		// Fill in the info window controls.
-		GridBagConstraints gc = new GridBagConstraints();
+		gc = new GridBagConstraints();
 		gc.insets = new Insets(2, 2, 2, 2);
 
 		gc.gridx = 0;
@@ -508,16 +533,38 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		} else if ("exitGame".equals(e.getActionCommand())) {
 			System.exit(0);
 
-		} else if ("startSingleplayerGame".equals(e.getActionCommand())) {
+		} else if ("startLobby".equals(e.getActionCommand())) {
+			this.setContentPane(this.gameLobbyContentPane);
+			this.validate();
+			this.repaint();
+		}
+
+		// Lobby screen.
+		if ("startGame".equals(e.getActionCommand())) {
+
+			// Get number of players
+			int numPlayers = Integer.parseInt(numPlayersTextField.getText());
+
+			if (numPlayers > 5 || numPlayers < 1) {
+				// TODO: better error handling
+				// TODO: format numplayers.
+				JOptionPane.showMessageDialog(this, "Can't have a game with "
+						+ numPlayers + " players.");
+
+				return;
+			}
+
+			// Start the game.
+			this.gameState = GameState.GAME_START;
+			this.game = new Game(numPlayers);
+			// Now that we know the number of players we can create the game
+			// screen.
+			this.initGameScreen();
+
+			// And switch to the correct content pane.
 			this.setContentPane(this.gameContentPane);
 			this.validate();
 			this.repaint();
-			this.gameState = GameState.GAME_START;
-			// TODO pass in number of players
-			this.game = new Game(4);
-
-		} else if ("startMultiplayerGame".equals(e.getActionCommand())) {
-			// TODO
 		}
 
 		// Options screen.
@@ -597,6 +644,10 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		// Detect if there has been a mouse click on the board canvas object.
 		if (e.getComponent() == this.gameBoardWindow) {
 
+			if (gameState == null) {
+				return;
+			}
+
 			int err = 0;
 
 			// We'll do some click calculations outside of the state-specific
@@ -629,8 +680,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				// If no error draw the tile on the gameboard and remove it
 				// from the currentTile area.
 				if (err == 0) {
+					// UI code.
+					int tileSize = Tile.tileTypeSize * Tile.tileSize;
+					tileToPlace.setx(xBoard * tileSize);
+					tileToPlace.sety(yBoard * tileSize);
+
 					this.gameBoardWindow.add(tileToPlace);
 					this.currentTilePanel.clear();
+
 					this.gameBoardWindow.repaint();
 					this.currentTilePanel.repaint();
 
@@ -653,14 +710,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 				if (err == 0) {
 					Meeple m = game.getMeeple(xBoard, yBoard, xTile, yTile);
+
+					// UI code.
+					int tileSize = Tile.tileTypeSize * Tile.tileSize;
+					m.getx((xBoard * tileSize) + (xTile * Tile.tileTypeSize));
+					m.gety((yBoard * tileSize) + (yTile * Tile.tileTypeSize));
+
 					this.gameBoardWindow.add(m);
 					this.gameBoardWindow.repaint();
 
 					gameState = GameState.SCORE_PLAYERS;
 
-					this.game.scoreCloisters(false);
-					this.game.scoreRoads(false);
-					this.game.scoreCities(false);
+					this.game.score(false);
 
 					// After scoring in-game events, check if the draw pile is
 					// empty. If so then we want to do end game scoring, and
@@ -668,10 +729,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 					if (this.game.isDrawPileEmpty()) {
 						gameState = GameState.GAME_END;
 
-						this.game.scoreCloisters(true);
-						this.game.scoreRoads(true);
-						this.game.scoreCities(true);
-						this.game.scoreFields();
+						this.game.score(true);
 
 						// TODO: some shiny end-game notification or
 						// what-have-you

@@ -92,41 +92,22 @@ public class Game {
 	}
 
 	/**
-	 * Score each player for any cloisters they may have.
+	 * Score each player for all game features.
 	 * 
 	 * @param hasGameEnded
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
 	 */
-	public void scoreCloisters(boolean hasGameEnded) {
+	public void score(boolean hasGameEnded) {
+
 		this.gameBoard.scoreCloisters(this.players, hasGameEnded);
-	}
-
-	/**
-	 * Score the cities.
-	 * 
-	 * @param hasGameEnded
-	 *            A boolean indicating whether the game has ended.
-	 */
-	public void scoreCities(boolean hasGameEnded) {
-		this.gameBoard.scoreCities(this.players, hasGameEnded);
-	}
-
-	/**
-	 * Score the roads.
-	 * 
-	 * @param hasGameEnded
-	 *            A boolean indicating whether the game has ended.
-	 */
-	public void scoreRoads(boolean hasGameEnded) {
 		this.gameBoard.scoreRoads(this.players, hasGameEnded);
-	}
+		this.gameBoard.scoreCities(this.players, hasGameEnded);
 
-	/**
-	 * This function scores the fields at the end of the game.
-	 */
-	public void scoreFields() {
-		this.gameBoard.scoreFields(this.players);
+		if (hasGameEnded) {
+			this.gameBoard.scoreFields(this.players);
+		}
+
 	}
 
 	public Player[] getPlayers() {
