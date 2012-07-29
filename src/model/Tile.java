@@ -14,24 +14,35 @@ public class Tile implements DrawableInterface {
 	// A tile is stored as a 7x7 matrix, where the corner cells are null.
 	// (Would be 5x5 but some tiles need more space.)
 	// ie.
-	// x _ _ _ _ _ x Stored: [ [ _ _ _ _ _ _ _ ], ] X: 3, 2
-	// _ _ _ _ _ _ _ | [ _ _ _ _ _ _ _ ], | p: y, x
-	// _ _ _ _ _ _ _ | [ _ _ _ _ _ _ _ ], |
-	// _ _ _ _ _ _ _ | [ _ _ X _ _ _ _ ], |
-	// _ _ _ _ _ _ _ | [ _ _ _ _ _ _ _ ], |
-	// _ _ _ _ _ _ _ | [ _ _ _ _ _ _ _ ], |
-	// x _ _ _ _ _ x [ [ _ _ _ _ _ _ _ ] ]
+	//
+	// x _ _ _ _ _ x
+	// _ _ _ _ _ _ _
+	// _ _ _ _ _ _ _
+	// _ _ _ _ _ _ _
+	// _ _ _ _ _ _ _
+	// _ _ _ _ _ _ _
+	// x _ _ _ _ _ x
+	//
+	// Stored:
+	// [ [ _ _ _ _ _ _ _ ],] X: 3, 2
+	// | [ _ _ _ _ _ _ _ ],| p: y, x
+	// | [ _ _ _ _ _ _ _ ],|
+	// | [ _ _ X _ _ _ _ ],|
+	// | [ _ _ _ _ _ _ _ ],|
+	// | [ _ _ _ _ _ _ _ ],|
+	// [ [ _ _ _ _ _ _ _ ] ]
 
 	// The top, right, bottom, and left three cells are set as either city,
 	// road, or field. The center is then set as a proper representation.
 	// ie.
-	// x F F R F F x x F F F F F x x C C C C C x
-	// C F F R F F F F F F F F F F C C C C C F F
-	// C F F R F F F F F K K K F F C C C F F F F
-	// C F F R F F F F F K K K F F C C F F R R R
-	// C F F R F F F F F K K K F F C C F R R F F
-	// C F F R F F F F F F R F F F C F F R F F F
-	// x F F R F F x x F F R F F x x F F R F F x
+	//
+	// x C C C C C x
+	// C C C C C F F
+	// C C C F F F F
+	// C C F F R R R
+	// C C F R R F F
+	// C F F R F F F
+	// x F F R F F x
 
 	// Shown above are the starting tile, a cloister attached to a road,
 	// and a 2-sided city/castle with an L-bend road (respectively).
@@ -43,8 +54,8 @@ public class Tile implements DrawableInterface {
 	private int orientation = 0;
 
 	// UI variables.
-	private int xPos;
-	private int yPos;
+	private int xPos = 0;
+	private int yPos = 0;
 
 	/** Denotes the width of a tileType element when drawn by the ui. **/
 	public static final int tileTypeSize = 10;

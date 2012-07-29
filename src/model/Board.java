@@ -243,10 +243,10 @@ public class Board {
 
 					// UI code.
 					meeples[i]
-							.setTilex((xBoard * Tile.tileTypeSize * Tile.tileSize)
+							.getx((xBoard * Tile.tileTypeSize * Tile.tileSize)
 									+ (xTile * Tile.tileTypeSize));
 					meeples[i]
-							.setTiley((yBoard * Tile.tileTypeSize * Tile.tileSize)
+							.gety((yBoard * Tile.tileTypeSize * Tile.tileSize)
 									+ (yTile * Tile.tileTypeSize));
 
 					return 0;
