@@ -187,13 +187,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		audioSettingsLabel.setHorizontalAlignment(JLabel.CENTER);
 
 		windowedResolutionDropDown = new JComboBox(this.windowedResolutions);
-
 		windowedResolutionDropDown.setSelectedItem("800 x 600");
 		windowedResolutionDropDown.setActionCommand("changeResolution");
 		windowedResolutionDropDown.addActionListener(this);
 
 		JComboBox windowedModeDropDown = new JComboBox(this.windowedSettings);
-
 		windowedModeDropDown.setSelectedItem("Windowed");
 		windowedModeDropDown.setActionCommand("changeWindowedMode");
 		windowedModeDropDown.addActionListener(this);
