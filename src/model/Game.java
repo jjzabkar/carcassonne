@@ -123,4 +123,13 @@ public class Game {
 		return this.gameBoard.getMeeple(xBoard, yBoard, xTile, yTile);
 	}
 
+	// Pass off info about the board, used for ui to calculate the canvas size.
+	public int getBoardWidth() {
+		return gameBoard.getWidth();
+	}
+
+	public int getBoardHeight() {
+		return gameBoard.getHeight();
+	}
+
 }

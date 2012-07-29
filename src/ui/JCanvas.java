@@ -13,13 +13,17 @@ import javax.swing.JPanel;
  */
 class JCanvas extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private ArrayList<DrawableInterface> components;
+	private ArrayList<DrawableInterface> components = new ArrayList<DrawableInterface>();
 
 	public JCanvas() {
+		this.setLayout(null);
 		this.setDoubleBuffered(true);
-		this.components = new ArrayList<DrawableInterface>();
-
 		this.setPreferredSize(new Dimension(600, 600));
+	}
+
+	public JCanvas(int width, int height) {
+		this();
+		this.setPreferredSize(new Dimension(width, height));
 	}
 
 	@Override
@@ -29,7 +33,6 @@ class JCanvas extends JPanel {
 		for (int i = 0; i < components.size(); i++) {
 			components.get(i).draw(g);
 		}
-
 	}
 
 	public void add(DrawableInterface o) {

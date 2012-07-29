@@ -1,13 +1,13 @@
 package ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,7 +17,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,6 +24,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -107,14 +107,26 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 	// State machine for menus:
 	//
-	// title -> quit <------------------|<--------------|
-	// |<-----> Multiplayer <-----> Game Lobby -----> Playing!
-	// |
-	// |
-	// | | sound (%)
-	// |<-----> options <---------------->| music (on/off)
-	// | video (resolution, windowed)
-
+	// title
+	// - options
+	// - lobby (play)
+	// - quit
+	//
+	// options
+	// - title
+	// - change music
+	// - change video
+	// - change sound
+	//
+	// lobby
+	// - title
+	// - game options
+	// - play
+	//
+	// play
+	// -title
+	// -quit
+	//
 	private void initTitleScreen() {
 		this.titleScreenContentPane = new JPanel(new BorderLayout());
 
@@ -263,10 +275,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		gc.insets = new Insets(2, 2, 20, 2);
 		optionsContainer.add(backButton, gc);
 
-		this.optionsScreenContentPane
-				.add(optionsLabel, BorderLayout.PAGE_START);
-		this.optionsScreenContentPane.add(optionsContainer,
-				BorderLayout.PAGE_END);
+		optionsScreenContentPane.add(optionsLabel, BorderLayout.PAGE_START);
+		optionsScreenContentPane.add(optionsContainer, BorderLayout.PAGE_END);
 	}
 
 	// Allow the players to choose colors, pick how many of them are playing.
@@ -302,8 +312,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private void initGameScreen() {
 		this.gameContentPane = new JPanel(new BorderLayout());
 
-		this.gameBoardWindow = new JCanvas();
-		gameBoardWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		int tileSize = Tile.tileSize * Tile.tileTypeSize;
+		int gameBoardWidth = game.getBoardWidth() * tileSize;
+		int gameBoardHeight = game.getBoardHeight() * tileSize;
+		Point scrollPos = new Point(gameBoardWidth / 2, gameBoardHeight / 2);
+
+		gameBoardWindow = new JCanvas(gameBoardWidth, gameBoardHeight);
+		JScrollPane gameBoardWindowScrollPane = new JScrollPane(gameBoardWindow);
+		gameBoardWindowScrollPane.getViewport().setViewPosition(scrollPos);
 
 		// Add mouse listener for game window.
 		this.gameBoardWindow.addMouseListener(this);
@@ -311,15 +327,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		JPanel infoContainer = new JPanel(new BorderLayout());
 		GridBagConstraints gc;
 
-		infoContainer.setPreferredSize(new Dimension(200, 600));
-		infoContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
 		// Top part of the info window has the score information.
 		JPanel scoreInfoWindow = new JPanel(new GridBagLayout());
-		scoreInfoWindow.setPreferredSize(new Dimension((int) infoContainer
-				.getPreferredSize().getWidth(), (int) infoContainer
-				.getPreferredSize().getHeight() * 1 / 3));
-		scoreInfoWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 		// Create the player scoring list.
 		gc = new GridBagConstraints();
@@ -328,6 +337,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		gc.gridy = 0;
 
 		for (int i = 0; i < this.game.getNumPlayers(); i++) {
+
 			JLabel playerName = new JLabel("Player " + (i + 1) + ":");
 			JLabel playerScore = new JLabel(""
 					+ this.game.getPlayers()[i].getScore());
@@ -337,15 +347,10 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			scoreInfoWindow.add(playerScore, gc);
 			gc.gridy++;
 			gc.gridx = 0;
-
 		}
 
 		// Bottom part of the info window has the controls.
 		JPanel controlsWindow = new JPanel(new GridBagLayout());
-		controlsWindow.setPreferredSize(new Dimension((int) infoContainer
-				.getPreferredSize().getWidth(), (int) infoContainer
-				.getPreferredSize().getHeight() * 2 / 3));
-		controlsWindow.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 		// Zooming.
 		JButton zoomInButton = new JButton("+");
@@ -355,23 +360,6 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		JButton zoomOutButton = new JButton("-");
 		zoomOutButton.setActionCommand("zoomOut");
 		zoomOutButton.addActionListener(this);
-
-		// Panning.
-		JButton panRightButton = new JButton(">");
-		panRightButton.setActionCommand("panRight");
-		panRightButton.addActionListener(this);
-
-		JButton panLeftButton = new JButton("<");
-		panLeftButton.setActionCommand("panLeft");
-		panLeftButton.addActionListener(this);
-
-		JButton panUpButton = new JButton("^");
-		panUpButton.setActionCommand("panUp");
-		panUpButton.addActionListener(this);
-
-		JButton panDownButton = new JButton("v");
-		panDownButton.setActionCommand("panDown");
-		panDownButton.addActionListener(this);
 
 		// Tile Rotation.
 		JButton rotateCWButton = new JButton("--\\");
@@ -388,23 +376,19 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		// space it should take up in the layout.
 		ImageIcon drawTileImageIcon = new ImageIcon("tile-back.png");
 		Image drawTileImage = drawTileImageIcon.getImage();
-		BufferedImage drawTileBI = new BufferedImage(70, 70,
+
+		BufferedImage drawTileBI = new BufferedImage(tileSize, tileSize,
 				BufferedImage.TYPE_INT_ARGB);
 		Graphics g = drawTileBI.createGraphics();
-		g.drawImage(drawTileImage, 0, 0, 70, 70, null);
+		g.drawImage(drawTileImage, 0, 0, tileSize, tileSize, null);
 		ImageIcon drawTileButtonImage = new ImageIcon(drawTileBI);
 
 		JButton drawTileButton = new JButton(drawTileButtonImage);
-		drawTileButton.setPreferredSize(new Dimension(controlsWindow
-				.getPreferredSize().width * 2 / 3, controlsWindow
-				.getPreferredSize().height * 2 / 8));
 		drawTileButton.setActionCommand("drawTile");
 		drawTileButton.addActionListener(this);
 
 		// Current Tile.
-		currentTilePanel = new JCanvas();
-		currentTilePanel.setPreferredSize(new Dimension(Tile.tileSize
-				* Tile.tileTypeSize, Tile.tileSize * Tile.tileTypeSize));
+		currentTilePanel = new JCanvas(tileSize, tileSize);
 
 		// End turn button.
 		// Action for this button should only be allowed to let the player
@@ -432,32 +416,24 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		controlsWindow.add(zoomOutButton, gc);
 		gc.gridx = 0;
 		gc.gridy = 2;
-		controlsWindow.add(panLeftButton, gc);
-		gc.gridx = 1;
-		controlsWindow.add(panUpButton, gc);
-		gc.gridx = 2;
-		controlsWindow.add(panRightButton, gc);
-		gc.gridx = 0;
-		gc.gridy = 3;
 		controlsWindow.add(rotateCCWButton, gc);
-		gc.gridx = 1;
-		controlsWindow.add(panDownButton, gc);
 		gc.gridx = 2;
 		controlsWindow.add(rotateCWButton, gc);
 		gc.gridx = 0;
-		gc.gridy = 4;
+		gc.gridy = 3;
 		gc.gridwidth = 3;
 		gc.gridheight = 3;
 		controlsWindow.add(currentTilePanel, gc);
 		gc.gridx = 0;
-		gc.gridy = 7;
+		gc.gridy = 6;
 		gc.gridwidth = 3;
 		gc.gridheight = 1;
+		gc.fill = GridBagConstraints.HORIZONTAL;
 		controlsWindow.add(endTurnButton, gc);
 
 		// Add everything to everything in the info container.
-		this.gameContentPane.add(this.gameBoardWindow, BorderLayout.CENTER);
-		this.gameContentPane.add(infoContainer, BorderLayout.EAST);
+		gameContentPane.add(gameBoardWindowScrollPane, BorderLayout.CENTER);
+		gameContentPane.add(infoContainer, BorderLayout.EAST);
 		infoContainer.add(scoreInfoWindow, BorderLayout.NORTH);
 		infoContainer.add(controlsWindow, BorderLayout.SOUTH);
 	}
@@ -541,7 +517,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		if ("startGame".equals(e.getActionCommand())) {
 
 			// Get number of players
-			int numPlayers = Integer.parseInt(numPlayersTextField.getText());
+			int numPlayers = 0;
+
+			try {
+				numPlayers = Integer.parseInt(numPlayersTextField.getText());
+
+			} catch (Exception ex) {
+				return;
+			}
 
 			if (numPlayers > 5 || numPlayers < 1) {
 				// TODO: better error handling

@@ -242,18 +242,9 @@ public class Board {
 					return 0;
 				}
 			}
-			return 1;
 		}
 
-		if (!correctTile) {
-			return 2;
-		}
-
-		if (!newFeature) {
-			return 3;
-		}
-
-		return -1;
+		return 1;
 	}
 
 	/**
@@ -1245,6 +1236,15 @@ public class Board {
 		int[][] neighborTiles = { nStr, eStr, sStr, wStr };
 
 		return neighborTiles;
+	}
+
+	// Used for the ui; return the size of the array.
+	public int getWidth() {
+		return gameBoard[0].length;
+	}
+
+	public int getHeight() {
+		return gameBoard.length;
 	}
 
 }
