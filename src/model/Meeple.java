@@ -35,11 +35,11 @@ public class Meeple implements DrawableInterface {
 		return yPos;
 	}
 
-	public void getx(int tilex) {
+	public void setx(int tilex) {
 		this.xPos = tilex;
 	}
 
-	public void gety(int tiley) {
+	public void sety(int tiley) {
 		this.yPos = tiley;
 	}
 

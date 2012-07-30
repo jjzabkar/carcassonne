@@ -694,8 +694,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 					// UI code.
 					int tileSize = Tile.tileTypeSize * Tile.tileSize;
-					m.getx((xBoard * tileSize) + (xTile * Tile.tileTypeSize));
-					m.gety((yBoard * tileSize) + (yTile * Tile.tileTypeSize));
+					m.setx((xBoard * tileSize) + (xTile * Tile.tileTypeSize));
+					m.sety((yBoard * tileSize) + (yTile * Tile.tileTypeSize));
 
 					this.gameBoardWindow.add(m);
 					this.gameBoardWindow.repaint();
