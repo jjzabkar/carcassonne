@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -309,6 +310,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		this.gameLobbyContentPane.add(startButton, BorderLayout.PAGE_END);
 	}
 
+	private ArrayList<JLabel> playerScoreArray = new ArrayList<JLabel>();
+
 	private void initGameScreen() {
 		this.gameContentPane = new JPanel(new BorderLayout());
 
@@ -336,11 +339,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		gc.gridx = 0;
 		gc.gridy = 0;
 
+		// TODO factor out a jlabel playerscore class?
+
 		for (int i = 0; i < this.game.getNumPlayers(); i++) {
 
 			JLabel playerName = new JLabel("Player " + (i + 1) + ":");
 			JLabel playerScore = new JLabel(""
 					+ this.game.getPlayers()[i].getScore());
+			playerScoreArray.add(playerScore);
 
 			scoreInfoWindow.add(playerName, gc);
 			gc.gridx++;
@@ -703,6 +709,12 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 					gameState = GameState.SCORE_PLAYERS;
 
 					this.game.score(false);
+
+					// Update player scores on the ui.
+					for (int i = 0; i < game.getNumPlayers(); i++) {
+						playerScoreArray.get(i).setText(
+								"" + game.getPlayers()[i].getScore());
+					}
 
 					// After scoring in-game events, check if the draw pile is
 					// empty. If so then we want to do end game scoring, and
