@@ -17,7 +17,7 @@ public class MeepleTest {
 		Meeple meeple = new Meeple(Color.BLACK);
 
 		// Oracle.
-		Color oracleColor = Color.BLACK.brighter().brighter().brighter();
+		Color oracleColor = Color.BLACK;
 		int oracleX = 0;
 		int oracleY = 0;
 

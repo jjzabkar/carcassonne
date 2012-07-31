@@ -18,12 +18,17 @@ public class BoardTest {
 	private int err = 0;
 	private Board board;
 	private Player player;
+
+	// Tiles
 	private char[][] chr2;
+	private char[][] k;
+	private char[][] cr3;
+	private char[][] c2a;
 
 	@Before
 	public void initialize() {
 
-		// Test object.
+		// Test objects.
 		chr2 = new char[][] { { 'x', 'C', 'C', 'C', 'C', 'C', 'x' },
 				{ 'F', 'F', 'C', 'C', 'C', 'C', 'C' },
 				{ 'F', 'F', 'F', 'F', 'C', 'C', 'C' },
@@ -31,6 +36,30 @@ public class BoardTest {
 				{ 'F', 'F', 'R', 'R', 'F', 'C', 'C' },
 				{ 'F', 'F', 'F', 'R', 'F', 'F', 'C' },
 				{ 'x', 'F', 'F', 'R', 'F', 'F', 'x' } };
+
+		k = new char[][] { { 'x', 'F', 'F', 'F', 'F', 'F', 'x' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+				{ 'F', 'F', 'K', 'K', 'K', 'F', 'F' },
+				{ 'F', 'F', 'K', 'K', 'K', 'F', 'F' },
+				{ 'F', 'F', 'K', 'K', 'K', 'F', 'F' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
+				{ 'x', 'F', 'F', 'F', 'F', 'F', 'x' } };
+
+		cr3 = new char[][] { { 'x', 'F', 'F', 'R', 'F', 'F', 'x' },
+				{ 'C', 'F', 'F', 'R', 'F', 'F', 'F' },
+				{ 'C', 'F', 'F', 'R', 'F', 'F', 'F' },
+				{ 'C', 'F', 'F', 'F', 'R', 'R', 'R' },
+				{ 'C', 'F', 'F', 'R', 'F', 'F', 'F' },
+				{ 'C', 'F', 'F', 'R', 'F', 'F', 'F' },
+				{ 'x', 'F', 'F', 'R', 'F', 'F', 'x' } };
+
+		c2a = new char[][] { { 'x', 'F', 'F', 'F', 'F', 'F', 'x' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'C' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'C' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'C' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'C' },
+				{ 'F', 'F', 'F', 'F', 'F', 'F', 'C' },
+				{ 'x', 'C', 'C', 'C', 'C', 'C', 'x' } };
 
 		board = new Board();
 		player = new Player(Color.BLACK);
@@ -213,12 +242,209 @@ public class BoardTest {
 		Meeple m = board.getMeeple(64, 42, 0, 4);
 
 		assertNotNull(m);
-		assertEquals(Color.BLACK.brighter().brighter().brighter(), m.getColor());
+		assertEquals(Color.BLACK, m.getColor());
 	}
 
 	@Test
 	public void scoreTest01() {
-		// TODO
+		// Test scoring of a simple road (during game).
+		// Place a tile with a meeple on it, then place another tile completing
+		// the road. Then call score().
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 5, 3);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		player.getCurrentTile().rotateClockwise();
+
+		err = board.placeTile(player, 5, 4);
+		assertEquals(0, err);
+
+		board.scoreRoads(new Player[] { player }, false);
+		assertEquals(2, player.getScore());
+	}
+
+	@Test
+	public void scoreTest02() {
+		// Test scoring of a simple castle (during game).
+		// Place a tile with a meeple on it, then place another tile completing
+		// the road. Then call score().
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 0, 1);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		player.getCurrentTile().rotateClockwise();
+		player.getCurrentTile().rotateClockwise();
+
+		err = board.placeTile(player, 3, 4);
+		assertEquals(0, err);
+
+		board.scoreCities(new Player[] { player }, false);
+		assertEquals(4, player.getScore());
+	}
+
+	@Test
+	public void scoreTest03() {
+		// Test scoring of a finished cloister (during game).
+
+		player.setCurrentTile(new Tile(k, "K"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 6, 6);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 6, 6, 3, 3);
+		assertEquals(0, err);
+
+		// Starting from north position, placing clockwise manner.
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateClockwise();
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 6, 5);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 7, 5);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		err = board.placeTile(player, 7, 6);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 7, 7);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 6, 7);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 5, 7);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 5, 6);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 5, 5);
+		assertEquals(0, err);
+
+		board.scoreCloisters(new Player[] { player }, false);
+		assertEquals(9, player.getScore());
+		// TODO meeple should also have been removed from the tile.
+	}
+
+	@Test
+	public void scoreTest04() {
+		// Test scoring of a simple road (not finished) (end game).
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 5, 3);
+		assertEquals(0, err);
+
+		board.scoreRoads(new Player[] { player }, true);
+		assertEquals(1, player.getScore());
+	}
+
+	@Test
+	public void scoreTest05() {
+		// Test scoring of a simple castle (not finished) (end game).
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 0, 1);
+		assertEquals(0, err);
+
+		board.scoreCities(new Player[] { player }, true);
+		assertEquals(1, player.getScore());
+	}
+
+	@Test
+	public void scoreTest06() {
+		// Test scoring of a cloister (not finished) (end game).
+
+		player.setCurrentTile(new Tile(k, "K"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 6, 6);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 6, 6, 3, 3);
+		assertEquals(0, err);
+
+		// Starting from north position, placing clockwise manner.
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateClockwise();
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 6, 5);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 7, 5);
+		assertEquals(0, err);
+
+		board.scoreCloisters(new Player[] { player }, true);
+		assertEquals(3, player.getScore());
+	}
+
+	@Test
+	public void scoreTest07() {
+		// Test scoring of a field (not finished) (end game).
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 6, 6);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 6, 6, 3, 3);
+		assertEquals(0, err);
+
+		// Place a tile at north position.
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 6, 5);
+		assertEquals(0, err);
+
+		// Place a tile at east position, finishing a castle.
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 7, 6);
+		assertEquals(0, err);
+
+		board.scoreFields(new Player[] { player });
+		assertEquals(3, player.getScore());
 	}
 
 }

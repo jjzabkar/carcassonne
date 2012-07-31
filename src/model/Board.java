@@ -929,7 +929,11 @@ public class Board {
 		// the city.
 		for (int i = 0; i < this.gameBoard.length; i++) {
 			for (int j = 0; j < this.gameBoard[i].length; j++) {
-				Tile tile = this.gameBoard[j][i];
+				Tile tile = this.gameBoard[i][j];
+
+				if (tile == null) {
+					continue;
+				}
 
 				for (int k = 0; k < tile.getLeft().length; k++) {
 					for (int l = 0; l < tile.getTop().length; l++) {
@@ -938,6 +942,8 @@ public class Board {
 							String currentTile = j + "," + i + "," + l + ","
 									+ k;
 
+							// TODO; a tile can have more than 1 city on it;
+							// ie adjacent 'L' shape layouts which branch off.
 							for (int m = 0; m < cities.size(); m++) {
 								if (cities.get(m).contains(currentTile)) {
 									newCity = false;
