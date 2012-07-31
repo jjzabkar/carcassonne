@@ -732,10 +732,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 			int playerScore = game.getPlayers()[i].getScore();
 			playerScoreArray.get(i).setText("" + playerScore);
+			playerScoreArray.get(i).repaint();
 		}
-
-		// Refresh the ui to reflect the changes.
-		gameBoardWindow.repaint();
 
 	}
 
