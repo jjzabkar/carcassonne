@@ -739,8 +739,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 	private void endTurn() {
 
-		this.game.score(false);
+		ArrayList<Meeple> removedMeeples = game.score(false);
+
+		for (int i = 0; i < removedMeeples.size(); i++) {
+			gameBoardWindow.remove(removedMeeples.get(i));
+		}
+
 		this.refreshUiScores();
+		this.gameBoardWindow.repaint();
 
 		// After scoring in-game events, check if the draw pile is
 		// empty. If so then we want to do end game scoring, and
@@ -748,8 +754,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		if (this.game.isDrawPileEmpty()) {
 
 			gameState = GameState.GAME_END;
-			this.game.score(true);
+
+			removedMeeples = game.score(true);
+
+			for (int i = 0; i < removedMeeples.size(); i++) {
+				gameBoardWindow.remove(removedMeeples.get(i));
+			}
+
 			this.refreshUiScores();
+			this.gameBoardWindow.repaint();
 
 			// TODO: some shiny end-game notification or what-have-you
 

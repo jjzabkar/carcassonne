@@ -454,8 +454,12 @@ public class Board {
 	 * @param hasGameEnded
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
+	 * @return an Arraylist of Meeple which have been removed from the board.
 	 */
-	public void scoreCloisters(Player[] players, boolean hasGameEnded) {
+	public ArrayList<Meeple> scoreCloisters(Player[] players,
+			boolean hasGameEnded) {
+
+		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
 		Iterator<Meeple> iter = this.meeplePlacement.keySet().iterator();
 
 		while (iter.hasNext()) {
@@ -517,6 +521,7 @@ public class Board {
 
 						// And remove the meeple from the tile.
 						this.meeplePlacement.remove(m);
+						removedMeeples.add(m);
 
 						// Since we are iterating through meeplePlacement
 						// we need to refresh it when it's altered.
@@ -526,6 +531,8 @@ public class Board {
 			}
 		}
 
+		return removedMeeples;
+
 	}
 
 	/**
@@ -534,9 +541,10 @@ public class Board {
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
-	public void scoreCities(Player[] players, boolean hasGameEnded) {
-		this.genericScore(players, TileType.CITY, hasGameEnded);
+	public ArrayList<Meeple> scoreCities(Player[] players, boolean hasGameEnded) {
+		return this.genericScore(players, TileType.CITY, hasGameEnded);
 	}
 
 	/**
@@ -545,9 +553,10 @@ public class Board {
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
-	public void scoreRoads(Player[] players, boolean hasGameEnded) {
-		this.genericScore(players, TileType.ROAD, hasGameEnded);
+	public ArrayList<Meeple> scoreRoads(Player[] players, boolean hasGameEnded) {
+		return this.genericScore(players, TileType.ROAD, hasGameEnded);
 	}
 
 	/**
@@ -630,10 +639,13 @@ public class Board {
 	 *            The tile type to score for.
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
-	private void genericScore(Player[] players, TileType scoreTileType,
-			boolean hasGameEnded) {
-		// Initialize empty tracker variables.
+	private ArrayList<Meeple> genericScore(Player[] players,
+			TileType scoreTileType, boolean hasGameEnded) {
+
+		// Initialize empty tracker variables & other variables.
+		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
 		ArrayList<Meeple> meeplesOnFeature = new ArrayList<Meeple>();
 		int nTiles = 0;
 		boolean nullTileFound = false;
@@ -690,11 +702,12 @@ public class Board {
 						// Remove the meeples from the board.
 						for (int k = 0; k < meeplesOnFeature.size(); k++) {
 							Meeple meeple = meeplesOnFeature.get(k);
-							this.meeplePlacement.remove(meeple);
+							meeplePlacement.remove(meeple);
+							removedMeeples.add(meeple);
 
 							// Since we are iterating through meeplePlacement
 							// we need to refresh it when it's altered.
-							iter = this.meeplePlacement.keySet().iterator();
+							iter = meeplePlacement.keySet().iterator();
 						}
 
 						// Recalculate scores.
@@ -708,6 +721,8 @@ public class Board {
 				}
 			}
 		}
+
+		return removedMeeples;
 	}
 
 	/**
@@ -847,8 +862,10 @@ public class Board {
 	// already counted castle) and add points.. & the castle for future
 	// checking.
 	//
-	public void scoreFields(Player[] players) {
+	public ArrayList<Meeple> scoreFields(Player[] players) {
+
 		// Get the list of completed cities, init other vars too.
+		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
 		ArrayList<HashSet<String>> allCities = this.getCompletedCities();
 		ArrayList<Meeple> meeplesOnFeature = new ArrayList<Meeple>();
 		int nCities = 0;
@@ -895,11 +912,12 @@ public class Board {
 					// Remove the meeples from the board.
 					for (int k = 0; k < meeplesOnFeature.size(); k++) {
 						Meeple meeple = meeplesOnFeature.get(k);
-						this.meeplePlacement.remove(meeple);
+						meeplePlacement.remove(meeple);
+						removedMeeples.add(meeple);
 
 						// Since we are iterating through meeplePlacement
 						// we need to refresh it when it's altered.
-						iter = this.meeplePlacement.keySet().iterator();
+						iter = meeplePlacement.keySet().iterator();
 					}
 
 					// Recalculate scores.
@@ -911,6 +929,8 @@ public class Board {
 				}
 			}
 		}
+
+		return removedMeeples;
 	}
 
 	/**

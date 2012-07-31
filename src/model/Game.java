@@ -1,6 +1,7 @@
 package model;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -97,17 +98,21 @@ public class Game {
 	 * @param hasGameEnded
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
-	public void score(boolean hasGameEnded) {
+	public ArrayList<Meeple> score(boolean hasGameEnded) {
 
-		this.gameBoard.scoreCloisters(this.players, hasGameEnded);
-		this.gameBoard.scoreRoads(this.players, hasGameEnded);
-		this.gameBoard.scoreCities(this.players, hasGameEnded);
+		ArrayList<Meeple> meeples = new ArrayList<Meeple>();
+
+		meeples.addAll(gameBoard.scoreCloisters(this.players, hasGameEnded));
+		meeples.addAll(gameBoard.scoreRoads(this.players, hasGameEnded));
+		meeples.addAll(gameBoard.scoreCities(this.players, hasGameEnded));
 
 		if (hasGameEnded) {
-			this.gameBoard.scoreFields(this.players);
+			meeples.addAll(gameBoard.scoreFields(this.players));
 		}
 
+		return meeples;
 	}
 
 	public Player[] getPlayers() {
