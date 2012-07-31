@@ -2,7 +2,6 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -14,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
@@ -377,19 +375,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		rotateCCWButton.addActionListener(this);
 
 		// Draw Pile.
-		// We make the draw icon the same size as a tile (currently).
-		// We set the height of the draw icon container according to how much
-		// space it should take up in the layout.
-		ImageIcon drawTileImageIcon = new ImageIcon("tile-back.png");
-		Image drawTileImage = drawTileImageIcon.getImage();
-
-		BufferedImage drawTileBI = new BufferedImage(tileSize, tileSize,
-				BufferedImage.TYPE_INT_ARGB);
-		Graphics g = drawTileBI.createGraphics();
-		g.drawImage(drawTileImage, 0, 0, tileSize, tileSize, null);
-		ImageIcon drawTileButtonImage = new ImageIcon(drawTileBI);
-
-		JButton drawTileButton = new JButton(drawTileButtonImage);
+		ImageIcon drawTileImageIcon = new ImageIcon("tile-back.jpg");
+		JButton drawTileButton = new JButton(drawTileImageIcon);
 		drawTileButton.setActionCommand("drawTile");
 		drawTileButton.addActionListener(this);
 
