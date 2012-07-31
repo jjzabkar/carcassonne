@@ -517,6 +517,10 @@ public class Board {
 
 						// And remove the meeple from the tile.
 						this.meeplePlacement.remove(m);
+
+						// Since we are iterating through meeplePlacement
+						// we need to refresh it when it's altered.
+						iter = this.meeplePlacement.keySet().iterator();
 					}
 				}
 			}
@@ -642,6 +646,7 @@ public class Board {
 		Iterator<Meeple> iter = this.meeplePlacement.keySet().iterator();
 
 		while (iter.hasNext()) {
+
 			Meeple m = iter.next();
 			MeeplePosition mp = this.meeplePlacement.get(m);
 
@@ -686,6 +691,10 @@ public class Board {
 						for (int k = 0; k < meeplesOnFeature.size(); k++) {
 							Meeple meeple = meeplesOnFeature.get(k);
 							this.meeplePlacement.remove(meeple);
+
+							// Since we are iterating through meeplePlacement
+							// we need to refresh it when it's altered.
+							iter = this.meeplePlacement.keySet().iterator();
 						}
 
 						// Recalculate scores.
@@ -887,6 +896,10 @@ public class Board {
 					for (int k = 0; k < meeplesOnFeature.size(); k++) {
 						Meeple meeple = meeplesOnFeature.get(k);
 						this.meeplePlacement.remove(meeple);
+
+						// Since we are iterating through meeplePlacement
+						// we need to refresh it when it's altered.
+						iter = this.meeplePlacement.keySet().iterator();
 					}
 
 					// Recalculate scores.

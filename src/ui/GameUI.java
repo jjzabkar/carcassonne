@@ -708,37 +708,9 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 					gameState = GameState.SCORE_PLAYERS;
 
-					this.game.score(false);
+					this.endTurn();
 
-					// Update player scores on the ui.
-					for (int i = 0; i < game.getNumPlayers(); i++) {
-						playerScoreArray.get(i).setText(
-								"" + game.getPlayers()[i].getScore());
-					}
-
-					// After scoring in-game events, check if the draw pile is
-					// empty. If so then we want to do end game scoring, and
-					// then end the game.
-					if (this.game.isDrawPileEmpty()) {
-						gameState = GameState.GAME_END;
-
-						this.game.score(true);
-
-						// Update player scores on the ui.
-						for (int i = 0; i < game.getNumPlayers(); i++) {
-							playerScoreArray.get(i).setText(
-									"" + game.getPlayers()[i].getScore());
-						}
-
-						// TODO: some shiny end-game notification or
-						// what-have-you
-
-					} else {
-						// If not then we set the correct game state and advance
-						// gameplay to the next player.
-						gameState = GameState.DRAW_TILE;
-						this.endTurn();
-					}
+					gameState = GameState.DRAW_TILE;
 
 				} else {
 					// TODO: better error handling
@@ -753,7 +725,38 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 	}
 
+	private void refreshUiScores() {
+
+		// Update player scores on the ui.
+		for (int i = 0; i < game.getNumPlayers(); i++) {
+
+			int playerScore = game.getPlayers()[i].getScore();
+			playerScoreArray.get(i).setText("" + playerScore);
+		}
+
+		// Refresh the ui to reflect the changes.
+		gameBoardWindow.repaint();
+
+	}
+
 	private void endTurn() {
+
+		this.game.score(false);
+		this.refreshUiScores();
+
+		// After scoring in-game events, check if the draw pile is
+		// empty. If so then we want to do end game scoring, and
+		// then end the game.
+		if (this.game.isDrawPileEmpty()) {
+
+			gameState = GameState.GAME_END;
+			this.game.score(true);
+			this.refreshUiScores();
+
+			// TODO: some shiny end-game notification or what-have-you
+
+		}
+
 		currentPlayerIdx = (currentPlayerIdx + 1) % game.getNumPlayers();
 		currentPlayer = game.getPlayers()[currentPlayerIdx];
 	}
