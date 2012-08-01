@@ -2,6 +2,7 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -309,6 +310,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	}
 
 	private ArrayList<JLabel> playerScoreArray = new ArrayList<JLabel>();
+	private ArrayList<JLabel> playerLabelArray = new ArrayList<JLabel>();
 
 	private void initGameScreen() {
 		this.gameContentPane = new JPanel(new BorderLayout());
@@ -344,6 +346,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			JLabel playerName = new JLabel("Player " + (i + 1) + ":");
 			JLabel playerScore = new JLabel(""
 					+ this.game.getPlayers()[i].getScore());
+			playerLabelArray.add(playerName);
 			playerScoreArray.add(playerScore);
 
 			scoreInfoWindow.add(playerName, gc);
@@ -469,6 +472,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			if (this.gameState == GameState.GAME_START) {
 				this.gameState = GameState.DRAW_TILE;
 				currentPlayer = game.getPlayers()[currentPlayerIdx];
+				this.showCurrentPlayer(currentPlayerIdx);
 			}
 
 			// Each turn begins with a player drawing a tile from the draw
@@ -748,6 +752,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 		currentPlayerIdx = (currentPlayerIdx + 1) % game.getNumPlayers();
 		currentPlayer = game.getPlayers()[currentPlayerIdx];
+		this.showCurrentPlayer(currentPlayerIdx);
+	}
+
+	private void showCurrentPlayer(int playerIndex) {
+		// un-bold all players
+		for (int i = 0; i < playerLabelArray.size(); i++) {
+			playerLabelArray.get(i).setFont(getFont().deriveFont(Font.PLAIN));
+		}
+
+		// bold the player whose turn it currently is.
+		playerLabelArray.get(playerIndex).setFont(
+				getFont().deriveFont(Font.BOLD));
 	}
 
 	@Override
