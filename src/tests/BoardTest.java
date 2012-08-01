@@ -18,6 +18,7 @@ public class BoardTest {
 	private int err = 0;
 	private Board board;
 	private Player player;
+	private Player player2;
 
 	// Tiles
 	private char[][] chr2;
@@ -63,6 +64,7 @@ public class BoardTest {
 
 		board = new Board();
 		player = new Player(Color.BLACK);
+		player2 = new Player(Color.BLUE);
 	}
 
 	@Test
@@ -246,7 +248,7 @@ public class BoardTest {
 	}
 
 	@Test
-	public void scoreTest01() {
+	public void scoreRoadTest01() {
 		// Test scoring of a simple road (during game).
 		// Place a tile with a meeple on it, then place another tile completing
 		// the road. Then call score().
@@ -271,7 +273,24 @@ public class BoardTest {
 	}
 
 	@Test
-	public void scoreTest02() {
+	public void scoreRoadTest02() {
+		// Test scoring of a simple road (not finished) (end game).
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 5, 3);
+		assertEquals(0, err);
+
+		board.scoreRoads(new Player[] { player }, true);
+		assertEquals(1, player.getScore());
+	}
+
+	@Test
+	public void scoreCastleTest01() {
 		// Test scoring of a simple castle (during game).
 		// Place a tile with a meeple on it, then place another tile completing
 		// the road. Then call score().
@@ -297,7 +316,59 @@ public class BoardTest {
 	}
 
 	@Test
-	public void scoreTest03() {
+	public void scoreCastleTest02() {
+		// Test scoring of a simple castle (not finished) (end game).
+
+		player.setCurrentTile(new Tile(cr3, "CR3"));
+		assertEquals(0, player.getScore());
+
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 4, 0, 1);
+		assertEquals(0, err);
+
+		board.scoreCities(new Player[] { player }, true);
+		assertEquals(1, player.getScore());
+	}
+
+	@Test
+	public void scoreCastleTest03() {
+		// Test scoring of a simple castle.
+		// One player starts the castle, another one finishes it as a
+		// side-effect of tile placement.
+
+		assertEquals(0, player.getScore());
+		assertEquals(0, player2.getScore());
+
+		player.setCurrentTile(new Tile(c2a, "C2A"));
+		player.getCurrentTile().rotateCounterClockwise();
+		err = board.placeTile(player, 4, 4);
+		assertEquals(0, err);
+
+		player.setCurrentTile(new Tile(chr2, "CHR2"));
+		player.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player, 4, 3);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player, 4, 3, 4, 5);
+		assertEquals(0, err);
+
+		player2.setCurrentTile(new Tile(c2a, "C2A"));
+		player2.getCurrentTile().rotateClockwise();
+		err = board.placeTile(player2, 5, 3);
+		assertEquals(0, err);
+
+		err = board.placeMeeple(player2, 5, 3, 4, 6);
+		assertEquals(0, err);
+
+		board.scoreCities(new Player[] { player, player2 }, false);
+		assertEquals(6, player.getScore());
+		assertEquals(0, player2.getScore());
+	}
+
+	@Test
+	public void scoreCloisterTest01() {
 		// Test scoring of a finished cloister (during game).
 
 		player.setCurrentTile(new Tile(k, "K"));
@@ -356,41 +427,7 @@ public class BoardTest {
 	}
 
 	@Test
-	public void scoreTest04() {
-		// Test scoring of a simple road (not finished) (end game).
-
-		player.setCurrentTile(new Tile(cr3, "CR3"));
-		assertEquals(0, player.getScore());
-
-		err = board.placeTile(player, 4, 4);
-		assertEquals(0, err);
-
-		err = board.placeMeeple(player, 4, 4, 5, 3);
-		assertEquals(0, err);
-
-		board.scoreRoads(new Player[] { player }, true);
-		assertEquals(1, player.getScore());
-	}
-
-	@Test
-	public void scoreTest05() {
-		// Test scoring of a simple castle (not finished) (end game).
-
-		player.setCurrentTile(new Tile(cr3, "CR3"));
-		assertEquals(0, player.getScore());
-
-		err = board.placeTile(player, 4, 4);
-		assertEquals(0, err);
-
-		err = board.placeMeeple(player, 4, 4, 0, 1);
-		assertEquals(0, err);
-
-		board.scoreCities(new Player[] { player }, true);
-		assertEquals(1, player.getScore());
-	}
-
-	@Test
-	public void scoreTest06() {
+	public void scoreCloisterTest02() {
 		// Test scoring of a cloister (not finished) (end game).
 
 		player.setCurrentTile(new Tile(k, "K"));
@@ -419,7 +456,7 @@ public class BoardTest {
 	}
 
 	@Test
-	public void scoreTest07() {
+	public void scoreFieldTest01() {
 		// Test scoring of a field (not finished) (end game).
 
 		player.setCurrentTile(new Tile(c2a, "C2A"));
