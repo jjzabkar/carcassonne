@@ -179,19 +179,25 @@ public class Board {
 
 		boolean sidesMatch = (topMatches && bottomMatches && rightMatches && leftMatches);
 
-		boolean firstPlay = true;
+		// Return our answer.
+		return (free && adjacent && sidesMatch) || !hasGameStarted();
+	}
+
+	// Answer whether there has been a tile placed yet or not.
+	public boolean hasGameStarted() {
+
+		boolean gameStarted = false;
 
 		// Check if there has already been a tile placed on the board.
 		for (int i = 0; i < this.gameBoard.length; i++) {
 			for (int j = 0; j < this.gameBoard[i].length; j++) {
 				if (this.gameBoard[j][i] != null) {
-					firstPlay = false;
+					gameStarted = true;
 				}
 			}
 		}
 
-		// Return our answer.
-		return (free && adjacent && sidesMatch) || firstPlay;
+		return gameStarted;
 	}
 
 	/**

@@ -651,6 +651,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			// looking for the tile placement state.
 			if (gameState == GameState.PLACE_TILE) {
 
+				// If this is the first turn we want to force the position so
+				// that the tile is placed in the center of the game board.
+				if (!this.game.hasGameStarted()) {
+
+					// Set the click point.
+					xBoard = 76;
+					yBoard = 76;
+				}
+
 				// Place the tile.
 				Tile tileToPlace = currentPlayer.getCurrentTile();
 				err = game.placeTile(currentPlayer, xBoard, yBoard);

@@ -70,6 +70,11 @@ public class Game {
 		return this.gameBoard.placeTile(aPlayer, xPos, yPos);
 	}
 
+	// return whether there has been a tile placed yet or not
+	public boolean hasGameStarted() {
+		return this.gameBoard.hasGameStarted();
+	}
+
 	/**
 	 * Allow a player to place a meeple on the game board.
 	 * 
