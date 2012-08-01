@@ -307,6 +307,11 @@ public class Board {
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
+		// Can't place a meeple on a tile which doesn't exist!
+		if (currentTile == null) {
+			return false;
+		}
+
 		// Search the position & add it to searched map.
 		if (!hasMeeple(currentTile, xTile, yTile)) {
 			toSearch.remove(tilePosition);
