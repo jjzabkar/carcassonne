@@ -23,13 +23,11 @@ public class Board {
 	private class MeeplePosition {
 
 		private Tile tile = null;
-		private boolean isPlaced = false;
 		private int xTile;
 		private int yTile;
 
 		public MeeplePosition(Tile tile, int xTile, int yTile) {
 			this.tile = tile;
-			this.isPlaced = true;
 			this.xTile = xTile;
 			this.yTile = yTile;
 		}
@@ -39,15 +37,6 @@ public class Board {
 		 */
 		public Tile getTile() {
 			return tile;
-		}
-
-		/**
-		 * @return the isPlaced
-		 */
-		// TODO meepleposition object only exists if the meeple is placed,
-		// so this is not needed.
-		public boolean isPlaced() {
-			return isPlaced;
 		}
 
 		/**
@@ -897,7 +886,7 @@ public class Board {
 
 		// Get the list of completed cities, init other vars too.
 		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
-		ArrayList<HashSet<String>> allCities = getCompletedCities();
+		ArrayList<HashSet<String>> completedCities = getCompletedCities();
 		ArrayList<Meeple> meeplesOnFeature = new ArrayList<Meeple>();
 		int nCities = 0;
 
@@ -912,50 +901,47 @@ public class Board {
 			Meeple m = iter.next();
 			MeeplePosition mp = meeplePlacement.get(m);
 
-			// When we find a meeple on the field, do the recursive search.
-			if (mp.isPlaced()) {
-				Tile tile = mp.getTile();
+			Tile tile = mp.getTile();
+			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
 
-				TileType tileType = tile.getTileType(mp.getxTile(),
-						mp.getyTile());
+			if (tileType == TileType.FIELD) {
+				// Init search.
+				toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
+						+ mp.getxTile() + "," + mp.getyTile());
 
-				if (tileType == TileType.FIELD) {
-					// Init search.
-					toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
-							+ mp.getxTile() + "," + mp.getyTile());
+				// Call the search.
+				fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
+						completedCities, new ArrayList<HashSet<String>>(),
+						featureProperties);
 
-					// Call the search.
-					fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
-							allCities, new ArrayList<HashSet<String>>(),
-							featureProperties);
+				// Recover the tracker variables.
+				// Only primitives need to be recovered.
+				nCities = (Integer) featureProperties[0];
 
-					// Recover the tracker variables.
-					// Only primitives need to be recovered.
-					nCities = (Integer) featureProperties[0];
+				// Score multiplier.
+				int multiplier = 3;
 
-					// Score multiplier.
-					int multiplier = 3;
+				ArrayList<Player> scoringPlayers = getFeatureScorers(players,
+						meeplesOnFeature);
 
-					ArrayList<Player> scoringPlayers = getFeatureScorers(
-							players, meeplesOnFeature);
+				// Remove the meeples from the board.
+				for (int i = 0; i < meeplesOnFeature.size(); i++) {
 
-					// Remove the meeples from the board.
-					for (int k = 0; k < meeplesOnFeature.size(); k++) {
-						Meeple meeple = meeplesOnFeature.get(k);
-						meeplePlacement.remove(meeple);
-						removedMeeples.add(meeple);
+					Meeple meepleOnFeature = meeplesOnFeature.get(i);
+					meeplePlacement.remove(meepleOnFeature);
+					removedMeeples.add(meepleOnFeature);
+				}
 
-						// Since we are iterating through meeplePlacement
-						// we need to refresh it when it's altered.
-						iter = meeplePlacement.keySet().iterator();
-					}
+				// Since we are iterating through meeplePlacement
+				// we need to refresh it when it's altered.
+				iter = meeplePlacement.keySet().iterator();
 
-					// Recalculate scores.
-					for (int k = 0; k < scoringPlayers.size(); k++) {
-						int score = scoringPlayers.get(k).getScore();
-						int newScore = (nCities * multiplier) + score;
-						scoringPlayers.get(k).setScore(newScore);
-					}
+				// Recalculate scores.
+				for (int i = 0; i < scoringPlayers.size(); i++) {
+
+					int score = scoringPlayers.get(i).getScore();
+					int newScore = (nCities * multiplier) + score;
+					scoringPlayers.get(i).setScore(newScore);
 				}
 			}
 		}
@@ -980,7 +966,13 @@ public class Board {
 	 */
 	private ArrayList<HashSet<String>> getCompletedCities() {
 
+		// Each HashSet in the ArrayList denotes a city; a collection of strings
+		// which indicate the tile locations which comprise the city.
 		ArrayList<HashSet<String>> cities = new ArrayList<HashSet<String>>();
+
+		// Each city which is found to be incomplete is recorded by having an
+		// entry put in incompleteCities specifying the index of the incomplete
+		// city in the cities array.
 		ArrayList<Integer> incompleteCities = new ArrayList<Integer>();
 
 		boolean newCity = true;
@@ -1003,14 +995,15 @@ public class Board {
 				for (int k = 0; k < tile.getLeft().length; k++) {
 					for (int l = 0; l < tile.getTop().length; l++) {
 						if (tile.getTileType(l, k) == TileType.CITY) {
-							// Board x, board y, tile x, tile y.
-							String currentTile = j + "," + i + "," + l + ","
-									+ k;
 
-							// TODO; a tile can have more than 1 city on it;
-							// ie adjacent 'L' shape layouts which branch off.
+							// Reset flags for testing the next tile position.
+							newCity = true;
+
+							// Board x, board y, tile x, tile y.
+							String curTile = j + "," + i + "," + l + "," + k;
+
 							for (int m = 0; m < cities.size(); m++) {
-								if (cities.get(m).contains(currentTile)) {
+								if (cities.get(m).contains(curTile)) {
 									newCity = false;
 								}
 							}
@@ -1019,16 +1012,13 @@ public class Board {
 								searched = new HashSet<String>();
 								toSearch = new HashSet<String>();
 
-								toSearch.add(currentTile);
+								toSearch.add(curTile);
 
 								getCompletedCitiesRecursive(searched, toSearch,
 										cities, incompleteCities);
-
-								newCity = true;
 							}
 
 						}
-
 					}
 				}
 			}
@@ -1036,11 +1026,9 @@ public class Board {
 
 		// After the search is completed we will remove the incomplete cities
 		// from the list as they are not used in field scoring.
-		int offset = 0;
-
-		for (int i = 0; i < incompleteCities.size(); i++) {
-			cities.remove(incompleteCities.get(i) + offset);
-			offset--;
+		for (int i = incompleteCities.size() - 1; i >= 0; i--) {
+			int cityToRemove = incompleteCities.get(i);
+			cities.remove(cityToRemove);
 		}
 
 		return cities;
@@ -1071,6 +1059,7 @@ public class Board {
 	private void getCompletedCitiesRecursive(HashSet<String> searched,
 			HashSet<String> toSearch, ArrayList<HashSet<String>> cities,
 			ArrayList<Integer> incompleteCities) {
+
 		// Take a position from the toSearch map to search.
 		String tilePosition = toSearch.toArray(new String[0])[0];
 		String[] tilePos = tilePosition.split(",");
@@ -1098,6 +1087,7 @@ public class Board {
 			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
 
 			if (tile != null) {
+
 				String toAdd = "";
 
 				for (int j = 0; j < neighborTiles[i].length; j++) {
@@ -1117,8 +1107,9 @@ public class Board {
 						&& !searched.contains(toAdd)) {
 					toSearch.add(toAdd);
 				}
+
 			} else {
-				// If we find a null tile, add the cities length to
+				// If we find a null tile, add the city's index to
 				// incompleteCities.
 				// Do not subtract 1, as the city has yet to be added;
 				// Once the city is added to cities, the index will be correct.
@@ -1166,6 +1157,7 @@ public class Board {
 			ArrayList<HashSet<String>> allCities,
 			ArrayList<HashSet<String>> adjacentCities,
 			Object[] featureProperties) {
+
 		// Take a position from the toSearch map to search.
 		String tilePosition = toSearch.toArray(new String[0])[0];
 		String[] tilePos = tilePosition.split(",");
@@ -1224,14 +1216,14 @@ public class Board {
 					boolean newCity = true;
 
 					for (int j = 0; j < adjacentCities.size(); j++) {
-						if (adjacentCities.get(j).contains(tilePosition)) {
+						if (adjacentCities.get(j).contains(toAdd)) {
 							newCity = false;
 						}
 					}
 
 					if (newCity) {
 						for (int j = 0; j < allCities.size(); j++) {
-							if (allCities.get(j).contains(tilePosition)) {
+							if (allCities.get(j).contains(toAdd)) {
 								adjacentCities.add(allCities.get(j));
 							}
 						}
@@ -1271,6 +1263,7 @@ public class Board {
 	 */
 	private int[][] getTileNeighbors(int xBoard, int yBoard, int xTile,
 			int yTile) {
+
 		int[] nStr = { xBoard, yBoard, xTile, (yTile - 1) };
 		int[] eStr = { xBoard, yBoard, (xTile + 1), yTile };
 		int[] sStr = { xBoard, yBoard, xTile, (yTile + 1) };

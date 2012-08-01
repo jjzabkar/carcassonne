@@ -418,7 +418,6 @@ public class BoardTest {
 		assertEquals(3, player.getScore());
 	}
 
-	/*
 	@Test
 	public void scoreTest07() {
 		// Test scoring of a field (not finished) (end game).
@@ -447,6 +446,5 @@ public class BoardTest {
 		board.scoreFields(new Player[] { player });
 		assertEquals(3, player.getScore());
 	}
-	*/
 
 }
