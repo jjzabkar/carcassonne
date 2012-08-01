@@ -15,14 +15,14 @@ public class Meeple implements DrawableInterface {
 	private Color color;
 
 	// UI variables.
-	private int xPos = 0;
-	private int yPos = 0;
+	private int x = 0;
+	private int y = 0;
 
-	public Meeple(Color aColor) {
+	public Meeple(Color color) {
 		// TODO: some other means to differentiate meeple and tile color
 		// TODO: above; also, in board class, the meeples are related to the
 		// player by their color. we need something better
-		this.color = aColor;
+		this.color = color;
 	}
 
 	public Color getColor() {
@@ -30,19 +30,19 @@ public class Meeple implements DrawableInterface {
 	}
 
 	public int getx() {
-		return xPos;
+		return x;
 	}
 
 	public int gety() {
-		return yPos;
+		return y;
 	}
 
-	public void setx(int tilex) {
-		this.xPos = tilex;
+	public void setx(int x) {
+		this.x = x;
 	}
 
-	public void sety(int tiley) {
-		this.yPos = tiley;
+	public void sety(int y) {
+		this.y = y;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class Meeple implements DrawableInterface {
 
 		// Create some sort of a shape to be on the middle of a tile.
 		g.setColor(color);
-		g.fillRoundRect(xPos, yPos, Tile.tileTypeSize, Tile.tileTypeSize,
+		g.fillRoundRect(x, y, Tile.tileTypeSize, Tile.tileTypeSize,
 				Tile.tileTypeSize / 4, Tile.tileTypeSize / 4);
 
 	}

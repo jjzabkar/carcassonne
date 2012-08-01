@@ -54,8 +54,8 @@ public class Tile implements DrawableInterface {
 	private int orientation = 0;
 
 	// UI variables.
-	private int xPos = 0;
-	private int yPos = 0;
+	private int x = 0;
+	private int y = 0;
 
 	/** Denotes the width of a tileType element when drawn by the ui. **/
 	public static final int tileTypeSize = 10;
@@ -203,8 +203,8 @@ public class Tile implements DrawableInterface {
 		return left;
 	}
 
-	public TileType getTileType(int xPos, int yPos) {
-		return this.tile[yPos][xPos];
+	public TileType getTileType(int x, int y) {
+		return this.tile[y][x];
 	}
 
 	public String getIdentifier() {
@@ -216,19 +216,19 @@ public class Tile implements DrawableInterface {
 	}
 
 	public int getx() {
-		return xPos;
+		return x;
 	}
 
 	public int gety() {
-		return yPos;
+		return y;
 	}
 
-	public void setx(int tilex) {
-		this.xPos = tilex;
+	public void setx(int x) {
+		this.x = x;
 	}
 
-	public void sety(int tiley) {
-		this.yPos = tiley;
+	public void sety(int y) {
+		this.y = y;
 	}
 
 	@Override
@@ -267,8 +267,8 @@ public class Tile implements DrawableInterface {
 				}
 
 				g.setColor(tileTypeColor);
-				g.fillRect(this.xPos + (j * tileTypeSize), this.yPos
-						+ (i * tileTypeSize), tileTypeSize, tileTypeSize);
+				g.fillRect(x + (j * tileTypeSize), y + (i * tileTypeSize),
+						tileTypeSize, tileTypeSize);
 			}
 		}
 	}
