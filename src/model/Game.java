@@ -92,6 +92,11 @@ public class Game {
 				.placeMeeple(aPlayer, xBoard, yBoard, xTile, yTile);
 	}
 
+	// return the number of meeples which are in gameplay
+	public int getNumMeeplesPlaced(Player player) {
+		return this.gameBoard.getNumMeeplesPlaced(player);
+	}
+
 	/**
 	 * Score each player for all game features.
 	 * 

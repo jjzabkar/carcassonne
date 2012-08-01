@@ -247,6 +247,21 @@ public class Board {
 		return 1;
 	}
 
+	// return the number of meeples which are in gameplay
+	public int getNumMeeplesPlaced(Player player) {
+
+		int numMeeplesPlaced = 0;
+		Meeple[] meeples = player.getMeeples();
+
+		for (int i = 0; i < meeples.length; i++) {
+			if (this.meeplePlacement.get(meeples[i]) != null) {
+				numMeeplesPlaced++;
+			}
+		}
+
+		return numMeeplesPlaced;
+	}
+
 	/**
 	 * This function returns whether a meeple may be placed on the game board.
 	 * This function uses the method

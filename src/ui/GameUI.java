@@ -676,6 +676,15 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 							"Can't place tile there.");
 				}
 
+				// Check if the player can place any meeples.
+				// If not, end their turn.
+				if (this.game.getNumMeeplesPlaced(currentPlayer) == 7) {
+
+					gameState = GameState.SCORE_PLAYERS;
+					this.endTurn();
+					gameState = GameState.DRAW_TILE;
+				}
+
 				return;
 			}
 
