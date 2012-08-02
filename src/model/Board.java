@@ -666,27 +666,35 @@ public class Board {
 	private ArrayList<Meeple> genericScore(Player[] players,
 			TileType scoreTileType, boolean hasGameEnded) {
 
-		// Initialize empty tracker variables & other variables.
+		// Initialize the variables which will hold information about the
+		// specific feature. These are reset for each feature.
+		int nTiles;
+		boolean nullTileFound;
+		HashSet<String> searched;
+		HashSet<String> toSearch;
+		ArrayList<Meeple> meeplesOnFeature;
+
+		// And other variables.
 		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
-		ArrayList<Meeple> meeplesOnFeature = new ArrayList<Meeple>();
-
-		int nTiles = 0;
-		boolean nullTileFound = false;
-
-		HashSet<String> searched = new HashSet<String>();
-		HashSet<String> toSearch = new HashSet<String>();
-		Object[] featureProperties = { nTiles, nullTileFound };
 
 		// Run through all the placed meeples.
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
 
 		while (iter.hasNext()) {
 
+			// Reset the variables which hold info about specific features.
+			nTiles = 0;
+			nullTileFound = false;
+			searched = new HashSet<String>();
+			toSearch = new HashSet<String>();
+			meeplesOnFeature = new ArrayList<Meeple>();
+			Object[] featureProperties = { nTiles, nullTileFound };
+
+			// And now the real work begins.
 			MeeplePosition mp = meeplePlacement.get(iter.next());
 
 			// Check to see if it is attached to the correct tile type.
 			Tile tile = mp.getTile();
-
 			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
 
 			// If it is attached to the correct tile type.
@@ -889,22 +897,31 @@ public class Board {
 	//
 	public ArrayList<Meeple> scoreFields(Player[] players) {
 
-		// Get the list of completed cities, init other vars too.
+		// Initialize the variables which will hold information about the
+		// specific feature. These are reset for each feature.
+		int nCities;
+		HashSet<String> searched;
+		HashSet<String> toSearch;
+		ArrayList<Meeple> meeplesOnFeature;
+
+		// And other variables.
 		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
 		ArrayList<HashSet<String>> completedCities = getCompletedCities();
-		ArrayList<Meeple> meeplesOnFeature = new ArrayList<Meeple>();
-		int nCities = 0;
-
-		HashSet<String> searched = new HashSet<String>();
-		HashSet<String> toSearch = new HashSet<String>();
-		Object[] featureProperties = { nCities };
 
 		// Run through all the placed meeples.
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
 
 		while (iter.hasNext()) {
-			Meeple m = iter.next();
-			MeeplePosition mp = meeplePlacement.get(m);
+
+			// Reset the variables which hold info about specific features.
+			nCities = 0;
+			searched = new HashSet<String>();
+			toSearch = new HashSet<String>();
+			meeplesOnFeature = new ArrayList<Meeple>();
+			Object[] featureProperties = { nCities };
+
+			// And now the real work begins.
+			MeeplePosition mp = meeplePlacement.get(iter.next());
 
 			Tile tile = mp.getTile();
 			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
