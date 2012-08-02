@@ -76,6 +76,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private JCanvas gameBoardWindow;
 	private JCanvas currentTilePanel;
 	private JTextField numPlayersTextField;
+	private JButton endTurnButton;
 
 	public GameUI() {
 		// Initialize game menus.
@@ -389,7 +390,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		// End turn button.
 		// Action for this button should only be allowed to let the player
 		// skip placing their meeple.
-		JButton endTurnButton = new JButton("End my turn");
+		endTurnButton = new JButton("End my turn");
 		endTurnButton.setActionCommand("endTurn");
 		endTurnButton.addActionListener(this);
 
@@ -467,14 +468,6 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				this.endTurn();
 			}
 
-			// If the game has just started then transition to the first 'real'
-			// game state. We choose the first player to play and start.
-			if (this.gameState == GameState.GAME_START) {
-				this.gameState = GameState.DRAW_TILE;
-				currentPlayer = game.getPlayers()[currentPlayerIdx];
-				this.showCurrentPlayer(currentPlayerIdx);
-			}
-
 			// Each turn begins with a player drawing a tile from the draw
 			// pile. Here we allow a player to draw the tile, and after they
 			// have we draw it to the screen on the current tile panel.
@@ -533,11 +526,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			}
 
 			// Start the game.
-			this.gameState = GameState.GAME_START;
 			this.game = new Game(numPlayers);
+
 			// Now that we know the number of players we can create the game
 			// screen.
 			this.initGameScreen();
+
+			// If the game has just started then transition to the first 'real'
+			// game state. We choose the first player to play and start.
+			this.gameState = GameState.DRAW_TILE;
+			currentPlayer = game.getPlayers()[currentPlayerIdx];
+			this.showCurrentPlayer(currentPlayerIdx);
+			this.endTurnButton.setEnabled(false);
 
 			// And switch to the correct content pane.
 			this.setContentPane(this.gameContentPane);
@@ -692,6 +692,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 					gameState = GameState.SCORE_PLAYERS;
 					this.endTurn();
 					gameState = GameState.DRAW_TILE;
+				} else {
+					this.endTurnButton.setEnabled(true);
 				}
 
 				return;
@@ -771,6 +773,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		currentPlayerIdx = (currentPlayerIdx + 1) % game.getNumPlayers();
 		currentPlayer = game.getPlayers()[currentPlayerIdx];
 		this.showCurrentPlayer(currentPlayerIdx);
+		this.endTurnButton.setEnabled(false);
 	}
 
 	private void showCurrentPlayer(int playerIndex) {

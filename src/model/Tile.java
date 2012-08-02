@@ -231,6 +231,11 @@ public class Tile implements DrawableInterface {
 		this.y = y;
 	}
 
+	private final Color lightbrown = new Color(185, 156, 107);
+	private final Color lightgreen = new Color(169, 208, 79);
+	private final Color red = new Color(126, 46, 31);
+	private final Color darkblue = new Color(24, 61, 97);
+
 	@Override
 	public void draw(Graphics g) {
 
@@ -244,26 +249,26 @@ public class Tile implements DrawableInterface {
 					switch (tile[i][j]) {
 
 					case CLOISTER:
-						tileTypeColor = Color.yellow;
+						tileTypeColor = red;
 						break;
 					case CITY:
-						tileTypeColor = Color.orange;
+						tileTypeColor = lightbrown;
 						break;
 					case ROAD:
 						tileTypeColor = Color.gray;
 						break;
 					case RIVER:
-						tileTypeColor = Color.blue;
+						tileTypeColor = darkblue;
 						break;
 					case FIELD:
-						tileTypeColor = Color.green;
+						tileTypeColor = lightgreen;
 						break;
 
 					}
 
 				} else {
 
-					tileTypeColor = Color.black;
+					tileTypeColor = Color.white;
 				}
 
 				g.setColor(tileTypeColor);
