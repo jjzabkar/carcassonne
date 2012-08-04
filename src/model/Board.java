@@ -344,18 +344,18 @@ public class Board {
 
 		// Take a position from the toSearch map.
 		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
-		BoardPosition bp = null;
+		BoardPosition boardPosition = null;
 
 		if (boardPositionIterator.hasNext()) {
-			bp = boardPositionIterator.next();
+			boardPosition = boardPositionIterator.next();
 		} else {
 			return false;
 		}
 
-		int xBoard = bp.xBoard;
-		int yBoard = bp.yBoard;
-		int xTile = bp.xTile;
-		int yTile = bp.yTile;
+		int xBoard = boardPosition.xBoard;
+		int yBoard = boardPosition.yBoard;
+		int xTile = boardPosition.xTile;
+		int yTile = boardPosition.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
@@ -366,8 +366,8 @@ public class Board {
 
 		// Search the position & add it to searched map.
 		if (!hasMeeple(currentTile, xTile, yTile)) {
-			toSearch.remove(bp);
-			searched.add(bp);
+			toSearch.remove(boardPosition);
+			searched.add(boardPosition);
 		} else {
 			return false;
 		}
@@ -754,10 +754,10 @@ public class Board {
 			if (tileType == scoreTileType) {
 
 				// Init search.
-				BoardPosition bp = new BoardPosition(getxTile(tile),
+				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
 						getyTile(tile), mp.xTile, mp.yTile);
 
-				toSearch.add(bp);
+				toSearch.add(boardPosition);
 
 				// Call our search.
 				genericScoreRecursive(searched, toSearch, meeplesOnFeature,
@@ -842,18 +842,18 @@ public class Board {
 
 		// Take a position from the toSearch map to search.
 		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
-		BoardPosition bp = null;
+		BoardPosition boardPosition = null;
 
 		if (boardPositionIterator.hasNext()) {
-			bp = boardPositionIterator.next();
+			boardPosition = boardPositionIterator.next();
 		} else {
 			return;
 		}
 
-		int xBoard = bp.xBoard;
-		int yBoard = bp.yBoard;
-		int xTile = bp.xTile;
-		int yTile = bp.yTile;
+		int xBoard = boardPosition.xBoard;
+		int yBoard = boardPosition.yBoard;
+		int xTile = boardPosition.xTile;
+		int yTile = boardPosition.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
@@ -863,8 +863,8 @@ public class Board {
 			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
 		}
 
-		toSearch.remove(bp);
-		searched.add(bp);
+		toSearch.remove(boardPosition);
+		searched.add(boardPosition);
 
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map,
@@ -914,7 +914,7 @@ public class Board {
 
 			while (searchedIterator.hasNext()) {
 
-				BoardPosition boardPosition = searchedIterator.next();
+				boardPosition = searchedIterator.next();
 
 				BoardPosition tilePosition = new BoardPosition(
 						boardPosition.xBoard, boardPosition.yBoard, 0, 0);
@@ -990,10 +990,10 @@ public class Board {
 			if (tileType == TileType.FIELD) {
 
 				// Init search.
-				BoardPosition bp = new BoardPosition(getxTile(tile),
+				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
 						getyTile(tile), mp.xTile, mp.yTile);
 
-				toSearch.add(bp);
+				toSearch.add(boardPosition);
 
 				// Call the search.
 				fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
@@ -1152,23 +1152,23 @@ public class Board {
 
 		// Take a position from the toSearch map to search.
 		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
-		BoardPosition bp = null;
+		BoardPosition boardPosition = null;
 
 		if (boardPositionIterator.hasNext()) {
-			bp = boardPositionIterator.next();
+			boardPosition = boardPositionIterator.next();
 		} else {
 			return;
 		}
 
-		int xBoard = bp.xBoard;
-		int yBoard = bp.yBoard;
-		int xTile = bp.xTile;
-		int yTile = bp.yTile;
+		int xBoard = boardPosition.xBoard;
+		int yBoard = boardPosition.yBoard;
+		int xTile = boardPosition.xTile;
+		int yTile = boardPosition.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
-		toSearch.remove(bp);
-		searched.add(bp);
+		toSearch.remove(boardPosition);
+		searched.add(boardPosition);
 
 		TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
@@ -1252,18 +1252,18 @@ public class Board {
 
 		// Take a position from the toSearch map to search.
 		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
-		BoardPosition bp = null;
+		BoardPosition boardPosition = null;
 
 		if (boardPositionIterator.hasNext()) {
-			bp = boardPositionIterator.next();
+			boardPosition = boardPositionIterator.next();
 		} else {
 			return;
 		}
 
-		int xBoard = bp.xBoard;
-		int yBoard = bp.yBoard;
-		int xTile = bp.xTile;
-		int yTile = bp.yTile;
+		int xBoard = boardPosition.xBoard;
+		int yBoard = boardPosition.yBoard;
+		int xTile = boardPosition.xTile;
+		int yTile = boardPosition.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
@@ -1274,8 +1274,8 @@ public class Board {
 			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
 		}
 
-		toSearch.remove(bp);
-		searched.add(bp);
+		toSearch.remove(boardPosition);
+		searched.add(boardPosition);
 
 		// Get the neighbor tile positions.
 		BoardPosition[] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile,
