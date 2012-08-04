@@ -16,42 +16,20 @@ public class Board {
 	private Tile[][] gameBoard;
 
 	/*
-	 * This class acts as a mediator between the tiles and meeples to keep track
-	 * of which tiles have a meeple placed on them, and on which section.
+	 * This class keeps track of which tiles have a meeple placed on them, and
+	 * on which section.
 	 */
 	private class MeeplePosition {
 
-		private Tile tile = null;
-		private int xTile;
-		private int yTile;
+		private final Tile tile;
+		private final int xTile;
+		private final int yTile;
 
 		public MeeplePosition(Tile tile, int xTile, int yTile) {
 			this.tile = tile;
 			this.xTile = xTile;
 			this.yTile = yTile;
 		}
-
-		/**
-		 * @return the tile
-		 */
-		public Tile getTile() {
-			return tile;
-		}
-
-		/**
-		 * @return the xTile
-		 */
-		public int getxTile() {
-			return xTile;
-		}
-
-		/**
-		 * @return the yTile
-		 */
-		public int getyTile() {
-			return yTile;
-		}
-
 	}
 
 	// The board will keep track of the relationship between meeples and tiles.
@@ -403,9 +381,9 @@ public class Board {
 			Meeple meeple = iter.next();
 			MeeplePosition meeplePosition = meeplePlacement.get(meeple);
 
-			if (meeplePosition != null && meeplePosition.getTile() == tile
-					&& meeplePosition.getxTile() == xTile
-					&& meeplePosition.getyTile() == yTile) {
+			if (meeplePosition != null && meeplePosition.tile == tile
+					&& meeplePosition.xTile == xTile
+					&& meeplePosition.yTile == yTile) {
 				return meeple;
 			}
 		}
@@ -491,8 +469,8 @@ public class Board {
 			MeeplePosition mp = meeplePlacement.get(meeple);
 
 			// Check to see if it is attached to a cloister.
-			Tile tile = mp.getTile();
-			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
+			Tile tile = mp.tile;
+			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
 
 			// If it is attached to a cloister.
 			if (tileType == TileType.CLOISTER) {
@@ -698,15 +676,15 @@ public class Board {
 			MeeplePosition mp = meeplePlacement.get(iter.next());
 
 			// Check to see if it is attached to the correct tile type.
-			Tile tile = mp.getTile();
-			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
+			Tile tile = mp.tile;
+			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
 
 			// If it is attached to the correct tile type.
 			if (tileType == scoreTileType) {
 
 				// Init search.
 				toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
-						+ mp.getxTile() + "," + mp.getyTile());
+						+ mp.xTile + "," + mp.yTile);
 
 				// Call our search.
 				genericScoreRecursive(searched, toSearch, meeplesOnFeature,
@@ -927,13 +905,13 @@ public class Board {
 			// And now the real work begins.
 			MeeplePosition mp = meeplePlacement.get(iter.next());
 
-			Tile tile = mp.getTile();
-			TileType tileType = tile.getTileType(mp.getxTile(), mp.getyTile());
+			Tile tile = mp.tile;
+			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
 
 			if (tileType == TileType.FIELD) {
 				// Init search.
 				toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
-						+ mp.getxTile() + "," + mp.getyTile());
+						+ mp.xTile + "," + mp.yTile);
 
 				// Call the search.
 				fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
