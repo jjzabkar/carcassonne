@@ -16,25 +16,9 @@ public class Board {
 	private Tile[][] gameBoard;
 
 	/*
-	 * This class keeps track of which tiles have a meeple placed on them, and
-	 * on which section.
-	 */
-	private class MeeplePosition {
-
-		private final Tile tile;
-		private final int xTile;
-		private final int yTile;
-
-		public MeeplePosition(Tile tile, int xTile, int yTile) {
-			this.tile = tile;
-			this.xTile = xTile;
-			this.yTile = yTile;
-		}
-	}
-
-	/*
-	 * This class is used to keep track of the searching of tiles during scoring
-	 * methods.
+	 * This class is used to keep track of a board position any time it is
+	 * needed. It is used in to keep track of meeple placement, and in the
+	 * scoring functions.
 	 */
 	private class BoardPosition {
 
@@ -100,7 +84,7 @@ public class Board {
 	// creates somewhat of an overhead. Here, especially so since tiles can
 	// have multiple meeples on them. So we'll just have one table which will
 	// keep track for each meeple which tile it is on.
-	private HashMap<Meeple, MeeplePosition> meeplePlacement;
+	private HashMap<Meeple, BoardPosition> meeplePlacement;
 
 	/**
 	 * Initialize the game board. All tile positions are set to null to start.
@@ -108,7 +92,7 @@ public class Board {
 	 */
 	public Board() {
 
-		meeplePlacement = new HashMap<Meeple, MeeplePosition>();
+		meeplePlacement = new HashMap<Meeple, BoardPosition>();
 
 		// We have 72 tiles to place, with the starting tile in the center
 		// of the board. This guarantees that the board can't extend outside
@@ -253,26 +237,29 @@ public class Board {
 	public int placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
 			int yTile) {
 		// First we need to check the correctness of the input x & y.
-		boolean correctTile = (xBoard == aPlayer.getLastTilePlacedXPos() && yBoard == aPlayer
-				.getLastTilePlacedYPos());
+		boolean xPlacedCorrectly = (xBoard == aPlayer.getLastTilePlacedXPos());
+		boolean yPlacedCorrectly = (yBoard == aPlayer.getLastTilePlacedYPos());
+
+		boolean correctTile = (xPlacedCorrectly && yPlacedCorrectly);
 
 		// Next we check that the tile type is not already taken.
 		boolean newFeature = isNewFeature(xBoard, yBoard, xTile, yTile);
 
 		// If so, we place the meeple.
 		if (correctTile && newFeature) {
-			Tile theTile = gameBoard[yBoard][xBoard];
+
 			ArrayList<Meeple> meeples = aPlayer.getMeeples();
 
 			// TODO: better selection of meeple to allow the correct one to
 			// be selected and draw?
-			MeeplePosition mp;
+			BoardPosition meeplePosition;
 
 			for (int i = 0; i < meeples.size(); i++) {
 				if (meeplePlacement.get(meeples.get(i)) == null) {
 
-					mp = new MeeplePosition(theTile, xTile, yTile);
-					meeplePlacement.put(meeples.get(i), mp);
+					meeplePosition = new BoardPosition(xBoard, yBoard, xTile,
+							yTile);
+					meeplePlacement.put(meeples.get(i), meeplePosition);
 
 					return 0;
 				}
@@ -450,9 +437,11 @@ public class Board {
 
 		while (iter.hasNext()) {
 			Meeple meeple = iter.next();
-			MeeplePosition meeplePosition = meeplePlacement.get(meeple);
+			BoardPosition meeplePosition = meeplePlacement.get(meeple);
 
-			if (meeplePosition != null && meeplePosition.tile == tile
+			if (meeplePosition != null
+					&& meeplePosition.xBoard == getxTile(tile)
+					&& meeplePosition.yBoard == getyTile(tile)
 					&& meeplePosition.xTile == xTile
 					&& meeplePosition.yTile == yTile) {
 				return meeple;
@@ -537,11 +526,12 @@ public class Board {
 		while (iter.hasNext()) {
 
 			Meeple meeple = iter.next();
-			MeeplePosition mp = meeplePlacement.get(meeple);
+			BoardPosition meeplePosition = meeplePlacement.get(meeple);
 
 			// Check to see if it is attached to a cloister.
-			Tile tile = mp.tile;
-			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
+			Tile tile = gameBoard[meeplePosition.yBoard][meeplePosition.xBoard];
+			TileType tileType = tile.getTileType(meeplePosition.xTile,
+					meeplePosition.yTile);
 
 			// If it is attached to a cloister.
 			if (tileType == TileType.CLOISTER) {
@@ -744,18 +734,20 @@ public class Board {
 			Object[] featureProperties = { nTiles, nullTileFound };
 
 			// And now the real work begins.
-			MeeplePosition mp = meeplePlacement.get(iter.next());
+			BoardPosition meeplePosition = meeplePlacement.get(iter.next());
 
 			// Check to see if it is attached to the correct tile type.
-			Tile tile = mp.tile;
-			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
+			Tile tile = gameBoard[meeplePosition.yBoard][meeplePosition.xBoard];
+			TileType tileType = tile.getTileType(meeplePosition.xTile,
+					meeplePosition.yTile);
 
 			// If it is attached to the correct tile type.
 			if (tileType == scoreTileType) {
 
 				// Init search.
 				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
-						getyTile(tile), mp.xTile, mp.yTile);
+						getyTile(tile), meeplePosition.xTile,
+						meeplePosition.yTile);
 
 				toSearch.add(boardPosition);
 
@@ -982,16 +974,18 @@ public class Board {
 			Object[] featureProperties = { nCities };
 
 			// And now the real work begins.
-			MeeplePosition mp = meeplePlacement.get(iter.next());
+			BoardPosition meeplePosition = meeplePlacement.get(iter.next());
 
-			Tile tile = mp.tile;
-			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
+			Tile tile = gameBoard[meeplePosition.yBoard][meeplePosition.xBoard];
+			TileType tileType = tile.getTileType(meeplePosition.xTile,
+					meeplePosition.yTile);
 
 			if (tileType == TileType.FIELD) {
 
 				// Init search.
 				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
-						getyTile(tile), mp.xTile, mp.yTile);
+						getyTile(tile), meeplePosition.xTile,
+						meeplePosition.yTile);
 
 				toSearch.add(boardPosition);
 
