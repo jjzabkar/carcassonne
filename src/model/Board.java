@@ -352,7 +352,8 @@ public class Board {
 		}
 
 		// Search the position & add it to searched map.
-		if (!hasMeeple(currentTile, xTile, yTile)) {
+		// If there is a meeple on the feature then it isn't a new feature.
+		if (getMeeple(currentTile, xTile, yTile) == null) {
 			toSearch.remove(boardPosition);
 			searched.add(boardPosition);
 		} else {
@@ -397,27 +398,6 @@ public class Board {
 		}
 
 		return isNewFeatureRecursive(searched, toSearch);
-	}
-
-	/**
-	 * Return whether a tile has a meeple on it, with respect to the tile pos.
-	 * 
-	 * @param tile
-	 *            The tile to check for the meeple.
-	 * @param xTile
-	 *            The x position to check for the meeple.
-	 * @param yTile
-	 *            The y position to check for the meeple.
-	 * @return True if the tile has a meeple on it, false otherwise.
-	 */
-	// TODO remove this?
-	private boolean hasMeeple(Tile tile, int xTile, int yTile) {
-
-		if (getMeeple(tile, xTile, yTile) != null) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -850,9 +830,11 @@ public class Board {
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
 		// Search the position & add it to searched map.
-		if (hasMeeple(currentTile, xTile, yTile)) {
+		Meeple meeple = getMeeple(currentTile, xTile, yTile);
+
+		if (meeple != null) {
 			// Add the meeple on the tile to our list.
-			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
+			meeplesOnFeature.add(meeple);
 		}
 
 		toSearch.remove(boardPosition);
@@ -868,6 +850,7 @@ public class Board {
 				yTile);
 
 		for (int i = 0; i < neighborTiles.length; i++) {
+
 			// Check the tile is not null.
 			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
@@ -1262,10 +1245,11 @@ public class Board {
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
 		// Search the position & add it to searched map.
-		if (hasMeeple(currentTile, xTile, yTile)) {
+		Meeple meeple = getMeeple(currentTile, xTile, yTile);
 
+		if (meeple != null) {
 			// Add the meeple on the tile to our list.
-			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
+			meeplesOnFeature.add(meeple);
 		}
 
 		toSearch.remove(boardPosition);
