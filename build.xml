@@ -4,6 +4,7 @@
     <property name="src.dir" location="${basedir}/src" />
     <property name="build.dir" location="${basedir}/bin" />
 
+	<property name="resources.dir" value="resources" />
     <property name="lib.dir" location="${basedir}/lib" />
     <property name="docs.dir" location="${basedir}/docs" />
     <property name="dist.dir" location="${basedir}/dist" />
@@ -134,6 +135,7 @@
     <target name="jar">
         <jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
             excludes="**/tests/**">
+        	<fileset dir="${src.dir}" includes="${resources.dir}/**" />
             <manifest>
                 <attribute name="Main-Class" value="${main.class}" />
             </manifest>
@@ -142,5 +144,6 @@
 
     <target name="main" depends="clean, compile, junit" />
     <target name="emma" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report" />
+	<target name="all" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report, docs, jar" />
 
 </project>

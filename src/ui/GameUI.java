@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
@@ -50,7 +51,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 	// UI settings.
 	private String title = "Carcassonne";
-	private Image icon = Toolkit.getDefaultToolkit().getImage("icon.png");
+	private URL iconUrl = getClass().getResource("/resources/icon.png");
+	private Image iconImage = Toolkit.getDefaultToolkit().getImage(iconUrl);
 
 	private String[] windowedResolutions = { "800 x 600", "1024 x 768",
 			"1280 x 720", "1280 x 960", "1280 x 1024", "1360 x 768",
@@ -88,7 +90,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 		// Set the title bar and icon.
 		this.setTitle(title);
-		this.setIconImage(icon);
+		this.setIconImage(iconImage);
 
 		// Show the title screen to begin with.
 		this.setContentPane(this.titleScreenContentPane);
@@ -379,7 +381,8 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		rotateCCWButton.addActionListener(this);
 
 		// Draw Pile.
-		ImageIcon drawTileImageIcon = new ImageIcon("tile-back.jpg");
+		URL drawTileUrl = getClass().getResource("/resources/tile-back.jpg");
+		ImageIcon drawTileImageIcon = new ImageIcon(drawTileUrl);
 		JButton drawTileButton = new JButton(drawTileImageIcon);
 		drawTileButton.setActionCommand("drawTile");
 		drawTileButton.addActionListener(this);
