@@ -556,7 +556,7 @@ public class Board {
 
 	/**
 	 * Score the cities, using the helper function
-	 * {@link #genericScore(TileType, boolean)}.
+	 * {@link #genericScore(Player[], TileType, boolean)}.
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
@@ -568,7 +568,7 @@ public class Board {
 
 	/**
 	 * Score the roads, using the helper function
-	 * {@link #genericScore(TileType, boolean)}.
+	 * {@link #genericScore(Player[], TileType, boolean)}.
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
