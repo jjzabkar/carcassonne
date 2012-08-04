@@ -378,21 +378,22 @@ public class Board {
 		TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
 		// Add to an array. And run through adding each to toSearch.
-		int[][] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile, yTile);
+		BoardPosition[] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile,
+				yTile);
 
 		for (int i = 0; i < neighborTiles.length; i++) {
 			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
+			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
-						neighborTiles[i][1], neighborTiles[i][2],
-						neighborTiles[i][3]);
+				BoardPosition toAdd = new BoardPosition(
+						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+						neighborTiles[i].xTile, neighborTiles[i].yTile);
 
 				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i][2],
-						neighborTiles[i][3]);
+				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
+						neighborTiles[i].yTile);
 
 				// Check the tile is not already in searched or toSearch.
 				if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -871,21 +872,22 @@ public class Board {
 		TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
 		// Add to an array. And run through adding each to toSearch.
-		int[][] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile, yTile);
+		BoardPosition[] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile,
+				yTile);
 
 		for (int i = 0; i < neighborTiles.length; i++) {
 			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
+			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
-						neighborTiles[i][1], neighborTiles[i][2],
-						neighborTiles[i][3]);
+				BoardPosition toAdd = new BoardPosition(
+						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+						neighborTiles[i].xTile, neighborTiles[i].yTile);
 
 				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i][2],
-						neighborTiles[i][3]);
+				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
+						neighborTiles[i].yTile);
 
 				// Check the tile is not already in searched or toSearch.
 				if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -1171,24 +1173,25 @@ public class Board {
 		TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
 		// Add neighbors to an array. And run through adding each to toSearch.
-		int[][] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile, yTile);
+		BoardPosition[] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile,
+				yTile);
 
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map,
 		// and is of the same tile type.
 		for (int i = 0; i < neighborTiles.length; i++) {
 			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
+			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
-						neighborTiles[i][1], neighborTiles[i][2],
-						neighborTiles[i][3]);
+				BoardPosition toAdd = new BoardPosition(
+						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+						neighborTiles[i].xTile, neighborTiles[i].yTile);
 
 				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i][2],
-						neighborTiles[i][3]);
+				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
+						neighborTiles[i].yTile);
 
 				// Check the tile is not already in searched or toSearch.
 				if (tileType == currentTileType && !toSearch.contains(toAdd)
@@ -1275,24 +1278,25 @@ public class Board {
 		searched.add(bp);
 
 		// Get the neighbor tile positions.
-		int[][] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile, yTile);
+		BoardPosition[] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile,
+				yTile);
 
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map, and is a field.
 		for (int i = 0; i < neighborTiles.length; i++) {
 			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
+			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
 			if (tile != null) {
 
 				// Add the tile to the toSearch set.
-				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
-						neighborTiles[i][1], neighborTiles[i][2],
-						neighborTiles[i][3]);
+				BoardPosition toAdd = new BoardPosition(
+						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+						neighborTiles[i].xTile, neighborTiles[i].yTile);
 
 				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i][2],
-						neighborTiles[i][3]);
+				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
+						neighborTiles[i].yTile);
 
 				// Add the tile to be searched if it is also a field.
 				if (tileType == TileType.FIELD) {
@@ -1352,10 +1356,9 @@ public class Board {
 	 * @return An integer array containing the coordinates of all neighboring
 	 *         tile positions (not tiles).
 	 */
-	private int[][] getTileNeighbors(int xBoard, int yBoard, int xTile,
+	private BoardPosition[] getTileNeighbors(int xBoard, int yBoard, int xTile,
 			int yTile) {
 
-		// TODO change to boardposition
 		int[] nStr = { xBoard, yBoard, xTile, (yTile - 1) };
 		int[] eStr = { xBoard, yBoard, (xTile + 1), yTile };
 		int[] sStr = { xBoard, yBoard, xTile, (yTile + 1) };
@@ -1387,7 +1390,18 @@ public class Board {
 			wStr[0]--;
 		}
 
-		int[][] neighborTiles = { nStr, eStr, sStr, wStr };
+		BoardPosition nBoardPosition;
+		BoardPosition eBoardPosition;
+		BoardPosition sBoardPosition;
+		BoardPosition wBoardPosition;
+
+		nBoardPosition = new BoardPosition(nStr[0], nStr[1], nStr[2], nStr[3]);
+		eBoardPosition = new BoardPosition(eStr[0], eStr[1], eStr[2], eStr[3]);
+		sBoardPosition = new BoardPosition(sStr[0], sStr[1], sStr[2], sStr[3]);
+		wBoardPosition = new BoardPosition(wStr[0], wStr[1], wStr[2], wStr[3]);
+
+		BoardPosition[] neighborTiles = { nBoardPosition, eBoardPosition,
+				sBoardPosition, wBoardPosition };
 
 		return neighborTiles;
 	}
