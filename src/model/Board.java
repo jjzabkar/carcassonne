@@ -32,6 +32,69 @@ public class Board {
 		}
 	}
 
+	/*
+	 * This class is used to keep track of the searching of tiles during scoring
+	 * methods.
+	 */
+	private class BoardPosition {
+
+		private final int xBoard;
+		private final int yBoard;
+		private final int xTile;
+		private final int yTile;
+
+		public BoardPosition(int xBoard, int yBoard, int xTile, int yTile) {
+			this.xBoard = xBoard;
+			this.yBoard = yBoard;
+			this.xTile = xTile;
+			this.yTile = yTile;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+
+			if (other == null) {
+				return false;
+			}
+
+			if (other == this) {
+				return true;
+			}
+
+			if (!(other instanceof BoardPosition)) {
+				return false;
+			}
+
+			BoardPosition otherBoardPosition = (BoardPosition) other;
+
+			if (this.xBoard == otherBoardPosition.xBoard
+					&& this.yBoard == otherBoardPosition.yBoard
+					&& this.xTile == otherBoardPosition.xTile
+					&& this.yTile == otherBoardPosition.yTile) {
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			// Whenever we override equals we need to override hashCode.
+
+			// Let's assume (this should always be correct anyway based on the
+			// tile and board design) that xBoard & yBoard can be an integer
+			// from 0-999, and that xTile & yTile can be an integer from 0-9.
+
+			// So we'll just shift over the digits so the first three represent
+			// xBoard, next three yBoard, and the next two xTile and yTile.
+
+			int board = (this.xBoard * 1000) + this.yBoard;
+			int tile = (this.xTile * 10) + this.yTile;
+
+			return (board * 100) + tile;
+		}
+	}
+
 	// The board will keep track of the relationship between meeples and tiles.
 	// Two hash tables for quick lookup would be somewhat ideal, though it
 	// creates somewhat of an overhead. Here, especially so since tiles can
@@ -252,11 +315,16 @@ public class Board {
 	 * @return A boolean indicating whether the terrain is free to be claimed.
 	 */
 	private boolean isNewFeature(int xBoard, int yBoard, int xTile, int yTile) {
-		// Hold searched tile positions so we don't search any positions twice.
-		HashSet<String> searched = new HashSet<String>();
-		HashSet<String> toSearch = new HashSet<String>();
 
-		toSearch.add(xBoard + "," + yBoard + "," + xTile + "," + yTile);
+		// Hold searched tile positions so we don't search any positions twice.
+		HashSet<BoardPosition> searched = new HashSet<BoardPosition>();
+		HashSet<BoardPosition> toSearch = new HashSet<BoardPosition>();
+
+		// Create the starting position.
+		BoardPosition boardPosition;
+		boardPosition = new BoardPosition(xBoard, yBoard, xTile, yTile);
+
+		toSearch.add(boardPosition);
 
 		// Do a recursive search on all adjacent cells for a meeple.
 		return isNewFeatureRecursive(searched, toSearch);
@@ -271,16 +339,23 @@ public class Board {
 	 *            A HashSet containing any tiles to be searched.
 	 * @return A boolean indicating whether the terrain is free to be claimed.
 	 */
-	private boolean isNewFeatureRecursive(HashSet<String> searched,
-			HashSet<String> toSearch) {
-		// Take a position from the toSearch map.
-		String tilePosition = toSearch.toArray(new String[0])[0];
-		String[] tilePos = tilePosition.split(",");
+	private boolean isNewFeatureRecursive(HashSet<BoardPosition> searched,
+			HashSet<BoardPosition> toSearch) {
 
-		int xBoard = Integer.parseInt(tilePos[0]);
-		int yBoard = Integer.parseInt(tilePos[1]);
-		int xTile = Integer.parseInt(tilePos[2]);
-		int yTile = Integer.parseInt(tilePos[3]);
+		// Take a position from the toSearch map.
+		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		BoardPosition bp = null;
+
+		if (boardPositionIterator.hasNext()) {
+			bp = boardPositionIterator.next();
+		} else {
+			return false;
+		}
+
+		int xBoard = bp.xBoard;
+		int yBoard = bp.yBoard;
+		int xTile = bp.xTile;
+		int yTile = bp.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
@@ -291,8 +366,8 @@ public class Board {
 
 		// Search the position & add it to searched map.
 		if (!hasMeeple(currentTile, xTile, yTile)) {
-			toSearch.remove(tilePosition);
-			searched.add(tilePosition);
+			toSearch.remove(bp);
+			searched.add(bp);
 		} else {
 			return false;
 		}
@@ -310,15 +385,10 @@ public class Board {
 			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
 
 			if (tile != null) {
-				String toAdd = "";
 
-				for (int j = 0; j < neighborTiles[i].length; j++) {
-					toAdd += neighborTiles[i][j];
-					toAdd += ",";
-				}
-
-				// Remove the last comma.
-				toAdd = toAdd.substring(0, toAdd.length() - 1);
+				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
+						neighborTiles[i][1], neighborTiles[i][2],
+						neighborTiles[i][3]);
 
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i][2],
@@ -652,8 +722,8 @@ public class Board {
 		// specific feature. These are reset for each feature.
 		int nTiles;
 		boolean nullTileFound;
-		HashSet<String> searched;
-		HashSet<String> toSearch;
+		HashSet<BoardPosition> searched;
+		HashSet<BoardPosition> toSearch;
 		ArrayList<Meeple> meeplesOnFeature;
 
 		// And other variables.
@@ -667,8 +737,8 @@ public class Board {
 			// Reset the variables which hold info about specific features.
 			nTiles = 0;
 			nullTileFound = false;
-			searched = new HashSet<String>();
-			toSearch = new HashSet<String>();
+			searched = new HashSet<BoardPosition>();
+			toSearch = new HashSet<BoardPosition>();
 			meeplesOnFeature = new ArrayList<Meeple>();
 			Object[] featureProperties = { nTiles, nullTileFound };
 
@@ -683,8 +753,10 @@ public class Board {
 			if (tileType == scoreTileType) {
 
 				// Init search.
-				toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
-						+ mp.xTile + "," + mp.yTile);
+				BoardPosition bp = new BoardPosition(getxTile(tile),
+						getyTile(tile), mp.xTile, mp.yTile);
+
+				toSearch.add(bp);
 
 				// Call our search.
 				genericScoreRecursive(searched, toSearch, meeplesOnFeature,
@@ -763,19 +835,24 @@ public class Board {
 	 *            the feature, and a boolean indicating the presence of a null
 	 *            tile.
 	 */
-	private void genericScoreRecursive(HashSet<String> searched,
-			HashSet<String> toSearch, ArrayList<Meeple> meeplesOnFeature,
-			Object[] featureProperties) {
+	private void genericScoreRecursive(HashSet<BoardPosition> searched,
+			HashSet<BoardPosition> toSearch,
+			ArrayList<Meeple> meeplesOnFeature, Object[] featureProperties) {
 
 		// Take a position from the toSearch map to search.
-		String tilePosition = toSearch.toArray(new String[0])[0];
-		String[] tilePos = tilePosition.split(",");
+		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		BoardPosition bp = null;
 
-		// TODO make struct for these instead of passing by weird string thing
-		int xBoard = Integer.parseInt(tilePos[0]);
-		int yBoard = Integer.parseInt(tilePos[1]);
-		int xTile = Integer.parseInt(tilePos[2]);
-		int yTile = Integer.parseInt(tilePos[3]);
+		if (boardPositionIterator.hasNext()) {
+			bp = boardPositionIterator.next();
+		} else {
+			return;
+		}
+
+		int xBoard = bp.xBoard;
+		int yBoard = bp.yBoard;
+		int xTile = bp.xTile;
+		int yTile = bp.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
@@ -785,8 +862,8 @@ public class Board {
 			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
 		}
 
-		toSearch.remove(tilePosition);
-		searched.add(tilePosition);
+		toSearch.remove(bp);
+		searched.add(bp);
 
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map,
@@ -801,15 +878,10 @@ public class Board {
 			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
 
 			if (tile != null) {
-				String toAdd = "";
 
-				for (int j = 0; j < neighborTiles[i].length; j++) {
-					toAdd += neighborTiles[i][j];
-					toAdd += ",";
-				}
-
-				// Remove the last comma.
-				toAdd = toAdd.substring(0, toAdd.length() - 1);
+				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
+						neighborTiles[i][1], neighborTiles[i][2],
+						neighborTiles[i][3]);
 
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i][2],
@@ -835,12 +907,17 @@ public class Board {
 					featureProperties);
 		} else {
 			// Get the number of tiles searched.
-			HashSet<String> searchedTiles = new HashSet<String>();
-			Iterator<String> searchedIterator = searched.iterator();
+			HashSet<BoardPosition> searchedTiles = new HashSet<BoardPosition>();
+			Iterator<BoardPosition> searchedIterator = searched.iterator();
 
 			while (searchedIterator.hasNext()) {
-				String[] coordinates = searchedIterator.next().split(",");
-				searchedTiles.add(coordinates[0] + "," + coordinates[1]);
+
+				BoardPosition boardPosition = searchedIterator.next();
+
+				BoardPosition tilePosition = new BoardPosition(
+						boardPosition.xBoard, boardPosition.yBoard, 0, 0);
+
+				searchedTiles.add(tilePosition);
 			}
 
 			// Set the number of tiles searched.
@@ -882,13 +959,13 @@ public class Board {
 		// Initialize the variables which will hold information about the
 		// specific feature. These are reset for each feature.
 		int nCities;
-		HashSet<String> searched;
-		HashSet<String> toSearch;
+		HashSet<BoardPosition> searched;
+		HashSet<BoardPosition> toSearch;
 		ArrayList<Meeple> meeplesOnFeature;
 
 		// And other variables.
 		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
-		ArrayList<HashSet<String>> completedCities = getCompletedCities();
+		ArrayList<HashSet<BoardPosition>> completedCities = getCompletedCities();
 
 		// Run through all the placed meeples.
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
@@ -897,8 +974,8 @@ public class Board {
 
 			// Reset the variables which hold info about specific features.
 			nCities = 0;
-			searched = new HashSet<String>();
-			toSearch = new HashSet<String>();
+			searched = new HashSet<BoardPosition>();
+			toSearch = new HashSet<BoardPosition>();
 			meeplesOnFeature = new ArrayList<Meeple>();
 			Object[] featureProperties = { nCities };
 
@@ -909,13 +986,17 @@ public class Board {
 			TileType tileType = tile.getTileType(mp.xTile, mp.yTile);
 
 			if (tileType == TileType.FIELD) {
+
 				// Init search.
-				toSearch.add(getxTile(tile) + "," + getyTile(tile) + ","
-						+ mp.xTile + "," + mp.yTile);
+				BoardPosition bp = new BoardPosition(getxTile(tile),
+						getyTile(tile), mp.xTile, mp.yTile);
+
+				toSearch.add(bp);
 
 				// Call the search.
 				fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
-						completedCities, new ArrayList<HashSet<String>>(),
+						completedCities,
+						new ArrayList<HashSet<BoardPosition>>(),
 						featureProperties);
 
 				// Recover the tracker variables.
@@ -968,11 +1049,12 @@ public class Board {
 	 * @return A list of sets of board positions belonging to separate completed
 	 *         cities.
 	 */
-	private ArrayList<HashSet<String>> getCompletedCities() {
+	private ArrayList<HashSet<BoardPosition>> getCompletedCities() {
 
 		// Each HashSet in the ArrayList denotes a city; a collection of strings
 		// which indicate the tile locations which comprise the city.
-		ArrayList<HashSet<String>> cities = new ArrayList<HashSet<String>>();
+		ArrayList<HashSet<BoardPosition>> cities;
+		cities = new ArrayList<HashSet<BoardPosition>>();
 
 		// Each city which is found to be incomplete is recorded by having an
 		// entry put in incompleteCities specifying the index of the incomplete
@@ -980,8 +1062,8 @@ public class Board {
 		ArrayList<Integer> incompleteCities = new ArrayList<Integer>();
 
 		boolean newCity = true;
-		HashSet<String> searched;
-		HashSet<String> toSearch;
+		HashSet<BoardPosition> searched;
+		HashSet<BoardPosition> toSearch;
 
 		// Run through the whole map; all board tiles and all tile positions.
 		// When we find a city tile type we check if the city it belongs to is
@@ -1003,20 +1085,21 @@ public class Board {
 							// Reset flags for testing the next tile position.
 							newCity = true;
 
-							// Board x, board y, tile x, tile y.
-							String curTile = j + "," + i + "," + l + "," + k;
+							// Get the current tile board position.
+							BoardPosition currentTile;
+							currentTile = new BoardPosition(j, i, l, k);
 
 							for (int m = 0; m < cities.size(); m++) {
-								if (cities.get(m).contains(curTile)) {
+								if (cities.get(m).contains(currentTile)) {
 									newCity = false;
 								}
 							}
 
 							if (newCity) {
-								searched = new HashSet<String>();
-								toSearch = new HashSet<String>();
+								searched = new HashSet<BoardPosition>();
+								toSearch = new HashSet<BoardPosition>();
 
-								toSearch.add(curTile);
+								toSearch.add(currentTile);
 
 								getCompletedCitiesRecursive(searched, toSearch,
 										cities, incompleteCities);
@@ -1060,23 +1143,30 @@ public class Board {
 	 *            A list of integers corresponding to any cities in the 'cities'
 	 *            parameter which are incomplete.
 	 */
-	private void getCompletedCitiesRecursive(HashSet<String> searched,
-			HashSet<String> toSearch, ArrayList<HashSet<String>> cities,
+	private void getCompletedCitiesRecursive(HashSet<BoardPosition> searched,
+			HashSet<BoardPosition> toSearch,
+			ArrayList<HashSet<BoardPosition>> cities,
 			ArrayList<Integer> incompleteCities) {
 
 		// Take a position from the toSearch map to search.
-		String tilePosition = toSearch.toArray(new String[0])[0];
-		String[] tilePos = tilePosition.split(",");
+		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		BoardPosition bp = null;
 
-		int xBoard = Integer.parseInt(tilePos[0]);
-		int yBoard = Integer.parseInt(tilePos[1]);
-		int xTile = Integer.parseInt(tilePos[2]);
-		int yTile = Integer.parseInt(tilePos[3]);
+		if (boardPositionIterator.hasNext()) {
+			bp = boardPositionIterator.next();
+		} else {
+			return;
+		}
+
+		int xBoard = bp.xBoard;
+		int yBoard = bp.yBoard;
+		int xTile = bp.xTile;
+		int yTile = bp.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
-		toSearch.remove(tilePosition);
-		searched.add(tilePosition);
+		toSearch.remove(bp);
+		searched.add(bp);
 
 		TileType currentTileType = currentTile.getTileType(xTile, yTile);
 
@@ -1092,15 +1182,9 @@ public class Board {
 
 			if (tile != null) {
 
-				String toAdd = "";
-
-				for (int j = 0; j < neighborTiles[i].length; j++) {
-					toAdd += neighborTiles[i][j];
-					toAdd += ",";
-				}
-
-				// Remove the last comma.
-				toAdd = toAdd.substring(0, toAdd.length() - 1);
+				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
+						neighborTiles[i][1], neighborTiles[i][2],
+						neighborTiles[i][3]);
 
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i][2],
@@ -1156,31 +1240,39 @@ public class Board {
 	 *            An object array used to hold the number of cities adjacent to
 	 *            the searched feature.
 	 */
-	private void fieldScoreRecursive(HashSet<String> searched,
-			HashSet<String> toSearch, ArrayList<Meeple> meeplesOnFeature,
-			ArrayList<HashSet<String>> allCities,
-			ArrayList<HashSet<String>> adjacentCities,
+	private void fieldScoreRecursive(HashSet<BoardPosition> searched,
+			HashSet<BoardPosition> toSearch,
+			ArrayList<Meeple> meeplesOnFeature,
+			ArrayList<HashSet<BoardPosition>> allCities,
+			ArrayList<HashSet<BoardPosition>> adjacentCities,
 			Object[] featureProperties) {
 
 		// Take a position from the toSearch map to search.
-		String tilePosition = toSearch.toArray(new String[0])[0];
-		String[] tilePos = tilePosition.split(",");
+		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		BoardPosition bp = null;
 
-		int xBoard = Integer.parseInt(tilePos[0]);
-		int yBoard = Integer.parseInt(tilePos[1]);
-		int xTile = Integer.parseInt(tilePos[2]);
-		int yTile = Integer.parseInt(tilePos[3]);
+		if (boardPositionIterator.hasNext()) {
+			bp = boardPositionIterator.next();
+		} else {
+			return;
+		}
+
+		int xBoard = bp.xBoard;
+		int yBoard = bp.yBoard;
+		int xTile = bp.xTile;
+		int yTile = bp.yTile;
 
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
 		// Search the position & add it to searched map.
 		if (hasMeeple(currentTile, xTile, yTile)) {
+
 			// Add the meeple on the tile to our list.
 			meeplesOnFeature.add(getMeeple(currentTile, xTile, yTile));
 		}
 
-		toSearch.remove(tilePosition);
-		searched.add(tilePosition);
+		toSearch.remove(bp);
+		searched.add(bp);
 
 		// Get the neighbor tile positions.
 		int[][] neighborTiles = getTileNeighbors(xBoard, yBoard, xTile, yTile);
@@ -1192,16 +1284,11 @@ public class Board {
 			Tile tile = gameBoard[neighborTiles[i][1]][neighborTiles[i][0]];
 
 			if (tile != null) {
+
 				// Add the tile to the toSearch set.
-				String toAdd = "";
-
-				for (int j = 0; j < neighborTiles[i].length; j++) {
-					toAdd += neighborTiles[i][j];
-					toAdd += ",";
-				}
-
-				// Remove the last comma.
-				toAdd = toAdd.substring(0, toAdd.length() - 1);
+				BoardPosition toAdd = new BoardPosition(neighborTiles[i][0],
+						neighborTiles[i][1], neighborTiles[i][2],
+						neighborTiles[i][3]);
 
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i][2],
@@ -1268,6 +1355,7 @@ public class Board {
 	private int[][] getTileNeighbors(int xBoard, int yBoard, int xTile,
 			int yTile) {
 
+		// TODO change to boardposition
 		int[] nStr = { xBoard, yBoard, xTile, (yTile - 1) };
 		int[] eStr = { xBoard, yBoard, (xTile + 1), yTile };
 		int[] sStr = { xBoard, yBoard, xTile, (yTile + 1) };
