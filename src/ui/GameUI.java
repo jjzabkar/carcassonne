@@ -366,10 +366,14 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		JButton zoomInButton = new JButton("+");
 		zoomInButton.setActionCommand("zoomIn");
 		zoomInButton.addActionListener(this);
+		// TODO
+		zoomInButton.setEnabled(false);
 
 		JButton zoomOutButton = new JButton("-");
 		zoomOutButton.setActionCommand("zoomOut");
 		zoomOutButton.addActionListener(this);
+		// TODO
+		zoomOutButton.setEnabled(false);
 
 		// Tile Rotation.
 		JButton rotateCWButton = new JButton("--\\");
