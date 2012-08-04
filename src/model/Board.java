@@ -1,6 +1,5 @@
 package model;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -222,17 +221,17 @@ public class Board {
 		// If so, we place the meeple.
 		if (correctTile && newFeature) {
 			Tile theTile = gameBoard[yBoard][xBoard];
-			Meeple[] meeples = aPlayer.getMeeples();
+			ArrayList<Meeple> meeples = aPlayer.getMeeples();
 
 			// TODO: better selection of meeple to allow the correct one to
 			// be selected and draw?
 			MeeplePosition mp;
 
-			for (int i = 0; i < meeples.length; i++) {
-				if (meeplePlacement.get(meeples[i]) == null) {
+			for (int i = 0; i < meeples.size(); i++) {
+				if (meeplePlacement.get(meeples.get(i)) == null) {
 
 					mp = new MeeplePosition(theTile, xTile, yTile);
-					meeplePlacement.put(meeples[i], mp);
+					meeplePlacement.put(meeples.get(i), mp);
 
 					return 0;
 				}
@@ -246,10 +245,10 @@ public class Board {
 	public int getNumMeeplesPlaced(Player player) {
 
 		int numMeeplesPlaced = 0;
-		Meeple[] meeples = player.getMeeples();
+		ArrayList<Meeple> meeples = player.getMeeples();
 
-		for (int i = 0; i < meeples.length; i++) {
-			if (meeplePlacement.get(meeples[i]) != null) {
+		for (int i = 0; i < meeples.size(); i++) {
+			if (meeplePlacement.get(meeples.get(i)) != null) {
 				numMeeplesPlaced++;
 			}
 		}
@@ -527,11 +526,10 @@ public class Board {
 				if (hasGameEnded || (!hasGameEnded && numNeighborTiles == 8)) {
 
 					// Find out which player owns the meeple.
-					// Let's just test color for now. TODO
 					Player scorer = null;
 
 					for (int i = 0; i < players.length; i++) {
-						if (players[i].getColor() == meeple.getColor()) {
+						if (players[i].getMeeples().contains(meeple)) {
 							scorer = players[i];
 						}
 					}
@@ -583,59 +581,65 @@ public class Board {
 	 * The player(s) with the most meeples on a feature receive the points for
 	 * the feature.
 	 * 
+	 * @param players
+	 *            An array of players which are playing the game.
 	 * @param meeplesOnFeature
 	 *            An ArrayList of meeples which are on the feature.
 	 * @return An ArrayList of players that will receive the points for the
 	 *         feature.
 	 */
-	// TODO thing besides color
 	private ArrayList<Player> getFeatureScorers(Player[] players,
 			ArrayList<Meeple> meeplesOnFeature) {
-		HashMap<Color, Integer> nMeeples = new HashMap<Color, Integer>();
 
-		// Count the number of meeples for each color.
-		for (int i = 0; i < meeplesOnFeature.size(); i++) {
-			Color color = meeplesOnFeature.get(i).getColor();
+		// For each player check if they own each meeple on the feature; if they
+		// do then add to the count of meeples which they have on the feature.
 
-			if (nMeeples.get(color) == null) {
-				nMeeples.put(color, 1);
-			} else {
-				nMeeples.put(color, nMeeples.get(color) + 1);
-			}
-		}
+		// At the same time keep track of the maximum number of meeples found
+		// on the feature, as the player with the most meeples on the feature
+		// will get the points for it.
 
-		// Find which player has the most meeples on the feature.
-		Iterator<Color> meepleColors = nMeeples.keySet().iterator();
+		// As there can be mulitple players which score (same # of meeples on
+		// the feature) we'll also keep track via an array of players (who get
+		// to score for the feature!).
+
+		HashMap<Player, Integer> nMeeples = new HashMap<Player, Integer>();
+		ArrayList<Player> scoringPlayers = new ArrayList<Player>();
 		int max = 0;
 
-		// One run to get the max number color.
-		while (meepleColors.hasNext()) {
-			Color color = meepleColors.next();
-			int num = nMeeples.get(color);
-
-			if (num >= max) {
-				max = num;
-			}
-		}
-
-		// One more run to get the colors with that max.
-		ArrayList<Color> scoringColors = new ArrayList<Color>();
-		ArrayList<Player> scoringPlayers = new ArrayList<Player>();
-
-		meepleColors = nMeeples.keySet().iterator();
-
-		while (meepleColors.hasNext()) {
-			Color color = meepleColors.next();
-			int num = nMeeples.get(color);
-
-			if (num == max) {
-				scoringColors.add(color);
-			}
-		}
-
 		for (int i = 0; i < players.length; i++) {
-			if (scoringColors.contains(players[i].getColor())) {
-				scoringPlayers.add(players[i]);
+
+			Player player = players[i];
+
+			for (int j = 0; j < meeplesOnFeature.size(); j++) {
+
+				if (player.getMeeples().contains(meeplesOnFeature.get(j))) {
+
+					if (nMeeples.get(player) == null) {
+
+						nMeeples.put(player, 1);
+
+					} else {
+
+						int newScore = nMeeples.get(player) + 1;
+						nMeeples.put(player, newScore);
+					}
+
+					int score = nMeeples.get(player);
+
+					// Keep track of our scoringPlayers array, &
+					// update max variable if neccessary.
+					if (score == max) {
+
+						scoringPlayers.add(player);
+
+					} else if (score > max) {
+
+						max = score;
+						scoringPlayers.clear();
+						scoringPlayers.add(player);
+					}
+
+				}
 			}
 		}
 

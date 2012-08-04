@@ -2,6 +2,7 @@ package model;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.util.ArrayList;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -11,7 +12,9 @@ import java.awt.Point;
 public class Player {
 
 	private Color color;
-	private Meeple[] meeples = new Meeple[7];
+
+	public final static int NUM_MEEPLES = 7;
+	private ArrayList<Meeple> meeples = new ArrayList<Meeple>();
 	private int score = 0;
 
 	private Tile currentTile = null;
@@ -20,8 +23,8 @@ public class Player {
 	public Player(Color aColor) {
 		this.color = aColor;
 
-		for (int i = 0; i < this.meeples.length; i++) {
-			this.meeples[i] = new Meeple(this.color);
+		for (int i = 0; i < NUM_MEEPLES; i++) {
+			this.meeples.add(new Meeple(this.color));
 		}
 	}
 
@@ -34,7 +37,7 @@ public class Player {
 		return this.currentTile;
 	}
 
-	public Meeple[] getMeeples() {
+	public ArrayList<Meeple> getMeeples() {
 		return this.meeples;
 	}
 

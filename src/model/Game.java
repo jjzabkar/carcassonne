@@ -26,6 +26,7 @@ public class Game {
 	 *            The number of players which will be playing the game.
 	 */
 	private void initPlayers(int numPlayers) {
+		// TODO players can pick their color?
 		this.players = new Player[numPlayers];
 		Color[] colors = { Color.BLACK, Color.BLUE, Color.YELLOW, Color.RED,
 				Color.GREEN };
