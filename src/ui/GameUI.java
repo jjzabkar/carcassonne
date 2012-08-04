@@ -78,6 +78,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private JCanvas gameBoardWindow;
 	private JCanvas currentTilePanel;
 	private JTextField numPlayersTextField;
+	private JButton drawTileButton;
 	private JButton endTurnButton;
 
 	public GameUI() {
@@ -387,7 +388,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		// Draw Pile.
 		URL drawTileUrl = getClass().getResource("/resources/tile-back.jpg");
 		ImageIcon drawTileImageIcon = new ImageIcon(drawTileUrl);
-		JButton drawTileButton = new JButton(drawTileImageIcon);
+		drawTileButton = new JButton(drawTileImageIcon);
 		drawTileButton.setActionCommand("drawTile");
 		drawTileButton.addActionListener(this);
 
@@ -490,7 +491,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				this.currentTilePanel.repaint();
 
 				gameState = GameState.PLACE_TILE;
-
+				this.drawTileButton.setEnabled(false);
 			}
 
 		}
@@ -781,6 +782,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 		currentPlayer = game.getPlayers()[currentPlayerIdx];
 		this.showCurrentPlayer(currentPlayerIdx);
 		this.endTurnButton.setEnabled(false);
+		this.drawTileButton.setEnabled(true);
 	}
 
 	private void showCurrentPlayer(int playerIndex) {
