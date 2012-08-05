@@ -38,13 +38,7 @@ public class Tile {
 	private String identifier = "";
 	private int orientation = 0;
 
-	/** Denotes the width of a tileType element when drawn by the ui. **/
-	public static final int tileTypeSize = 10;
-
-	/**
-	 * Denotes the height & width of a tile (number of tileType's wide) (hint:
-	 * it's square!).
-	 **/
+	/** Denotes the width & height of a tile (number of tileType's). **/
 	public static final int tileSize = 7;
 
 	private Tile() {

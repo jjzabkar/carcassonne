@@ -20,6 +20,9 @@ public class TileUi implements DrawableInterface {
 	private int x = 0;
 	private int y = 0;
 
+	/** Denotes the width & height of a tileType element. **/
+	public static final int tileTypeSize = 10;
+
 	private TileUi() {
 		// Create the tile array.
 		tile = new TileType[Tile.tileSize][Tile.tileSize];
@@ -141,9 +144,9 @@ public class TileUi implements DrawableInterface {
 				}
 
 				g.setColor(tileTypeColor);
-				g.fillRect(x + (j * Tile.tileTypeSize), y
-						+ (i * Tile.tileTypeSize), Tile.tileTypeSize,
-						Tile.tileTypeSize);
+				g.fillRect(x + (j * TileUi.tileTypeSize), y
+						+ (i * TileUi.tileTypeSize), TileUi.tileTypeSize,
+						TileUi.tileTypeSize);
 			}
 		}
 	}

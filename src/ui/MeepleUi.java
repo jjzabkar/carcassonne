@@ -3,8 +3,6 @@ package ui;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import model.Tile;
-
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
  * @version 1.0
@@ -48,7 +46,7 @@ public class MeepleUi implements DrawableInterface {
 
 		// Create some sort of a shape to be on the middle of a tile.
 		g.setColor(color);
-		g.fillRoundRect(x, y, Tile.tileTypeSize, Tile.tileTypeSize,
-				Tile.tileTypeSize / 4, Tile.tileTypeSize / 4);
+		g.fillRoundRect(x, y, TileUi.tileTypeSize, TileUi.tileTypeSize,
+				TileUi.tileTypeSize / 4, TileUi.tileTypeSize / 4);
 	}
 }

@@ -320,7 +320,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	private void initGameScreen() {
 		this.gameContentPane = new JPanel(new BorderLayout());
 
-		int tileSize = Tile.tileSize * Tile.tileTypeSize;
+		int tileSize = Tile.tileSize * TileUi.tileTypeSize;
 		int gameBoardWidth = game.getBoardWidth() * tileSize;
 		int gameBoardHeight = game.getBoardHeight() * tileSize;
 		Point scrollPos = new Point(gameBoardWidth / 2, gameBoardHeight / 2);
@@ -655,13 +655,13 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			// 10 each. Then the player has clicked 52 / 5*10 = 1st tile.
 			// Our array is zero-indexed, so this is correct. Otherwise we'd
 			// get the mathematical ceiling.
-			int xBoard = xPos / (Tile.tileTypeSize * Tile.tileSize);
-			int yBoard = yPos / (Tile.tileTypeSize * Tile.tileSize);
+			int xBoard = xPos / (TileUi.tileTypeSize * Tile.tileSize);
+			int yBoard = yPos / (TileUi.tileTypeSize * Tile.tileSize);
 
-			int xTile = (xPos % (Tile.tileTypeSize * Tile.tileSize))
-					/ Tile.tileTypeSize;
-			int yTile = (yPos % (Tile.tileTypeSize * Tile.tileSize))
-					/ Tile.tileTypeSize;
+			int xTile = (xPos % (TileUi.tileTypeSize * Tile.tileSize))
+					/ TileUi.tileTypeSize;
+			int yTile = (yPos % (TileUi.tileTypeSize * Tile.tileSize))
+					/ TileUi.tileTypeSize;
 
 			// Check that the proper game state is selected. Here we are
 			// looking for the tile placement state.
@@ -684,7 +684,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				// from the currentTile area.
 				if (err == 0) {
 					// UI code.
-					int tileSize = Tile.tileTypeSize * Tile.tileSize;
+					int tileSize = TileUi.tileTypeSize * Tile.tileSize;
 					TileUi tileUi = tileMapping.get(tile);
 					tileUi.setx(xBoard * tileSize);
 					tileUi.sety(yBoard * tileSize);
@@ -732,9 +732,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 							.getMeeple(xBoard, yBoard, xTile, yTile);
 
 					// UI code.
-					int tileSize = Tile.tileTypeSize * Tile.tileSize;
-					int mx = (xBoard * tileSize) + (xTile * Tile.tileTypeSize);
-					int my = (yBoard * tileSize) + (yTile * Tile.tileTypeSize);
+					int tileSize = TileUi.tileTypeSize * Tile.tileSize;
+					int mx = (xBoard * tileSize)
+							+ (xTile * TileUi.tileTypeSize);
+					int my = (yBoard * tileSize)
+							+ (yTile * TileUi.tileTypeSize);
 
 					MeepleUi m = new MeepleUi(currentPlayer.getColor(), mx, my);
 
