@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +15,10 @@ import java.util.Iterator;
 public class Board {
 
 	private Tile[][] gameBoard;
+
+	// The board will keep track of the relationship between meeples and their
+	// position on it.
+	private HashMap<Meeple, BoardPosition> meeplePlacement;
 
 	/*
 	 * This class is used to keep track of a board position any time it is
@@ -79,16 +84,8 @@ public class Board {
 		}
 	}
 
-	// The board will keep track of the relationship between meeples and tiles.
-	// Two hash tables for quick lookup would be somewhat ideal, though it
-	// creates somewhat of an overhead. Here, especially so since tiles can
-	// have multiple meeples on them. So we'll just have one table which will
-	// keep track for each meeple which tile it is on.
-	private HashMap<Meeple, BoardPosition> meeplePlacement;
-
 	/**
 	 * Initialize the game board. All tile positions are set to null to start.
-	 * After this, the starting tile is placed in the center of the board
 	 */
 	public Board() {
 
@@ -103,31 +100,32 @@ public class Board {
 		gameBoard = new Tile[145][145];
 
 		for (int i = 0; i < gameBoard.length; i++) {
-			for (int j = 0; j < gameBoard[i].length; j++) {
-				gameBoard[i][j] = null;
-			}
+			Arrays.fill(gameBoard[i], null);
 		}
 	}
 
 	/**
 	 * Allow a player to place a tile on the game board.
 	 * 
-	 * @param aPlayer
+	 * @param player
 	 *            The player which is placing the tile.
-	 * @param xPos
+	 * @param xBoard
 	 *            The x position on the game board to place the tile.
-	 * @param yPos
+	 * @param yBoard
 	 *            The y position on the game board to place the tile.
+	 * 
 	 * @return a non-zero integer if the tile could not be placed, zero
 	 *         otherwise.
 	 */
-	public int placeTile(Player aPlayer, int xPos, int yPos) {
-		Tile tileToPlace = aPlayer.getCurrentTile();
+	public int placeTile(Player player, int xBoard, int yBoard) {
 
-		if (tileToPlace != null && isTilePosValid(tileToPlace, xPos, yPos)) {
-			gameBoard[yPos][xPos] = tileToPlace;
-			aPlayer.setCurrentTile(null);
-			aPlayer.setLastTilePlacedPos(xPos, yPos);
+		Tile tile = player.getCurrentTile();
+
+		if (tile != null && isTilePosValid(tile, xBoard, yBoard)) {
+
+			gameBoard[yBoard][xBoard] = tile;
+			player.setCurrentTile(null);
+			player.setLastTilePlacedPosition(xBoard, yBoard);
 
 			return 0;
 		}
@@ -137,29 +135,34 @@ public class Board {
 
 	/**
 	 * Verifies whether a tile can be placed at a specified board position.
+	 * 
 	 * There are three separate conditions which have to be met. The first is
 	 * that the position for tile placement must not already be occupied by a
 	 * tile. Secondly, there must be at least one adjacent tile on either the
 	 * top, bottom, left, or right of the placement position. Lastly, the sides
 	 * of the tile to be placed must match with any adjacent tile sides.
 	 * 
-	 * @param tileToPlace
+	 * Alternatively, the tile must be the first to be placed on the board.
+	 * 
+	 * @param tile
 	 *            The tile which is to be placed.
-	 * @param xPos
+	 * @param xBoard
 	 *            The x position the tile is to be placed on the board.
-	 * @param yPos
+	 * @param yBoard
 	 *            The y position the tile is to be placed on the board.
+	 * 
 	 * @return True if the move is valid, false otherwise.
 	 */
-	private boolean isTilePosValid(Tile tileToPlace, int xPos, int yPos) {
+	private boolean isTilePosValid(Tile tile, int xBoard, int yBoard) {
+
 		// Check that there is no tile in the specified position.
-		boolean free = (gameBoard[yPos][xPos] == null);
+		boolean free = (gameBoard[yBoard][xBoard] == null);
 
 		// Check that there is an adjacent tile wrt/ the specified position.
-		Tile top = gameBoard[yPos - 1][xPos];
-		Tile bottom = gameBoard[yPos + 1][xPos];
-		Tile right = gameBoard[yPos][xPos + 1];
-		Tile left = gameBoard[yPos][xPos - 1];
+		Tile top = gameBoard[yBoard - 1][xBoard];
+		Tile bottom = gameBoard[yBoard + 1][xBoard];
+		Tile right = gameBoard[yBoard][xBoard + 1];
+		Tile left = gameBoard[yBoard][xBoard - 1];
 
 		boolean adjacent = (top != null) || (bottom != null) || (right != null)
 				|| (left != null);
@@ -170,33 +173,35 @@ public class Board {
 		boolean rightMatches = (right == null);
 		boolean leftMatches = (left == null);
 
-		if (top != null
-				&& Arrays.deepEquals(top.getBottom(), tileToPlace.getTop())) {
+		if (top != null && Arrays.deepEquals(top.getBottom(), tile.getTop())) {
 			topMatches = true;
 		}
 
 		if (bottom != null
-				&& Arrays.deepEquals(bottom.getTop(), tileToPlace.getBottom())) {
+				&& Arrays.deepEquals(bottom.getTop(), tile.getBottom())) {
 			bottomMatches = true;
 		}
 
 		if (right != null
-				&& Arrays.deepEquals(right.getLeft(), tileToPlace.getRight())) {
+				&& Arrays.deepEquals(right.getLeft(), tile.getRight())) {
 			rightMatches = true;
 		}
 
-		if (left != null
-				&& Arrays.deepEquals(left.getRight(), tileToPlace.getLeft())) {
+		if (left != null && Arrays.deepEquals(left.getRight(), tile.getLeft())) {
 			leftMatches = true;
 		}
 
-		boolean sidesMatch = (topMatches && bottomMatches && rightMatches && leftMatches);
+		boolean sidesMatch = topMatches && bottomMatches && rightMatches
+				&& leftMatches;
 
-		// Return our answer.
 		return (free && adjacent && sidesMatch) || !hasGameStarted();
 	}
 
-	// Answer whether there has been a tile placed yet or not.
+	/**
+	 * Answer whether there has been a tile placed yet or not.
+	 * 
+	 * @return True if any board positions are not null, false otherwise.
+	 */
 	public boolean hasGameStarted() {
 
 		boolean gameStarted = false;
@@ -219,7 +224,7 @@ public class Board {
 	 * type it is placed on (field, road, city, or cloister) must not be claimed
 	 * by another player's meeple.
 	 * 
-	 * @param aPlayer
+	 * @param player
 	 *            The player which is placing the meeple.
 	 * @param xBoard
 	 *            The x position the meeple is to be placed on the board.
@@ -229,37 +234,36 @@ public class Board {
 	 *            The x position on the tile to place the meeple.
 	 * @param yTile
 	 *            The y position on the tile to place the meeple.
-	 * @return An integer, with non-zero representing an error. -1: Something
-	 *         went horribly wrong. 1: Player has no meeples to place. 2: Player
-	 *         tried to place meeple on tile they didn't just place. 3: Player
-	 *         didn't play on a new feature.
+	 * 
+	 * @return An integer, with any non-zero value indicating an error.
 	 */
-	public int placeMeeple(Player aPlayer, int xBoard, int yBoard, int xTile,
+	public int placeMeeple(Player player, int xBoard, int yBoard, int xTile,
 			int yTile) {
+
 		// First we need to check the correctness of the input x & y.
-		boolean xPlacedCorrectly = (xBoard == aPlayer.getLastTilePlacedXPos());
-		boolean yPlacedCorrectly = (yBoard == aPlayer.getLastTilePlacedYPos());
+		boolean xPlacedCorrectly = (xBoard == player.getLastTilePlacedXPos());
+		boolean yPlacedCorrectly = (yBoard == player.getLastTilePlacedYPos());
 
 		boolean correctTile = (xPlacedCorrectly && yPlacedCorrectly);
 
-		// Next we check that the tile type is not already taken.
+		// Next we check that the feature is not already taken.
 		boolean newFeature = isNewFeature(xBoard, yBoard, xTile, yTile);
 
 		// If so, we place the meeple.
 		if (correctTile && newFeature) {
 
-			ArrayList<Meeple> meeples = aPlayer.getMeeples();
-
-			// TODO: better selection of meeple to allow the correct one to
-			// be selected and draw?
 			BoardPosition meeplePosition;
+			ArrayList<Meeple> meeples = player.getMeeples();
 
 			for (int i = 0; i < meeples.size(); i++) {
-				if (meeplePlacement.get(meeples.get(i)) == null) {
+
+				Meeple meeple = meeples.get(i);
+
+				if (meeplePlacement.get(meeple) == null) {
 
 					meeplePosition = new BoardPosition(xBoard, yBoard, xTile,
 							yTile);
-					meeplePlacement.put(meeples.get(i), meeplePosition);
+					meeplePlacement.put(meeple, meeplePosition);
 
 					return 0;
 				}
@@ -269,7 +273,14 @@ public class Board {
 		return 1;
 	}
 
-	// return the number of meeples which are in gameplay
+	/**
+	 * Find the number of meeples which are in play for a player.
+	 * 
+	 * @param player
+	 *            The player to check how many meeples are in play for.
+	 * 
+	 * @return The number of meeples which are in play.
+	 */
 	public int getNumMeeplesPlaced(Player player) {
 
 		int numMeeplesPlaced = 0;
@@ -299,6 +310,7 @@ public class Board {
 	 *            The x tile position to start the search at.
 	 * @param yTile
 	 *            The y tile position to start the search at.
+	 * 
 	 * @return A boolean indicating whether the terrain is free to be claimed.
 	 */
 	private boolean isNewFeature(int xBoard, int yBoard, int xTile, int yTile) {
@@ -324,17 +336,18 @@ public class Board {
 	 *            A HashSet containing any searched tiles.
 	 * @param toSearch
 	 *            A HashSet containing any tiles to be searched.
+	 * 
 	 * @return A boolean indicating whether the terrain is free to be claimed.
 	 */
 	private boolean isNewFeatureRecursive(HashSet<BoardPosition> searched,
 			HashSet<BoardPosition> toSearch) {
 
 		// Take a position from the toSearch map.
-		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
 		BoardPosition boardPosition = null;
 
-		if (boardPositionIterator.hasNext()) {
-			boardPosition = boardPositionIterator.next();
+		if (toSearchIterator.hasNext()) {
+			boardPosition = toSearchIterator.next();
 		} else {
 			return false;
 		}
@@ -353,7 +366,7 @@ public class Board {
 
 		// Search the position & add it to searched map.
 		// If there is a meeple on the feature then it isn't a new feature.
-		if (getMeeple(currentTile, xTile, yTile) == null) {
+		if (getMeeple(xBoard, yBoard, xTile, yTile) == null) {
 			toSearch.remove(boardPosition);
 			searched.add(boardPosition);
 		} else {
@@ -370,23 +383,26 @@ public class Board {
 				yTile);
 
 		for (int i = 0; i < neighborTiles.length; i++) {
+
 			// Check the tile is not null.
 			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(
-						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
-						neighborTiles[i].xTile, neighborTiles[i].yTile);
-
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
 						neighborTiles[i].yTile);
 
-				// Check the tile is not already in searched or toSearch.
-				if (tileType == currentTileType && !toSearch.contains(toAdd)
-						&& !searched.contains(toAdd)) {
-					toSearch.add(toAdd);
+				if (tileType == currentTileType) {
+
+					BoardPosition toAdd = new BoardPosition(
+							neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+							neighborTiles[i].xTile, neighborTiles[i].yTile);
+
+					// Check the tile is not already in searched or toSearch.
+					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
+						toSearch.add(toAdd);
+					}
 				}
 			}
 		}
@@ -401,29 +417,37 @@ public class Board {
 	}
 
 	/**
-	 * Return the meeple on a tile given the tile & its position.
+	 * Return the meeple on a tile given the its position.
 	 * 
-	 * @param tile
-	 *            The tile to check for the meeple.
+	 * This function is currently also used in the ui, as a helper function
+	 * which allows the game to get a meeple so that it can be placed on the
+	 * canvas component.
+	 * 
+	 * @param xBoard
+	 *            The x position on the board to check for the meeple.
+	 * @param yBoard
+	 *            The y position on the board to check for the meeple.
 	 * @param xTile
-	 *            The x position to check for the meeple.
+	 *            The x position on the tile to check for the meeple.
 	 * @param yTile
-	 *            The y position to check for the meeple.
+	 *            The y position on the tile to check for the meeple.
+	 * 
 	 * @return The meeple if one has claimed the tile, null otherwise.
 	 */
-	private Meeple getMeeple(Tile tile, int xTile, int yTile) {
+	public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
 
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
 
 		while (iter.hasNext()) {
+
 			Meeple meeple = iter.next();
 			BoardPosition meeplePosition = meeplePlacement.get(meeple);
 
-			if (meeplePosition != null
-					&& meeplePosition.xBoard == getxTile(tile)
-					&& meeplePosition.yBoard == getyTile(tile)
+			if (meeplePosition != null && meeplePosition.xBoard == xBoard
+					&& meeplePosition.yBoard == yBoard
 					&& meeplePosition.xTile == xTile
 					&& meeplePosition.yTile == yTile) {
+
 				return meeple;
 			}
 		}
@@ -431,54 +455,26 @@ public class Board {
 		return null;
 	}
 
-	// Helper function allows the game to get a meeple so that it can be added
-	// to the ui canvas component.
-	public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
-
-		Tile theTile = gameBoard[yBoard][xBoard];
-		return getMeeple(theTile, xTile, yTile);
-	}
-
 	/**
-	 * Get the x position of a tile on the game board.
+	 * Get the x & y position of a tile on the game board.
 	 * 
 	 * @param tile
 	 *            The tile to search for on the game board.
-	 * @return The x position of the tile, or -1 if it was not found.
+	 * 
+	 * @return The position of the tile, or null if it was not found.
 	 */
-	private int getxTile(Tile tile) {
+	private Point getTilePosition(Tile tile) {
 
 		for (int i = 0; i < gameBoard.length; i++) {
 			for (int j = 0; j < gameBoard[i].length; j++) {
 				if (gameBoard[i][j] != null && gameBoard[i][j] == tile) {
-					return j;
+					return new Point(j, i);
 				}
 			}
 		}
 
 		// The tile is not placed on the board.
-		return -1;
-	}
-
-	/**
-	 * Get the y position of a tile on the game board.
-	 * 
-	 * @param tile
-	 *            The tile to search for on the game board.
-	 * @return The y position of the tile, of -1 if it was not found.
-	 */
-	private int getyTile(Tile tile) {
-
-		for (int i = 0; i < gameBoard.length; i++) {
-			for (int j = 0; j < gameBoard[i].length; j++) {
-				if (gameBoard[i][j] != null && gameBoard[i][j] == tile) {
-					return i;
-				}
-			}
-		}
-
-		// The tile is not placed on the board.
-		return -1;
+		return null;
 	}
 
 	/**
@@ -493,7 +489,8 @@ public class Board {
 	 * @param hasGameEnded
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
-	 * @return an Arraylist of Meeple which have been removed from the board.
+	 * 
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
 	public ArrayList<Meeple> scoreCloisters(Player[] players,
 			boolean hasGameEnded) {
@@ -516,8 +513,9 @@ public class Board {
 			// If it is attached to a cloister.
 			if (tileType == TileType.CLOISTER) {
 				// If all 8 neighbor tiles are not null.
-				int xIile = getxTile(tile);
-				int yTile = getyTile(tile);
+				Point tilePosition = getTilePosition(tile);
+				int xIile = tilePosition.x;
+				int yTile = tilePosition.y;
 
 				Tile nTile = gameBoard[xIile][yTile - 1];
 				Tile neTile = gameBoard[xIile + 1][yTile - 1];
@@ -577,6 +575,7 @@ public class Board {
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * 
 	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
 	public ArrayList<Meeple> scoreCities(Player[] players, boolean hasGameEnded) {
@@ -589,6 +588,7 @@ public class Board {
 	 * 
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * 
 	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
 	public ArrayList<Meeple> scoreRoads(Player[] players, boolean hasGameEnded) {
@@ -596,7 +596,7 @@ public class Board {
 	}
 
 	/**
-	 * Find out which player(s) have the majority of meeples on a given feature.
+	 * Find out which players have the majority of meeples on a given feature.
 	 * The player(s) with the most meeples on a feature receive the points for
 	 * the feature.
 	 * 
@@ -604,6 +604,7 @@ public class Board {
 	 *            An array of players which are playing the game.
 	 * @param meeplesOnFeature
 	 *            An ArrayList of meeples which are on the feature.
+	 * 
 	 * @return An ArrayList of players that will receive the points for the
 	 *         feature.
 	 */
@@ -684,6 +685,7 @@ public class Board {
 	 *            The tile type to score for.
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
+	 * 
 	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
 	private ArrayList<Meeple> genericScore(Player[] players,
@@ -725,8 +727,9 @@ public class Board {
 			if (tileType == scoreTileType) {
 
 				// Init search.
-				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
-						getyTile(tile), meeplePosition.xTile,
+				Point tilePosition = getTilePosition(tile);
+				BoardPosition boardPosition = new BoardPosition(tilePosition.x,
+						tilePosition.y, meeplePosition.xTile,
 						meeplePosition.yTile);
 
 				toSearch.add(boardPosition);
@@ -777,6 +780,7 @@ public class Board {
 				}
 			}
 		}
+
 		return removedMeeples;
 	}
 
@@ -803,21 +807,20 @@ public class Board {
 	 *            An ArrayList of Meeple to be filled by the meeples which are
 	 *            found on the feature.
 	 * @param featureProperties
-	 *            An array of objects containing an ArrayList of meeples which
-	 *            have claimed the feature, the number of tiles which comprise
-	 *            the feature, and a boolean indicating the presence of a null
-	 *            tile.
+	 *            An array of objects containing the number of tiles which
+	 *            comprise the feature, and a boolean indicating the presence of
+	 *            a null tile.
 	 */
 	private void genericScoreRecursive(HashSet<BoardPosition> searched,
 			HashSet<BoardPosition> toSearch,
 			ArrayList<Meeple> meeplesOnFeature, Object[] featureProperties) {
 
 		// Take a position from the toSearch map to search.
-		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
 		BoardPosition boardPosition = null;
 
-		if (boardPositionIterator.hasNext()) {
-			boardPosition = boardPositionIterator.next();
+		if (toSearchIterator.hasNext()) {
+			boardPosition = toSearchIterator.next();
 		} else {
 			return;
 		}
@@ -830,7 +833,7 @@ public class Board {
 		Tile currentTile = gameBoard[yBoard][xBoard];
 
 		// Search the position & add it to searched map.
-		Meeple meeple = getMeeple(currentTile, xTile, yTile);
+		Meeple meeple = getMeeple(xBoard, yBoard, xTile, yTile);
 
 		if (meeple != null) {
 			// Add the meeple on the tile to our list.
@@ -856,18 +859,20 @@ public class Board {
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(
-						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
-						neighborTiles[i].xTile, neighborTiles[i].yTile);
-
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
 						neighborTiles[i].yTile);
 
-				// Check the tile is not already in searched or toSearch.
-				if (tileType == currentTileType && !toSearch.contains(toAdd)
-						&& !searched.contains(toAdd)) {
-					toSearch.add(toAdd);
+				if (tileType == currentTileType) {
+
+					BoardPosition toAdd = new BoardPosition(
+							neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+							neighborTiles[i].xTile, neighborTiles[i].yTile);
+
+					// Check the tile is not already in searched or toSearch.
+					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
+						toSearch.add(toAdd);
+					}
 				}
 
 			} else {
@@ -875,7 +880,6 @@ public class Board {
 				// feature is not complete.
 				featureProperties[1] = true;
 			}
-
 		}
 
 		// If there are still tiles in toSearch then continue searching.
@@ -900,7 +904,6 @@ public class Board {
 			// Set the number of tiles searched.
 			featureProperties[0] = searchedTiles.size();
 		}
-
 	}
 
 	/**
@@ -910,6 +913,11 @@ public class Board {
 	 * aforementioned helper functions and does not do much else besides set up
 	 * the variables to be passed to the helpers, recalculate the player scores,
 	 * and meeple removal after scoring.
+	 * 
+	 * @param players
+	 *            An array of the players. Used for scoring calculations.
+	 * 
+	 * @return an ArrayList of Meeple which have been removed from the board.
 	 */
 	// Basic overview:
 	//
@@ -920,16 +928,13 @@ public class Board {
 	//
 	// To do this:
 	//
-	// 1. flooding alg. altered to keep track of completed cities.
-	// returns a list of 'cities'
-	// a 'city' is a set of strings of coordinates ie ['46,42,4,4', ..]
-	// which consists of xBoard, yBoard, xTile, yTile.
+	// 1. Use the flooding algorithm altered to keep track of completed cities.
+	// It will return a list of 'cities', each of which will be a set of
+	// BoardPosition objects which will hold the xBoard, yBoard, xTile, yTile.
 	//
-	// 2. flooding alg. (genericScoreRecursive) altered to detect if there is
-	// an adjacent castle to the field being explored. if so, then check
-	// if it is in a completed castle (which is not the same as another
-	// already counted castle) and add points.. & the castle for future
-	// checking.
+	// 2. Use another flooding algorithm to detect if there is an adjacent
+	// castle to the field being explored. If there is, then check if it is a
+	// completed castle and add points, & the castle for future checking.
 	//
 	public ArrayList<Meeple> scoreFields(Player[] players) {
 
@@ -954,6 +959,7 @@ public class Board {
 			searched = new HashSet<BoardPosition>();
 			toSearch = new HashSet<BoardPosition>();
 			meeplesOnFeature = new ArrayList<Meeple>();
+			// TODO remove this passing properties
 			Object[] featureProperties = { nCities };
 
 			// And now the real work begins.
@@ -966,8 +972,9 @@ public class Board {
 			if (tileType == TileType.FIELD) {
 
 				// Init search.
-				BoardPosition boardPosition = new BoardPosition(getxTile(tile),
-						getyTile(tile), meeplePosition.xTile,
+				Point tilePosition = getTilePosition(tile);
+				BoardPosition boardPosition = new BoardPosition(tilePosition.x,
+						tilePosition.y, meeplePosition.xTile,
 						meeplePosition.yTile);
 
 				toSearch.add(boardPosition);
@@ -1017,21 +1024,23 @@ public class Board {
 	 * This function returns a list of the completed cities which exist. This is
 	 * the first of two helper functions which are used by
 	 * {@link #scoreFields()}. The other is the {@link #fieldScoreRecursive()}.
+	 * 
 	 * It searches through the game board position by position testing if each
 	 * is a city tile. If the position is a city tile and is not already part of
 	 * a completed city, then a new city is recorded using the
 	 * {@link #getCompletedCitiesRecursive(HashSet, HashSet, ArrayList, ArrayList)}
-	 * function. As a result of the linear method of board search, incomplete
-	 * cities must be recorded during the method and are removed at the end,
-	 * before the final list is returned.
+	 * function. As a result of the method of board search, incomplete cities
+	 * must be recorded during the method and are removed at the end, before the
+	 * final list is returned.
 	 * 
 	 * @return A list of sets of board positions belonging to separate completed
 	 *         cities.
 	 */
 	private ArrayList<HashSet<BoardPosition>> getCompletedCities() {
 
-		// Each HashSet in the ArrayList denotes a city; a collection of strings
-		// which indicate the tile locations which comprise the city.
+		// Each HashSet in the ArrayList denotes a city; a collection of
+		// BoardPosition objects which indicate the tile locations which
+		// comprise the city.
 		ArrayList<HashSet<BoardPosition>> cities;
 		cities = new ArrayList<HashSet<BoardPosition>>();
 
@@ -1057,8 +1066,8 @@ public class Board {
 					continue;
 				}
 
-				for (int k = 0; k < tile.getLeft().length; k++) {
-					for (int l = 0; l < tile.getTop().length; l++) {
+				for (int k = 0; k < Tile.tileSize; k++) {
+					for (int l = 0; l < Tile.tileSize; l++) {
 						if (tile.getTileType(l, k) == TileType.CITY) {
 
 							// Reset flags for testing the next tile position.
@@ -1083,7 +1092,6 @@ public class Board {
 								getCompletedCitiesRecursive(searched, toSearch,
 										cities, incompleteCities);
 							}
-
 						}
 					}
 				}
@@ -1128,11 +1136,11 @@ public class Board {
 			ArrayList<Integer> incompleteCities) {
 
 		// Take a position from the toSearch map to search.
-		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
 		BoardPosition boardPosition = null;
 
-		if (boardPositionIterator.hasNext()) {
-			boardPosition = boardPositionIterator.next();
+		if (toSearchIterator.hasNext()) {
+			boardPosition = toSearchIterator.next();
 		} else {
 			return;
 		}
@@ -1162,18 +1170,20 @@ public class Board {
 
 			if (tile != null) {
 
-				BoardPosition toAdd = new BoardPosition(
-						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
-						neighborTiles[i].xTile, neighborTiles[i].yTile);
-
 				// Check that the tile has the same tile type.
 				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
 						neighborTiles[i].yTile);
 
-				// Check the tile is not already in searched or toSearch.
-				if (tileType == currentTileType && !toSearch.contains(toAdd)
-						&& !searched.contains(toAdd)) {
-					toSearch.add(toAdd);
+				if (tileType == currentTileType) {
+
+					BoardPosition toAdd = new BoardPosition(
+							neighborTiles[i].xBoard, neighborTiles[i].yBoard,
+							neighborTiles[i].xTile, neighborTiles[i].yTile);
+
+					// Check the tile is not already in searched or toSearch.
+					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
+						toSearch.add(toAdd);
+					}
 				}
 
 			} else {
@@ -1194,7 +1204,6 @@ public class Board {
 		} else {
 			cities.add(searched);
 		}
-
 	}
 
 	/**
@@ -1228,11 +1237,11 @@ public class Board {
 			Object[] featureProperties) {
 
 		// Take a position from the toSearch map to search.
-		Iterator<BoardPosition> boardPositionIterator = toSearch.iterator();
+		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
 		BoardPosition boardPosition = null;
 
-		if (boardPositionIterator.hasNext()) {
-			boardPosition = boardPositionIterator.next();
+		if (toSearchIterator.hasNext()) {
+			boardPosition = toSearchIterator.next();
 		} else {
 			return;
 		}
@@ -1242,10 +1251,8 @@ public class Board {
 		int xTile = boardPosition.xTile;
 		int yTile = boardPosition.yTile;
 
-		Tile currentTile = gameBoard[yBoard][xBoard];
-
 		// Search the position & add it to searched map.
-		Meeple meeple = getMeeple(currentTile, xTile, yTile);
+		Meeple meeple = getMeeple(xBoard, yBoard, xTile, yTile);
 
 		if (meeple != null) {
 			// Add the meeple on the tile to our list.
@@ -1262,6 +1269,7 @@ public class Board {
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map, and is a field.
 		for (int i = 0; i < neighborTiles.length; i++) {
+
 			// Check the tile is not null.
 			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
 
@@ -1278,11 +1286,14 @@ public class Board {
 
 				// Add the tile to be searched if it is also a field.
 				if (tileType == TileType.FIELD) {
+
 					// Check the tile is not already in searched or toSearch.
 					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
 						toSearch.add(toAdd);
 					}
+
 				} else if (tileType == TileType.CITY) {
+
 					// If the neighboring tile is a city tile, find the city
 					// that it belongs to and add that city to our adjacent
 					// cities (only if not already in the adjacent cities).
@@ -1301,7 +1312,6 @@ public class Board {
 							}
 						}
 					}
-
 				}
 			}
 		}
@@ -1314,7 +1324,6 @@ public class Board {
 			// Get the number of cities searched.
 			featureProperties[0] = adjacentCities.size();
 		}
-
 	}
 
 	/**
@@ -1328,11 +1337,12 @@ public class Board {
 	 * @param yBoard
 	 *            An y position on the board.
 	 * @param xTile
-	 *            An x tile position on the board.
+	 *            An x tile position on a board tile.
 	 * @param yTile
-	 *            An y tile position on the board.
-	 * @return An integer array containing the coordinates of all neighboring
-	 *         tile positions (not tiles).
+	 *            An y tile position on a board tile.
+	 * 
+	 * @return An array of BoardPosition objects containing the coordinates of
+	 *         all neighboring tile positions (not tiles).
 	 */
 	private BoardPosition[] getTileNeighbors(int xBoard, int yBoard, int xTile,
 			int yTile) {
@@ -1384,7 +1394,7 @@ public class Board {
 		return neighborTiles;
 	}
 
-	// Used for the ui; return the size of the array.
+	// Used for the ui; return the size of the board array.
 	public int getWidth() {
 		return gameBoard[0].length;
 	}

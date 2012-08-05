@@ -42,11 +42,11 @@ public class Player {
 	}
 
 	public int getLastTilePlacedXPos() {
-		return (int) this.lastTilePlacedPos.getX();
+		return lastTilePlacedPos.x;
 	}
 
 	public int getLastTilePlacedYPos() {
-		return (int) this.lastTilePlacedPos.getY();
+		return lastTilePlacedPos.y;
 	}
 
 	public Color getColor() {
@@ -62,7 +62,7 @@ public class Player {
 		this.currentTile = aTile;
 	}
 
-	public void setLastTilePlacedPos(int xPos, int yPos) {
+	public void setLastTilePlacedPosition(int xPos, int yPos) {
 		this.lastTilePlacedPos = new Point(xPos, yPos);
 	}
 

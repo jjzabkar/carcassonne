@@ -49,7 +49,7 @@ public class PlayerTest {
 		Tile testTile = new Tile(testTileArr, "CHR2");
 
 		player.setCurrentTile(testTile);
-		player.setLastTilePlacedPos(46, 35);
+		player.setLastTilePlacedPosition(46, 35);
 
 		// Oracle.
 		Tile oracleTile = testTile;
