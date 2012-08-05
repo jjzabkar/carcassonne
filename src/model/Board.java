@@ -940,10 +940,10 @@ public class Board {
 
 		// Initialize the variables which will hold information about the
 		// specific feature. These are reset for each feature.
-		int nCities;
 		HashSet<BoardPosition> searched;
 		HashSet<BoardPosition> toSearch;
 		ArrayList<Meeple> meeplesOnFeature;
+		ArrayList<HashSet<BoardPosition>> adjacentCities;
 
 		// And other variables.
 		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
@@ -955,12 +955,10 @@ public class Board {
 		while (iter.hasNext()) {
 
 			// Reset the variables which hold info about specific features.
-			nCities = 0;
 			searched = new HashSet<BoardPosition>();
 			toSearch = new HashSet<BoardPosition>();
 			meeplesOnFeature = new ArrayList<Meeple>();
-			// TODO remove this passing properties
-			Object[] featureProperties = { nCities };
+			adjacentCities = new ArrayList<HashSet<BoardPosition>>();
 
 			// And now the real work begins.
 			BoardPosition meeplePosition = meeplePlacement.get(iter.next());
@@ -981,13 +979,11 @@ public class Board {
 
 				// Call the search.
 				fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
-						completedCities,
-						new ArrayList<HashSet<BoardPosition>>(),
-						featureProperties);
+						completedCities, adjacentCities);
 
 				// Recover the tracker variables.
 				// Only primitives need to be recovered.
-				nCities = (Integer) featureProperties[0];
+				int nCities = adjacentCities.size();
 
 				// Score multiplier.
 				int multiplier = 3;
@@ -1233,8 +1229,7 @@ public class Board {
 			HashSet<BoardPosition> toSearch,
 			ArrayList<Meeple> meeplesOnFeature,
 			ArrayList<HashSet<BoardPosition>> allCities,
-			ArrayList<HashSet<BoardPosition>> adjacentCities,
-			Object[] featureProperties) {
+			ArrayList<HashSet<BoardPosition>> adjacentCities) {
 
 		// Take a position from the toSearch map to search.
 		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
@@ -1319,10 +1314,7 @@ public class Board {
 		// If there are still tiles in toSearch then continue searching.
 		if (!toSearch.isEmpty()) {
 			fieldScoreRecursive(searched, toSearch, meeplesOnFeature,
-					allCities, adjacentCities, featureProperties);
-		} else {
-			// Get the number of cities searched.
-			featureProperties[0] = adjacentCities.size();
+					allCities, adjacentCities);
 		}
 	}
 
