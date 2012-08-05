@@ -542,6 +542,10 @@ public class Board {
 				// is still being played and the cloister is complete.
 				if (hasGameEnded || (!hasGameEnded && numNeighborTiles == 8)) {
 
+					// TODO something is wrong;
+					// after all 8 neighbor tiles were placed the meeple wasn't
+					// removed. however end-game scoring removed it.
+
 					// Find out which player owns the meeple.
 					Player scorer = null;
 

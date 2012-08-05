@@ -498,6 +498,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 		// Main screen.
 		if ("showOptionsScreen".equals(e.getActionCommand())) {
+			// TODO allow screen size & options changes during game
 			this.setContentPane(this.optionsScreenContentPane);
 			this.validate();
 			this.repaint();
@@ -693,6 +694,9 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 							"Can't place tile there.");
 				}
 
+				// TODO: if player has 7 meeples, but places a tile where one
+				// is returned to him, he should be able to play that one
+
 				// Check if the player can place any meeples.
 				// If not, end their turn.
 				if (this.game.getNumMeeplesPlaced(currentPlayer) == 7) {
@@ -775,7 +779,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 			gameState = GameState.GAME_END;
 			scoreGame(true);
-			// TODO: some shiny end-game notification or what-have-you
+			// TODO: end-game
 		}
 
 		currentPlayerIdx = (currentPlayerIdx + 1) % game.getNumPlayers();
