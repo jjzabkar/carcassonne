@@ -1,27 +1,12 @@
 package model;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
-import ui.DrawableInterface;
-
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
  * @version 1.0
  * @since 2012-06-08
  */
-public class Tile implements DrawableInterface {
+public class Tile {
 	// A tile is stored as a 7x7 matrix, where the corner cells are null.
-	// (Would be 5x5 but some tiles need more space.)
-	// ie.
-	//
-	// x _ _ _ _ _ x
-	// _ _ _ _ _ _ _
-	// _ _ _ _ _ _ _
-	// _ _ _ _ _ _ _
-	// _ _ _ _ _ _ _
-	// _ _ _ _ _ _ _
-	// x _ _ _ _ _ x
 	//
 	// Stored:
 	// [ [ _ _ _ _ _ _ _ ],] X: 3, 2
@@ -32,7 +17,7 @@ public class Tile implements DrawableInterface {
 	// | [ _ _ _ _ _ _ _ ],|
 	// [ [ _ _ _ _ _ _ _ ] ]
 
-	// The top, right, bottom, and left three cells are set as either city,
+	// The top, right, bottom, and left five cells are set as either city,
 	// road, or field. The center is then set as a proper representation.
 	// ie.
 	//
@@ -49,13 +34,9 @@ public class Tile implements DrawableInterface {
 	// Representation in this way allows for easier scoring and tests for
 	// connectedness.
 
-	protected TileType[][] tile;
+	private TileType[][] tile;
 	private String identifier = "";
 	private int orientation = 0;
-
-	// UI variables.
-	private int x = 0;
-	private int y = 0;
 
 	/** Denotes the width of a tileType element when drawn by the ui. **/
 	public static final int tileTypeSize = 10;
@@ -68,51 +49,39 @@ public class Tile implements DrawableInterface {
 
 	private Tile() {
 		// Create the tile array.
-		this.tile = new TileType[tileSize][tileSize];
+		tile = new TileType[tileSize][tileSize];
 
 		// Set the corners.
-		this.tile[0][0] = null;
-		this.tile[0][tileSize - 1] = null;
-		this.tile[tileSize - 1][0] = null;
-		this.tile[tileSize - 1][tileSize - 1] = null;
+		tile[0][0] = null;
+		tile[0][tileSize - 1] = null;
+		tile[tileSize - 1][0] = null;
+		tile[tileSize - 1][tileSize - 1] = null;
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param theTile
+	 * @param tile
 	 * @param identifier
 	 */
-	public Tile(char[][] theTile, String identifier) {
+	public Tile(char[][] tile, String identifier) {
 		this();
 
-		if (theTile.length != tileSize) {
+		if (tile.length != tileSize) {
 			throw new IllegalArgumentException("Tile size must be 7x7.");
 		}
 
-		for (int i = 0; i < theTile.length; i++) {
-			if (theTile[i].length != tileSize) {
+		for (int i = 0; i < tile.length; i++) {
+			if (tile[i].length != tileSize) {
 				throw new IllegalArgumentException("Tile size must be 7x7.");
 			}
 
-			for (int j = 0; j < theTile[i].length; j++) {
-				this.tile[i][j] = charToTileType(theTile[i][j]);
+			for (int j = 0; j < tile[i].length; j++) {
+				this.tile[i][j] = charToTileType(tile[i][j]);
 			}
 		}
 
 		this.identifier = identifier;
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param theTile
-	 * @param identifier
-	 * @param orientation
-	 */
-	public Tile(char[][] theTile, String identifier, int orientation) {
-		this(theTile, identifier);
-		this.orientation = orientation;
 	}
 
 	/**
@@ -146,14 +115,14 @@ public class Tile implements DrawableInterface {
 	public void rotateClockwise() {
 		TileType[][] ret = new TileType[tileSize][tileSize];
 
-		for (int i = 0; i < this.tile.length; i++) {
-			for (int j = 0; j < this.tile[i].length; j++) {
-				ret[i][j] = this.tile[tileSize - j - 1][i];
+		for (int i = 0; i < tile.length; i++) {
+			for (int j = 0; j < tile[i].length; j++) {
+				ret[i][j] = tile[tileSize - j - 1][i];
 			}
 		}
 
-		this.tile = ret;
-		this.orientation = (this.orientation + 1) % 4;
+		tile = ret;
+		orientation = (orientation + 1) % 4;
 	}
 
 	/**
@@ -162,120 +131,59 @@ public class Tile implements DrawableInterface {
 	public void rotateCounterClockwise() {
 		TileType[][] ret = new TileType[tileSize][tileSize];
 
-		for (int i = 0; i < this.tile.length; i++) {
-			for (int j = 0; j < this.tile[i].length; j++) {
-				ret[i][j] = this.tile[j][tileSize - i - 1];
+		for (int i = 0; i < tile.length; i++) {
+			for (int j = 0; j < tile[i].length; j++) {
+				ret[i][j] = tile[j][tileSize - i - 1];
 			}
 		}
 
-		this.tile = ret;
+		tile = ret;
 		// Modulus of a negative number doesn't work, so add 4.
-		// This gives us (-1 + 4) = 3.
-		this.orientation = (this.orientation + 3) % 4;
+		orientation = (orientation + 3) % 4;
 	}
 
 	// Accessor Methods
 	public TileType[] getTop() {
-		return this.tile[0];
+		return tile[0];
 	}
 
 	public TileType[] getRight() {
 		TileType[] right = new TileType[tileSize];
 
 		for (int i = 0; i < tileSize; i++) {
-			right[i] = this.tile[i][tileSize - 1];
+			right[i] = tile[i][tileSize - 1];
 		}
 
 		return right;
 	}
 
 	public TileType[] getBottom() {
-		return this.tile[tileSize - 1];
+		return tile[tileSize - 1];
 	}
 
 	public TileType[] getLeft() {
 		TileType[] left = new TileType[tileSize];
 
 		for (int i = 0; i < tileSize; i++) {
-			left[i] = this.tile[i][0];
+			left[i] = tile[i][0];
 		}
 
 		return left;
 	}
 
 	public TileType getTileType(int x, int y) {
-		return this.tile[y][x];
+		return tile[y][x];
 	}
 
 	public String getIdentifier() {
-		return this.identifier;
+		return identifier;
 	}
 
 	public int getOrientation() {
-		return this.orientation;
+		return orientation;
 	}
 
-	public int getx() {
-		return x;
+	public TileType[][] getTile() {
+		return tile;
 	}
-
-	public int gety() {
-		return y;
-	}
-
-	public void setx(int x) {
-		this.x = x;
-	}
-
-	public void sety(int y) {
-		this.y = y;
-	}
-
-	private final Color lightbrown = new Color(185, 156, 107);
-	private final Color lightgreen = new Color(169, 208, 79);
-	private final Color red = new Color(126, 46, 31);
-	private final Color darkblue = new Color(24, 61, 97);
-
-	@Override
-	public void draw(Graphics g) {
-
-		Color tileTypeColor = Color.black;
-
-		for (int i = 0; i < this.tile.length; i++) {
-			for (int j = 0; j < this.tile[i].length; j++) {
-
-				if (tile[i][j] != null) {
-
-					switch (tile[i][j]) {
-
-					case CLOISTER:
-						tileTypeColor = red;
-						break;
-					case CITY:
-						tileTypeColor = lightbrown;
-						break;
-					case ROAD:
-						tileTypeColor = Color.gray;
-						break;
-					case RIVER:
-						tileTypeColor = darkblue;
-						break;
-					case FIELD:
-						tileTypeColor = lightgreen;
-						break;
-
-					}
-
-				} else {
-
-					tileTypeColor = Color.white;
-				}
-
-				g.setColor(tileTypeColor);
-				g.fillRect(x + (j * tileTypeSize), y + (i * tileTypeSize),
-						tileTypeSize, tileTypeSize);
-			}
-		}
-	}
-
 }

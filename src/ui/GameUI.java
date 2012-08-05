@@ -458,19 +458,24 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 			if ("rotateCW".equals(e.getActionCommand())
 					&& currentPlayer.getCurrentTile() != null) {
 
-				currentPlayer.getCurrentTile().rotateClockwise();
+				Tile tile = currentPlayer.getCurrentTile();
+				tile.rotateClockwise();
+				tileMapping.get(tile).rotateClockwise();
+
 				this.currentTilePanel.repaint();
 			}
 
 			if ("rotateCCW".equals(e.getActionCommand())
 					&& currentPlayer.getCurrentTile() != null) {
 
-				currentPlayer.getCurrentTile().rotateCounterClockwise();
+				Tile tile = currentPlayer.getCurrentTile();
+				tile.rotateCounterClockwise();
+				tileMapping.get(tile).rotateCounterClockwise();
+
 				this.currentTilePanel.repaint();
 			}
 
-			// Allow a player to end their turn if they don't want to place a
-			// meeple.
+			// Let a player end their turn if they don't want to place a meeple.
 			if ("endTurn".equals(e.getActionCommand())
 					&& this.gameState == GameState.PLACE_MEEPLE) {
 				this.gameState = GameState.DRAW_TILE;
@@ -484,11 +489,12 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 					&& gameState == GameState.DRAW_TILE) {
 
 				game.drawTile(currentPlayer);
-				Tile tileToPlace = currentPlayer.getCurrentTile();
+				Tile tile = currentPlayer.getCurrentTile();
+				TileUi tileUi = new TileUi(tile.getTile(), tile.getIdentifier());
 
-				tileToPlace.setx(0);
-				tileToPlace.sety(0);
-				this.currentTilePanel.add(tileToPlace);
+				tileMapping.put(tile, tileUi);
+
+				this.currentTilePanel.add(tileUi);
 				this.currentTilePanel.repaint();
 
 				gameState = GameState.PLACE_TILE;
@@ -671,7 +677,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				}
 
 				// Place the tile.
-				Tile tileToPlace = currentPlayer.getCurrentTile();
+				Tile tile = currentPlayer.getCurrentTile();
 				err = game.placeTile(currentPlayer, xBoard, yBoard);
 
 				// If no error draw the tile on the gameboard and remove it
@@ -679,10 +685,11 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 				if (err == 0) {
 					// UI code.
 					int tileSize = Tile.tileTypeSize * Tile.tileSize;
-					tileToPlace.setx(xBoard * tileSize);
-					tileToPlace.sety(yBoard * tileSize);
+					TileUi tileUi = tileMapping.get(tile);
+					tileUi.setx(xBoard * tileSize);
+					tileUi.sety(yBoard * tileSize);
 
-					this.gameBoardWindow.add(tileToPlace);
+					this.gameBoardWindow.add(tileUi);
 					this.currentTilePanel.clear();
 
 					this.gameBoardWindow.repaint();
@@ -756,6 +763,7 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 	}
 
 	private HashMap<Meeple, MeepleUi> meepleMapping = new HashMap<Meeple, MeepleUi>();
+	private HashMap<Tile, TileUi> tileMapping = new HashMap<Tile, TileUi>();
 
 	private void scoreGame(boolean hasGameEnded) {
 

@@ -18,14 +18,13 @@ public class MeepleUi implements DrawableInterface {
 
 	public MeepleUi(Color color, int x, int y) {
 
-		// TODO: differentiate meeple and tile color?
 		this.color = color;
 		this.x = x;
 		this.y = y;
 	}
 
 	public Color getColor() {
-		return this.color;
+		return color;
 	}
 
 	public int getx() {
