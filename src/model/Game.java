@@ -2,6 +2,7 @@ package model;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -146,6 +147,10 @@ public class Game {
 
 	public int getBoardHeight() {
 		return gameBoard.getHeight();
+	}
+
+	public HashMap<Meeple, BoardPosition> getMeeplePlacement() {
+		return gameBoard.getMeeplePlacement();
 	}
 
 }

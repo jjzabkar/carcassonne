@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -719,12 +720,18 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 						yTile);
 
 				if (err == 0) {
-					Meeple m = game.getMeeple(xBoard, yBoard, xTile, yTile);
+
+					Meeple meeple = game
+							.getMeeple(xBoard, yBoard, xTile, yTile);
 
 					// UI code.
 					int tileSize = Tile.tileTypeSize * Tile.tileSize;
-					m.setx((xBoard * tileSize) + (xTile * Tile.tileTypeSize));
-					m.sety((yBoard * tileSize) + (yTile * Tile.tileTypeSize));
+					int mx = (xBoard * tileSize) + (xTile * Tile.tileTypeSize);
+					int my = (yBoard * tileSize) + (yTile * Tile.tileTypeSize);
+
+					MeepleUi m = new MeepleUi(currentPlayer.getColor(), mx, my);
+
+					meepleMapping.put(meeple, m);
 
 					this.gameBoardWindow.add(m);
 					this.gameBoardWindow.repaint();
@@ -748,12 +755,17 @@ public class GameUI extends JFrame implements ActionListener, MouseListener {
 
 	}
 
+	private HashMap<Meeple, MeepleUi> meepleMapping = new HashMap<Meeple, MeepleUi>();
+
 	private void scoreGame(boolean hasGameEnded) {
 
 		ArrayList<Meeple> removedMeeples = game.score(hasGameEnded);
 
 		for (int i = 0; i < removedMeeples.size(); i++) {
-			gameBoardWindow.remove(removedMeeples.get(i));
+			if (meepleMapping.get(removedMeeples.get(i)) != null) {
+				gameBoardWindow
+						.remove(meepleMapping.get(removedMeeples.get(i)));
+			}
 		}
 
 		this.gameBoardWindow.repaint();

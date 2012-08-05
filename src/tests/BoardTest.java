@@ -244,7 +244,6 @@ public class BoardTest {
 		Meeple m = board.getMeeple(64, 42, 0, 4);
 
 		assertNotNull(m);
-		assertEquals(Color.BLACK, m.getColor());
 	}
 
 	@Test

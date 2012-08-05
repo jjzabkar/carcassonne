@@ -24,7 +24,7 @@ public class Player {
 		this.color = aColor;
 
 		for (int i = 0; i < NUM_MEEPLES; i++) {
-			this.meeples.add(new Meeple(this.color));
+			this.meeples.add(new Meeple());
 		}
 	}
 
