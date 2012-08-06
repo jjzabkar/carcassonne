@@ -152,5 +152,4 @@ public class Game {
 	public HashMap<Meeple, BoardPosition> getMeeplePlacement() {
 		return gameBoard.getMeeplePlacement();
 	}
-
 }
