@@ -1,6 +1,5 @@
 package model;
 
-import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -11,8 +10,6 @@ import java.util.ArrayList;
  */
 public class Player {
 
-	private Color color;
-
 	public final static int NUM_MEEPLES = 7;
 	private ArrayList<Meeple> meeples = new ArrayList<Meeple>();
 	private int score = 0;
@@ -20,9 +17,7 @@ public class Player {
 	private Tile currentTile = null;
 	private Point lastTilePlacedPos = new Point(-1, -1);
 
-	public Player(Color aColor) {
-		this.color = aColor;
-
+	public Player() {
 		for (int i = 0; i < NUM_MEEPLES; i++) {
 			this.meeples.add(new Meeple());
 		}
@@ -47,10 +42,6 @@ public class Player {
 
 	public int getLastTilePlacedYPos() {
 		return lastTilePlacedPos.y;
-	}
-
-	public Color getColor() {
-		return this.color;
 	}
 
 	// Mutator Methods

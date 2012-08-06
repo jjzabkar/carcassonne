@@ -1,9 +1,6 @@
 package tests;
 
 import static org.junit.Assert.assertEquals;
-
-import java.awt.Color;
-
 import model.Player;
 import model.Tile;
 
@@ -15,16 +12,14 @@ public class PlayerTest {
 	public void playerInitTest() {
 
 		// Test object.
-		Player player = new Player(Color.BLACK);
+		Player player = new Player();
 
 		// Oracle.
-		Color oracleColor = Color.BLACK;
 		int oracleScore = 0;
 		Tile oracleTile = null;
 		int oracleLastPlacedPos = -1;
 
 		// Tests.
-		assertEquals(oracleColor, player.getColor());
 		assertEquals(oracleScore, player.getScore());
 		assertEquals(oracleTile, player.getCurrentTile());
 		assertEquals(oracleLastPlacedPos, player.getLastTilePlacedXPos());
@@ -35,7 +30,7 @@ public class PlayerTest {
 	public void playerTileTest() {
 
 		// Test object.
-		Player player = new Player(Color.BLACK);
+		Player player = new Player();
 
 		char[][] testTileArr = new char[][] {
 				{ 'x', 'C', 'C', 'C', 'C', 'C', 'x' },

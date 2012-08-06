@@ -2,9 +2,6 @@ package tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import java.awt.Color;
-
 import model.Board;
 import model.Meeple;
 import model.Player;
@@ -63,8 +60,8 @@ public class BoardTest {
 				{ 'x', 'C', 'C', 'C', 'C', 'C', 'x' } };
 
 		board = new Board();
-		player = new Player(Color.BLACK);
-		player2 = new Player(Color.BLUE);
+		player = new Player();
+		player2 = new Player();
 	}
 
 	@Test
@@ -191,7 +188,7 @@ public class BoardTest {
 		err = board.placeMeeple(player, 64, 42, 0, 4);
 		assertEquals(0, err);
 
-		Player secondPlayer = new Player(Color.BLUE);
+		Player secondPlayer = new Player();
 		Tile secondTile = new Tile(chr2, "CHR2");
 		secondTile.rotateClockwise();
 
@@ -214,7 +211,7 @@ public class BoardTest {
 		err = board.placeTile(player, 64, 42);
 		assertEquals(0, err);
 
-		Player secondPlayer = new Player(Color.BLUE);
+		Player secondPlayer = new Player();
 		Tile secondTile = new Tile(chr2, "CHR2");
 		secondTile.rotateClockwise();
 

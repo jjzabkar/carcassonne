@@ -14,7 +14,7 @@ import java.net.Socket;
  * @version 1.0
  * @since 2012-08-05
  */
-public class GameServer {
+public class SocketServer {
 
 	private final int portNumber;
 
@@ -30,7 +30,7 @@ public class GameServer {
 	 * @param portNumber
 	 *            The port number to run the server on.
 	 */
-	public GameServer(int portNumber) {
+	public SocketServer(int portNumber) {
 		this.portNumber = portNumber;
 	}
 
@@ -92,7 +92,7 @@ public class GameServer {
 	 * 
 	 * @return a non-zero integer if there is an error, otherwise return zero.
 	 */
-	public int run(GameProtocol protocol) {
+	public int run(SocketProtocol protocol) {
 
 		String inputLine;
 		String outputLine;
@@ -108,7 +108,7 @@ public class GameServer {
 				outputLine = protocol.processInput(inputLine);
 				clientWriter.println(outputLine);
 
-				if (outputLine.equals("Bye.")) {
+				if (outputLine.equals(SocketProtocol.EXIT)) {
 					break;
 				}
 			}

@@ -1,9 +1,6 @@
 package tests;
 
 import static org.junit.Assert.assertEquals;
-
-import java.awt.Color;
-
 import model.DrawPile;
 import model.Player;
 import model.Tile;
@@ -19,7 +16,7 @@ public class DrawPileTest {
 		DrawPile drawPile = new DrawPile();
 
 		// Tests.
-		Player player = new Player(Color.BLACK);
+		Player player = new Player();
 		drawPile.draw(player);
 		int numTiles = 1;
 

@@ -176,8 +176,4 @@ public class Tile {
 	public int getOrientation() {
 		return orientation;
 	}
-
-	public TileType[][] getTile() {
-		return tile;
-	}
 }
