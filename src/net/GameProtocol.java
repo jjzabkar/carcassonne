@@ -28,29 +28,48 @@ public class GameProtocol implements SocketProtocol {
 	// INIT;currentPlayer;<int>;gameBoardWidth;<int>;gameBoardHeight;<int>
 	//
 	// DRAWTILE;currentPlayer;<int>
-	// DRAWTILE;identifier;<string>;orientation;<0/1/2/3>
+	// DRAWTILE;identifier;<string>;orientation;<int:[0-3]>
+	//
+	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>
+	// ROTATETILE;error;<int:(0|1)>
 	//
 	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>
-	// PLACETILE;error;<0/1>
+	// PLACETILE;error;<int:(0|1)>
 	//
 	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
-	// PLACEMEEPLE;error;<0/1>
+	// PLACEMEEPLE;error;<int:(0|1)>
 	//
-	// SCORE;over;<0/1>
-	// SCORE;over;<0/1>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+	// SCORE;over;<int:(0|1)>
+	// SCORE;over;<int:(0|1)>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 	//
 	//
 	// INFO;player;<int>;
 	// INFO;player;<int>;currentPlayer;<int>;score;<int>;meeplesPlaced;<int>
 	//
 	// INFO;game;
-	// INFO;game;currentPlayer;<int>;drawPileEmpty;<0/1>
+	// INFO;game;currentPlayer;<int>;drawPileEmpty;<int:(0|1)>
 	//
+
+	// State layout:
+	//
+	// START_GAME
+	// DRAW_TILE
+	// PLACE_TILE
+	// SCORE_PLAYERS --> END_TURN
+	// PLACE_MEEPLE
+	// SCORE_PLAYERS --> DRAW_TILE
+	// END_GAME
+	//
+	// Each state advances to the state below it, or to the state pointed to on
+	// the right. End turn state is just a placeholder state which changes the
+	// game state to a proper state based on a few properties of our game. This
+	// allows us to not over-complicate the message passing protocol.
 
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 
 	private Game game;
-	private GameState gameState = GameState.GAME_START;
+	private GameState gameState = GameState.START_GAME;
+	private GameState lastMove;
 	private int numPlayers;
 	private int currentPlayer = 0;
 
@@ -102,52 +121,10 @@ public class GameProtocol implements SocketProtocol {
 			}
 		}
 
-		// The client wants the server to recalculate scoring information.
-		// Note that to get the updated scoring info the client must send us the
-		// INFO message to get the score of each player.
-		if (parsedMessage.get(0).equals("SCORE")) {
-
-			if (parsedMessage.get(1).equals("over")) {
-
-				int isGameOver = Integer.parseInt(parsedMessage.get(2));
-				boolean gameOver = (isGameOver == 0) ? false : true;
-
-				// If there are still tiles or the game isn't in an end state
-				// then the game isn't over.. even if the client says it is.
-				if ((!game.isDrawPileEmpty() || gameState != GameState.GAME_END)
-						&& gameOver) {
-					return SocketProtocol.NAK;
-				}
-
-				ArrayList<Meeple> removedMeeples = game.score(gameOver);
-
-				HashMap<Meeple, BoardPosition> meeplePlacement;
-				meeplePlacement = game.getMeeplePlacement();
-
-				output = "SCORE;over;" + isGameOver;
-
-				for (int i = 0; i < removedMeeples.size(); i++) {
-
-					BoardPosition meeplePosition;
-					meeplePosition = meeplePlacement.get(removedMeeples.get(i));
-
-					if (meeplePosition != null) {
-						output = output + ";meeple;xBoard;"
-								+ meeplePosition.xBoard + ";yBoard;"
-								+ meeplePosition.yBoard + ";xTile;"
-								+ meeplePosition.xTile + ";yTile;"
-								+ meeplePosition.yTile;
-					}
-				}
-
-				return output;
-			}
-		}
-
 		// If the game is just starting then we need to first ack that we got
 		// the number of players sent. Then send over initialization info. The
 		// gameboard width, height (# of tiles), the player whose turn it is,
-		if (GameState.GAME_START == gameState) {
+		if (GameState.START_GAME == gameState) {
 
 			if (!parsedMessage.get(0).equals("INIT")) {
 				return SocketProtocol.NAK;
@@ -201,7 +178,8 @@ public class GameProtocol implements SocketProtocol {
 
 		if (GameState.PLACE_TILE == gameState) {
 
-			if (!parsedMessage.get(0).equals("PLACETILE")) {
+			if (!parsedMessage.get(0).equals("PLACETILE")
+					&& !parsedMessage.get(0).equals("ROTATETILE")) {
 				return SocketProtocol.NAK;
 			}
 
@@ -213,26 +191,52 @@ public class GameProtocol implements SocketProtocol {
 					return SocketProtocol.NAK;
 				}
 
-				// If not we continue on with the game; place the tile and
-				// advance to the next game state.
-				int xBoard = 0;
-				int yBoard = 0;
+				// Check what the client wants us to do.
+				if (parsedMessage.get(0).equals("PLACETILE")) {
 
-				if (parsedMessage.get(3).equals("xBoard")) {
-					xBoard = Integer.parseInt(parsedMessage.get(4));
+					// If not we continue on with the game; place the tile and
+					// advance to the next game state.
+					int xBoard = 0;
+					int yBoard = 0;
+
+					if (parsedMessage.get(3).equals("xBoard")) {
+						xBoard = Integer.parseInt(parsedMessage.get(4));
+					}
+					if (parsedMessage.get(5).equals("yBoard")) {
+						yBoard = Integer.parseInt(parsedMessage.get(6));
+					}
+
+					Player player = game.getPlayers()[currentPlayer];
+					int err = game.placeTile(player, xBoard, yBoard);
+
+					output = "PLACETILE;error;" + err;
+
+					if (err == 0) {
+						lastMove = gameState;
+						gameState = GameState.SCORE_PLAYERS;
+					}
 				}
-				if (parsedMessage.get(5).equals("yBoard")) {
-					yBoard = Integer.parseInt(parsedMessage.get(6));
-				}
 
-				Player player = game.getPlayers()[currentPlayer];
-				int err = game.placeTile(player, xBoard, yBoard);
+				if (parsedMessage.get(0).equals("ROTATETILE")) {
 
-				output = "PLACETILE;error;" + err;
+					int err = 0;
+					String direction = "clockwise";
 
-				if (err == 0) {
-					// TODO player has option of placing meeple
-					gameState = GameState.PLACE_MEEPLE;
+					if (parsedMessage.get(3).equals("direction")) {
+						direction = parsedMessage.get(4);
+					}
+
+					Player player = game.getPlayers()[currentPlayer];
+
+					if (direction.equals("clockwise")) {
+						player.getCurrentTile().rotateClockwise();
+					} else if (direction.equals("counterClockwise")) {
+						player.getCurrentTile().rotateCounterClockwise();
+					} else {
+						err = 1;
+					}
+
+					output = "ROTATETILE;error;" + err;
 				}
 
 				return output;
@@ -279,21 +283,96 @@ public class GameProtocol implements SocketProtocol {
 
 				output = "PLACEMEEPLE;error;" + err;
 
-				// Check when ending a turn if there are more tiles to be drawn
-				// from the pile. If not, then the game is over.
-				// TODO: player has option of placing meeple.
 				if (err == 0) {
-					if (game.isDrawPileEmpty()) {
-						gameState = GameState.GAME_END;
-						output = SocketProtocol.EXIT;
-					} else {
-						currentPlayer = (currentPlayer + 1) & numPlayers;
-						gameState = GameState.DRAW_TILE;
-					}
+					lastMove = gameState;
+					gameState = GameState.SCORE_PLAYERS;
 				}
 
 				return output;
 			}
+		}
+
+		// The client wants the server to recalculate scoring information.
+		// Note that to get the updated scoring info the client must send us the
+		// INFO message to get the score of each player.
+		if (GameState.SCORE_PLAYERS == gameState) {
+
+			if (parsedMessage.get(0).equals("SCORE")) {
+
+				if (parsedMessage.get(1).equals("over")) {
+
+					int isGameOver = Integer.parseInt(parsedMessage.get(2));
+					boolean gameOver = (isGameOver == 0) ? false : true;
+
+					// If there are still tiles or the game isn't in an end
+					// state then the game isn't over.. even if the client says
+					// it is.
+					if ((!game.isDrawPileEmpty() || gameState != GameState.END_GAME)
+							&& gameOver) {
+						return SocketProtocol.NAK;
+					}
+
+					ArrayList<Meeple> removedMeeples = game.score(gameOver);
+
+					HashMap<Meeple, BoardPosition> meeplePlacement;
+					meeplePlacement = game.getMeeplePlacement();
+
+					output = "SCORE;over;" + isGameOver;
+
+					for (int i = 0; i < removedMeeples.size(); i++) {
+
+						BoardPosition meeplePosition;
+						meeplePosition = meeplePlacement.get(removedMeeples
+								.get(i));
+
+						if (meeplePosition != null) {
+							output = output + ";meeple;xBoard;"
+									+ meeplePosition.xBoard + ";yBoard;"
+									+ meeplePosition.yBoard + ";xTile;"
+									+ meeplePosition.xTile + ";yTile;"
+									+ meeplePosition.yTile;
+						}
+					}
+
+					// From here we can either advance to the end turn state, or
+					// the place meeple state.
+					// Assume an end turn state, but allow to change to meeple
+					// placement if need be.
+					gameState = GameState.END_TURN;
+
+					return output;
+				}
+			}
+		}
+
+		// End turn game state. We arrive here after scoring takes place. So,
+		// we've either just scored tile placement, or meeple placement. If
+		// we've just scored tile placement, then allow the player to place a
+		// meeple if they wish. Otherwise the game is either over, or the turn
+		// is over (gameplay resumes with the next player in the draw tile
+		// state).
+		if (GameState.END_TURN == gameState) {
+
+			if (parsedMessage.get(0).equals("PLACEMEEPLE")
+					&& lastMove != GameState.PLACE_MEEPLE) {
+
+				// If the player actually wants to place a meeple, let them.
+				gameState = GameState.PLACE_MEEPLE;
+			}
+
+			if (game.isDrawPileEmpty()) {
+				gameState = GameState.END_GAME;
+			} else {
+				currentPlayer = (currentPlayer + 1) & numPlayers;
+				gameState = GameState.DRAW_TILE;
+			}
+
+			return processInput(input);
+		}
+
+		// End game state.
+		if (GameState.END_GAME == gameState) {
+			return SocketProtocol.EXIT;
 		}
 
 		return SocketProtocol.NAK;
