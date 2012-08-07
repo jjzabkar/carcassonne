@@ -98,10 +98,6 @@ public class SocketServer {
 		String outputLine;
 
 		try {
-			// Send the initial message to the client.
-			outputLine = protocol.processInput(null);
-			clientWriter.println(outputLine);
-
 			// Get the response, process it, and send back the next message.
 			while ((inputLine = clientReader.readLine()) != null) {
 

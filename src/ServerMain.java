@@ -1,7 +1,7 @@
 import net.GameProtocol;
 import net.SocketServer;
 
-public class Main {
+public class ServerMain {
 
 	public static void main(String[] args) {
 
@@ -10,9 +10,13 @@ public class Main {
 
 		// Start up the server, and run it!
 		SocketServer socketServer = new SocketServer(4444);
-		socketServer.bind();
-		socketServer.listen();
-		socketServer.setUpStreams();
-		socketServer.run(gameProtocol);
+
+		int err = socketServer.bind();
+
+		err = socketServer.listen();
+
+		err = socketServer.setUpStreams();
+
+		err = socketServer.run(gameProtocol);
 	}
 }

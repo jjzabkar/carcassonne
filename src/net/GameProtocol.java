@@ -40,9 +40,9 @@ public class GameProtocol implements SocketProtocol {
 		parsedMessage.addAll(Arrays.asList(input.split(";")));
 
 		// Request for info; could be for game or player info.
-		if (parsedMessage.get(0) == "INFO") {
+		if (parsedMessage.get(0).equals("INFO")) {
 
-			if (parsedMessage.get(1) == "game") {
+			if (parsedMessage.get(1).equals("game")) {
 
 				// Send back game information.
 				int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
@@ -51,7 +51,7 @@ public class GameProtocol implements SocketProtocol {
 				return output;
 			}
 
-			if (parsedMessage.get(1) == "player") {
+			if (parsedMessage.get(1).equals("player")) {
 
 				// Get which player the client is inquiring about.
 				int playerInt = Integer.parseInt(parsedMessage.get(2));
@@ -74,9 +74,9 @@ public class GameProtocol implements SocketProtocol {
 		// The client wants the server to recalculate scoring information.
 		// Note that to get the updated scoring info the client must send us the
 		// INFO message to get the score of each player.
-		if (parsedMessage.get(0) == "SCORE") {
+		if (parsedMessage.get(0).equals("SCORE")) {
 
-			if (parsedMessage.get(1) == "over") {
+			if (parsedMessage.get(1).equals("over")) {
 
 				int isGameOver = Integer.parseInt(parsedMessage.get(2));
 				boolean gameOver = (isGameOver == 0) ? false : true;
@@ -118,11 +118,11 @@ public class GameProtocol implements SocketProtocol {
 		// gameboard width, height (# of tiles), the player whose turn it is,
 		if (GameState.GAME_START == gameState) {
 
-			if (parsedMessage.get(0) != "INIT") {
+			if (!parsedMessage.get(0).equals("INIT")) {
 				return SocketProtocol.NAK;
 			}
 
-			if (parsedMessage.get(1) == "numPlayers") {
+			if (parsedMessage.get(1).equals("numPlayers")) {
 				numPlayers = Integer.parseInt(parsedMessage.get(2));
 			}
 
@@ -140,11 +140,11 @@ public class GameProtocol implements SocketProtocol {
 
 		if (GameState.DRAW_TILE == gameState) {
 
-			if (parsedMessage.get(0) != "DRAWTILE") {
+			if (!parsedMessage.get(0).equals("DRAWTILE")) {
 				return SocketProtocol.NAK;
 			}
 
-			if (parsedMessage.get(1) == "currentPlayer") {
+			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// The client is telling us that a different player is taking
 				// a tile than we told them. This is incorrect.
@@ -170,11 +170,11 @@ public class GameProtocol implements SocketProtocol {
 
 		if (GameState.PLACE_TILE == gameState) {
 
-			if (parsedMessage.get(0) != "PLACETILE") {
+			if (!parsedMessage.get(0).equals("PLACETILE")) {
 				return SocketProtocol.NAK;
 			}
 
-			if (parsedMessage.get(1) == "currentPlayer") {
+			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the player the client is telling us that's
 				// playing is actually the player whose turn it is.
@@ -187,10 +187,10 @@ public class GameProtocol implements SocketProtocol {
 				int xBoard = 0;
 				int yBoard = 0;
 
-				if (parsedMessage.get(3) == "xBoard") {
+				if (parsedMessage.get(3).equals("xBoard")) {
 					xBoard = Integer.parseInt(parsedMessage.get(4));
 				}
-				if (parsedMessage.get(5) == "yBoard") {
+				if (parsedMessage.get(5).equals("yBoard")) {
 					yBoard = Integer.parseInt(parsedMessage.get(6));
 				}
 
@@ -210,11 +210,11 @@ public class GameProtocol implements SocketProtocol {
 
 		if (GameState.PLACE_MEEPLE == gameState) {
 
-			if (parsedMessage.get(0) != "PLACEMEEPLE") {
+			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
 				return SocketProtocol.NAK;
 			}
 
-			if (parsedMessage.get(1) == "currentPlayer") {
+			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the client is synchronized wrt/ player turn.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
@@ -228,16 +228,16 @@ public class GameProtocol implements SocketProtocol {
 				int xTile = 0;
 				int yTile = 0;
 
-				if (parsedMessage.get(3) == "xBoard") {
+				if (parsedMessage.get(3).equals("xBoard")) {
 					xBoard = Integer.parseInt(parsedMessage.get(4));
 				}
-				if (parsedMessage.get(5) == "yBoard") {
+				if (parsedMessage.get(5).equals("yBoard")) {
 					yBoard = Integer.parseInt(parsedMessage.get(6));
 				}
-				if (parsedMessage.get(7) == "xTile") {
+				if (parsedMessage.get(7).equals("xTile")) {
 					xTile = Integer.parseInt(parsedMessage.get(8));
 				}
-				if (parsedMessage.get(9) == "yTile") {
+				if (parsedMessage.get(9).equals("yTile")) {
 					yTile = Integer.parseInt(parsedMessage.get(10));
 				}
 
