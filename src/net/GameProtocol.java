@@ -254,6 +254,7 @@ public class GameProtocol implements SocketProtocol {
 				if (err == 0) {
 					if (game.isDrawPileEmpty()) {
 						gameState = GameState.GAME_END;
+						output = SocketProtocol.EXIT;
 					} else {
 						currentPlayer = (currentPlayer + 1) & numPlayers;
 						gameState = GameState.DRAW_TILE;
