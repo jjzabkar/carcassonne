@@ -25,7 +25,7 @@ public class GameProtocol implements SocketProtocol {
 	//
 	//
 	// INIT;numPlayers;<int>
-	// INIT;gameBoardWidth;<int>;gameBoardHeight;<int>;currentPlayer;<int>
+	// INIT;currentPlayer;<int>;gameBoardWidth;<int>;gameBoardHeight;<int>
 	//
 	// DRAWTILE;currentPlayer;<int>
 	// DRAWTILE;identifier;<string>;orientation;<0/1/2/3>
@@ -41,10 +41,10 @@ public class GameProtocol implements SocketProtocol {
 	//
 	//
 	// INFO;player;<int>;
-	// INFO;player;<int>;score;<int>;meeplesPlaced;<int>;currentPlayer;<int>
+	// INFO;player;<int>;currentPlayer;<int>;score;<int>;meeplesPlaced;<int>
 	//
 	// INFO;game;
-	// INFO;game;<0/1>
+	// INFO;game;currentPlayer;<int>;drawPileEmpty;<0/1>
 	//
 
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
@@ -75,7 +75,9 @@ public class GameProtocol implements SocketProtocol {
 
 				// Send back game information.
 				int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
-				output = "INFO;game;" + isDrawPileEmpty;
+
+				output = "INFO;game" + ";currentPlayer;" + currentPlayer
+						+ ";drawPileEmpty;" + isDrawPileEmpty;
 
 				return output;
 			}
@@ -92,9 +94,9 @@ public class GameProtocol implements SocketProtocol {
 				Player playerPlayer = game.getPlayers()[playerInt];
 				int numMeeplesPlaced = game.getNumMeeplesPlaced(playerPlayer);
 
-				output = "INFO;player;" + playerInt + ";score;" + playerScore
-						+ ";meeplesPlaced;" + numMeeplesPlaced
-						+ ";currentPlayer;" + isCurrentPlayer;
+				output = "INFO" + ";player;" + playerInt + ";currentPlayer;"
+						+ isCurrentPlayer + ";score;" + playerScore
+						+ ";meeplesPlaced;" + numMeeplesPlaced;
 
 				return output;
 			}
@@ -157,9 +159,9 @@ public class GameProtocol implements SocketProtocol {
 
 			game = new Game(numPlayers);
 
-			output = "INIT;gameBoardWidth;" + game.getBoardWidth()
-					+ ";gameBoardHeight;" + game.getBoardHeight()
-					+ ";currentPlayer;" + currentPlayer;
+			output = "INIT" + ";currentPlayer;" + currentPlayer
+					+ ";gameBoardWidth;" + game.getBoardWidth()
+					+ ";gameBoardHeight;" + game.getBoardHeight();
 
 			gameState = GameState.DRAW_TILE;
 
