@@ -18,6 +18,35 @@ import model.Tile;
  */
 public class GameProtocol implements SocketProtocol {
 
+	// Message format is as follows (client sends followed by server replies):
+	//
+	// Note: Any messages sent at the wrong time or other errors will cause the
+	// server to return SocketProtocol.NAK ("NAK").
+	//
+	//
+	// INIT;numPlayers;<int>
+	// INIT;gameBoardWidth;<int>;gameBoardHeight;<int>;currentPlayer;<int>
+	//
+	// DRAWTILE;currentPlayer;<int>
+	// DRAWTILE;identifier;<string>;orientation;<0/1/2/3>
+	//
+	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>
+	// PLACETILE;error;<0/1>
+	//
+	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
+	// PLACEMEEPLE;error;<0/1>
+	//
+	// SCORE;over;<0/1>
+	// SCORE;over;<0/1>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+	//
+	//
+	// INFO;player;<int>;
+	// INFO;player;<int>;score;<int>;meeplesPlaced;<int>;currentPlayer;<int>
+	//
+	// INFO;game;
+	// INFO;game;<0/1>
+	//
+
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 
 	private Game game;
@@ -159,7 +188,7 @@ public class GameProtocol implements SocketProtocol {
 
 				Tile tile = player.getCurrentTile();
 
-				output = "DRAWTILE;id;" + tile.getIdentifier()
+				output = "DRAWTILE;identifier;" + tile.getIdentifier()
 						+ ";orientation;" + tile.getOrientation();
 
 				gameState = GameState.PLACE_TILE;
