@@ -426,12 +426,13 @@ public class Board {
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
-	public ArrayList<Meeple> scoreCloisters(Player[] players,
+	public ArrayList<BoardPosition> scoreCloisters(Player[] players,
 			boolean hasGameEnded) {
 
-		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
+		ArrayList<BoardPosition> removedMeeples = new ArrayList<BoardPosition>();
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
 
 		// For each meeple which is placed we check to see if it is placed on
@@ -496,8 +497,8 @@ public class Board {
 					scorer.setScore(playerScore + numNeighborTiles + 1);
 
 					// And remove the meeple from the tile.
+					removedMeeples.add(meeplePlacement.get(meeple));
 					meeplePlacement.remove(meeple);
-					removedMeeples.add(meeple);
 
 					// Since we are iterating through meeplePlacement
 					// we need to refresh it when it's altered.
@@ -516,9 +517,11 @@ public class Board {
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
-	public ArrayList<Meeple> scoreCities(Player[] players, boolean hasGameEnded) {
+	public ArrayList<BoardPosition> scoreCities(Player[] players,
+			boolean hasGameEnded) {
 		return genericScore(players, TileType.CITY, hasGameEnded);
 	}
 
@@ -529,9 +532,11 @@ public class Board {
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
-	public ArrayList<Meeple> scoreRoads(Player[] players, boolean hasGameEnded) {
+	public ArrayList<BoardPosition> scoreRoads(Player[] players,
+			boolean hasGameEnded) {
 		return genericScore(players, TileType.ROAD, hasGameEnded);
 	}
 
@@ -626,9 +631,10 @@ public class Board {
 	 * @param hasGameEnded
 	 *            A boolean indicating whether the game has ended.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
-	private ArrayList<Meeple> genericScore(Player[] players,
+	private ArrayList<BoardPosition> genericScore(Player[] players,
 			TileType scoreTileType, boolean hasGameEnded) {
 
 		// Initialize the variables which will hold information about the
@@ -640,7 +646,7 @@ public class Board {
 		ArrayList<Meeple> meeplesOnFeature;
 
 		// And other variables.
-		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
+		ArrayList<BoardPosition> removedMeeples = new ArrayList<BoardPosition>();
 
 		// Run through all the placed meeples.
 		Iterator<Meeple> iter = meeplePlacement.keySet().iterator();
@@ -701,9 +707,9 @@ public class Board {
 					// Remove the meeples from the board.
 					for (int i = 0; i < meeplesOnFeature.size(); i++) {
 
-						Meeple meepleOnFeature = meeplesOnFeature.get(i);
-						meeplePlacement.remove(meepleOnFeature);
-						removedMeeples.add(meepleOnFeature);
+						Meeple meeple = meeplesOnFeature.get(i);
+						removedMeeples.add(meeplePlacement.get(meeple));
+						meeplePlacement.remove(meeple);
 					}
 
 					// Since we are iterating through meeplePlacement
@@ -857,7 +863,8 @@ public class Board {
 	 * @param players
 	 *            An array of the players. Used for scoring calculations.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
 	// Basic overview:
 	//
@@ -876,7 +883,7 @@ public class Board {
 	// castle to the field being explored. If there is, then check if it is a
 	// completed castle and add points, & the castle for future checking.
 	//
-	public ArrayList<Meeple> scoreFields(Player[] players) {
+	public ArrayList<BoardPosition> scoreFields(Player[] players) {
 
 		// Initialize the variables which will hold information about the
 		// specific feature. These are reset for each feature.
@@ -886,7 +893,7 @@ public class Board {
 		ArrayList<HashSet<BoardPosition>> adjacentCities;
 
 		// And other variables.
-		ArrayList<Meeple> removedMeeples = new ArrayList<Meeple>();
+		ArrayList<BoardPosition> removedMeeples = new ArrayList<BoardPosition>();
 		ArrayList<HashSet<BoardPosition>> completedCities = getCompletedCities();
 
 		// Run through all the placed meeples.
@@ -935,8 +942,8 @@ public class Board {
 				for (int i = 0; i < meeplesOnFeature.size(); i++) {
 
 					Meeple meepleOnFeature = meeplesOnFeature.get(i);
+					removedMeeples.add(meeplePlacement.get(meepleOnFeature));
 					meeplePlacement.remove(meepleOnFeature);
-					removedMeeples.add(meepleOnFeature);
 				}
 
 				// Since we are iterating through meeplePlacement
@@ -1334,9 +1341,4 @@ public class Board {
 	public int getHeight() {
 		return gameBoard.length;
 	}
-
-	public HashMap<Meeple, BoardPosition> getMeeplePlacement() {
-		return this.meeplePlacement;
-	}
-
 }

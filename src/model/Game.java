@@ -1,7 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -120,11 +119,12 @@ public class Game {
 	 *            True if scoring at the end of the game, false if scoring
 	 *            during the game.
 	 * 
-	 * @return an ArrayList of Meeple which have been removed from the board.
+	 * @return an ArrayList of BoardPosition which represent meeples that have
+	 *         been removed from the board.
 	 */
-	public ArrayList<Meeple> score(boolean hasGameEnded) {
+	public ArrayList<BoardPosition> score(boolean hasGameEnded) {
 
-		ArrayList<Meeple> meeples = new ArrayList<Meeple>();
+		ArrayList<BoardPosition> meeples = new ArrayList<BoardPosition>();
 
 		meeples.addAll(gameBoard.scoreCloisters(this.players, hasGameEnded));
 		meeples.addAll(gameBoard.scoreRoads(this.players, hasGameEnded));
@@ -157,9 +157,5 @@ public class Game {
 
 	public int getBoardHeight() {
 		return gameBoard.getHeight();
-	}
-
-	public HashMap<Meeple, BoardPosition> getMeeplePlacement() {
-		return gameBoard.getMeeplePlacement();
 	}
 }

@@ -2,12 +2,10 @@ package net;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import model.BoardPosition;
 import model.Game;
 import model.GameState;
-import model.Meeple;
 import model.Player;
 import model.Tile;
 
@@ -312,25 +310,21 @@ public class GameProtocol implements SocketProtocol {
 						return SocketProtocol.NAK;
 					}
 
-					ArrayList<Meeple> removedMeeples = game.score(gameOver);
-
-					HashMap<Meeple, BoardPosition> meeplePlacement;
-					meeplePlacement = game.getMeeplePlacement();
+					ArrayList<BoardPosition> removedMeeples;
+					removedMeeples = game.score(gameOver);
 
 					output = "SCORE;over;" + isGameOver;
 
 					for (int i = 0; i < removedMeeples.size(); i++) {
 
-						BoardPosition meeplePosition;
-						meeplePosition = meeplePlacement.get(removedMeeples
-								.get(i));
+						BoardPosition meeplePosition = removedMeeples.get(i);
 
 						if (meeplePosition != null) {
-							output = output + ";meeple;xBoard;"
+							output = output.concat(";meeple;xBoard;"
 									+ meeplePosition.xBoard + ";yBoard;"
 									+ meeplePosition.yBoard + ";xTile;"
 									+ meeplePosition.xTile + ";yTile;"
-									+ meeplePosition.yTile;
+									+ meeplePosition.yTile);
 						}
 					}
 
@@ -355,15 +349,15 @@ public class GameProtocol implements SocketProtocol {
 
 			if (parsedMessage.get(0).equals("PLACEMEEPLE")
 					&& lastMove != GameState.PLACE_MEEPLE) {
-
 				// If the player actually wants to place a meeple, let them.
 				gameState = GameState.PLACE_MEEPLE;
-			}
 
-			if (game.isDrawPileEmpty()) {
+			} else if (game.isDrawPileEmpty()) {
+
 				gameState = GameState.END_GAME;
 			} else {
-				currentPlayer = (currentPlayer + 1) & numPlayers;
+
+				currentPlayer = (currentPlayer + 1) % numPlayers;
 				gameState = GameState.DRAW_TILE;
 			}
 
