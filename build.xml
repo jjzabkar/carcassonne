@@ -4,7 +4,6 @@
     <property name="src.dir" location="${basedir}/src" />
     <property name="build.dir" location="${basedir}/bin" />
 
-	<property name="resources.dir" value="resources" />
     <property name="lib.dir" location="${basedir}/lib" />
     <property name="docs.dir" location="${basedir}/docs" />
     <property name="dist.dir" location="${basedir}/dist" />
@@ -13,8 +12,8 @@
     <property name="emma.report.dir" location="${basedir}/emma-report" />
     <property name="test.report.dir" location="${basedir}/tests" />
     
-    <property name="name.jar" value="Carcassonne.jar" />
-    <property name="main.class" value="ui.GameUI" />
+    <property name="name.jar" value="CarcassonneServer.jar" />
+    <property name="main.class" value="model.ServerMain" />
 
     <path id="build.class.path">
         <pathelement location="${build.dir}" />
@@ -135,7 +134,6 @@
     <target name="jar">
         <jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
             excludes="**/tests/**">
-        	<fileset dir="${src.dir}" includes="${resources.dir}/**" />
             <manifest>
                 <attribute name="Main-Class" value="${main.class}" />
             </manifest>

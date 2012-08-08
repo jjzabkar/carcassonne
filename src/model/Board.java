@@ -854,7 +854,7 @@ public class Board {
 
 	/**
 	 * This function scores the fields at the end of the game. It uses
-	 * {@link #fieldScoreRecursive(HashSet, HashSet, ArrayList, ArrayList, ArrayList, Object[])}
+	 * {@link #fieldScoreRecursive(HashSet, HashSet, ArrayList, ArrayList, ArrayList)}
 	 * and {@link #getCompletedCities()}. This function relies heavily on the
 	 * aforementioned helper functions and does not do much else besides set up
 	 * the variables to be passed to the helpers, recalculate the player scores,
