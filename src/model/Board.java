@@ -176,6 +176,11 @@ public class Board {
 	public int placeMeeple(Player player, int xBoard, int yBoard, int xTile,
 			int yTile) {
 
+		// Don't allow a player to play on a 'null' tiletype.
+		if (gameBoard[yBoard][xBoard].getTileType(xTile, yTile) == null) {
+			return 1;
+		}
+
 		// First we need to check the correctness of the input x & y.
 		boolean xPlacedCorrectly = (xBoard == player.getLastTilePlacedXPos());
 		boolean yPlacedCorrectly = (yBoard == player.getLastTilePlacedYPos());
