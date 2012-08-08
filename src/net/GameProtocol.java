@@ -284,6 +284,8 @@ public class GameProtocol implements SocketProtocol {
 				if (err == 0) {
 					lastMove = gameState;
 					gameState = GameState.SCORE_PLAYERS;
+				} else {
+					gameState = lastMove;
 				}
 
 				return output;
@@ -350,6 +352,8 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(0).equals("PLACEMEEPLE")
 					&& lastMove != GameState.PLACE_MEEPLE) {
 				// If the player actually wants to place a meeple, let them.
+				// Allow for a rollback of state if the meeple placement fails.
+				lastMove = gameState;
 				gameState = GameState.PLACE_MEEPLE;
 
 			} else if (game.isDrawPileEmpty()) {
