@@ -177,7 +177,8 @@ public class Board {
 			int yTile) {
 
 		// Don't allow a player to play on a 'null' tiletype.
-		if (gameBoard[yBoard][xBoard].getTileType(xTile, yTile) == null) {
+		if (gameBoard[yBoard][xBoard] == null
+				|| gameBoard[yBoard][xBoard].getTileType(xTile, yTile) == null) {
 			return 1;
 		}
 
