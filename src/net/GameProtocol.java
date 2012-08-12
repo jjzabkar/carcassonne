@@ -26,23 +26,23 @@ public class GameProtocol implements SocketProtocol {
 	// INIT;currentPlayer;<int>;gameBoardWidth;<int>;gameBoardHeight;<int>
 	//
 	// DRAWTILE;currentPlayer;<int>
-	// DRAWTILE;identifier;<string>;orientation;<int:[0-3]>
+	// DRAWTILE;currentPlayer;<int>;identifier;<string>;orientation;<int:[0-3]>
 	//
 	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>
-	// ROTATETILE;error;<int:(0|1)>
+	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>;error;<int:(0|1)>
 	//
 	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>
-	// PLACETILE;error;<int:(0|1)>
+	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;error;<int:(0|1)>
 	//
 	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
-	// PLACEMEEPLE;error;<int:(0|1)>
+	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>;error;<int:(0|1)>
 	//
 	// SCORE;over;<int:(0|1)>
 	// SCORE;over;<int:(0|1)>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 	//
 	//
 	// INFO;player;<int>;
-	// INFO;player;<int>;currentPlayer;<int>;score;<int>;meeplesPlaced;<int>
+	// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
 	//
 	// INFO;game;
 	// INFO;game;currentPlayer;<int>;drawPileEmpty;<int:(0|1)>
@@ -165,7 +165,8 @@ public class GameProtocol implements SocketProtocol {
 
 				Tile tile = player.getCurrentTile();
 
-				output = "DRAWTILE;identifier;" + tile.getIdentifier()
+				output = "DRAWTILE" + ";currentPlayer;" + currentPlayer
+						+ ";identifier;" + tile.getIdentifier()
 						+ ";orientation;" + tile.getOrientation();
 
 				gameState = GameState.PLACE_TILE;
@@ -207,7 +208,9 @@ public class GameProtocol implements SocketProtocol {
 					Player player = game.getPlayers()[currentPlayer];
 					int err = game.placeTile(player, xBoard, yBoard);
 
-					output = "PLACETILE;error;" + err;
+					output = "PLACETILE" + ";currentPlayer;" + currentPlayer
+							+ ";xBoard;" + xBoard + ";yBoard;" + yBoard
+							+ ";error;" + err;
 
 					if (err == 0) {
 						lastMove = gameState;
@@ -234,7 +237,8 @@ public class GameProtocol implements SocketProtocol {
 						err = 1;
 					}
 
-					output = "ROTATETILE;error;" + err;
+					output = "ROTATETILE" + ";currentPlayer;" + currentPlayer
+							+ ";direction;" + direction + ";error;" + err;
 				}
 
 				return output;
@@ -279,7 +283,9 @@ public class GameProtocol implements SocketProtocol {
 				int err;
 				err = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
 
-				output = "PLACEMEEPLE;error;" + err;
+				output = "PLACEMEEPLE" + ";currentPlayer;" + currentPlayer
+						+ ";xBoard;" + xBoard + ";yBoard;" + yBoard + ";xTile;"
+						+ xTile + ";yTile;" + yTile + ";error;" + err;
 
 				if (err == 0) {
 					lastMove = gameState;
