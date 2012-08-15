@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -31,7 +32,7 @@ public class MultiSocketServerThread extends Thread {
 		BufferedReader clientReader = null;
 
 		String inputLine;
-		String outputLine;
+		ArrayList<String> outputLine;
 
 		try {
 
@@ -47,7 +48,10 @@ public class MultiSocketServerThread extends Thread {
 			while ((inputLine = clientReader.readLine()) != null) {
 
 				outputLine = protocol.processInput(inputLine);
-				clientWriter.println(outputLine);
+
+				for (int i = 0; i < outputLine.size(); i++) {
+					clientWriter.println(outputLine.get(i));
+				}
 
 				if (outputLine.equals(SocketProtocol.EXIT)) {
 					break;
