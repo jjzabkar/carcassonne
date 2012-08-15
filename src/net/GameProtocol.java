@@ -37,8 +37,8 @@ public class GameProtocol implements SocketProtocol {
 	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
 	// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>;error;<int:(0|1)>
 	//
-	// SCORE;over;<int:(0|1)>
-	// SCORE;over;<int:(0|1)>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+	// SCORE
+	// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 	//
 	//
 	// INFO;player;<int>;
@@ -71,6 +71,96 @@ public class GameProtocol implements SocketProtocol {
 	private int numPlayers;
 	private int currentPlayer = 0;
 
+	private String createGameInfoMessage() {
+
+		int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
+
+		String output = "INFO;game" + ";currentPlayer;" + currentPlayer
+				+ ";drawPileEmpty;" + isDrawPileEmpty;
+
+		return output;
+	}
+
+	private String createPlayerInfoMessage(int player) {
+
+		int isCurrentPlayer = (player == currentPlayer) ? 1 : 0;
+		int playerScore = game.getPlayers()[player].getScore();
+
+		Player playerModel = game.getPlayers()[player];
+		int numMeeplesPlaced = game.getNumMeeplesPlaced(playerModel);
+
+		String output = "INFO" + ";player;" + player + ";currentPlayer;"
+				+ isCurrentPlayer + ";score;" + playerScore + ";meeplesPlaced;"
+				+ numMeeplesPlaced;
+
+		return output;
+	}
+
+	private String makeInitMsg(int player) {
+
+		String output = "INIT" + ";currentPlayer;" + player
+				+ ";gameBoardWidth;" + game.getBoardWidth()
+				+ ";gameBoardHeight;" + game.getBoardHeight();
+
+		return output;
+	}
+
+	private String makeDrawTileMsg(int player, String identifier,
+			int orientation) {
+
+		String output = "DRAWTILE" + ";currentPlayer;" + player
+				+ ";identifier;" + identifier + ";orientation;" + orientation;
+
+		return output;
+	}
+
+	private String makePlaceTileMsg(int player, int xBoard, int yBoard,
+			int error) {
+
+		String output = "PLACETILE" + ";currentPlayer;" + player + ";xBoard;"
+				+ xBoard + ";yBoard;" + yBoard + ";error;" + error;
+
+		return output;
+	}
+
+	private String makeRotateTileMsg(int player, String direction, int error) {
+
+		String output = "ROTATETILE" + ";currentPlayer;" + player
+				+ ";direction;" + direction + ";error;" + error;
+
+		return output;
+	}
+
+	private String makePlaceMeepleMsg(int player, int xBoard, int yBoard,
+			int xTile, int yTile, int error) {
+
+		String output = "PLACEMEEPLE" + ";currentPlayer;" + player + ";xBoard;"
+				+ xBoard + ";yBoard;" + yBoard + ";xTile;" + xTile + ";yTile;"
+				+ yTile + ";error;" + error;
+
+		return output;
+	}
+
+	private String makeScoreMsg(ArrayList<BoardPosition> removedMeeples) {
+
+		String output = "SCORE";
+
+		for (int i = 0; i < removedMeeples.size(); i++) {
+
+			BoardPosition meeplePosition = removedMeeples.get(i);
+
+			if (meeplePosition != null) {
+				output = output.concat(";meeple;xBoard;"
+						+ meeplePosition.xBoard + ";yBoard;"
+						+ meeplePosition.yBoard + ";xTile;"
+						+ meeplePosition.xTile + ";yTile;"
+						+ meeplePosition.yTile);
+			}
+		}
+
+		return output;
+	}
+
 	public String processInput(String input) {
 
 		String output = null;
@@ -91,31 +181,16 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(1).equals("game")) {
 
 				// Send back game information.
-				int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
-
-				output = "INFO;game" + ";currentPlayer;" + currentPlayer
-						+ ";drawPileEmpty;" + isDrawPileEmpty;
-
-				return output;
+				return createGameInfoMessage();
 			}
 
 			if (parsedMessage.get(1).equals("player")) {
 
 				// Get which player the client is inquiring about.
-				int playerInt = Integer.parseInt(parsedMessage.get(2));
+				int player = Integer.parseInt(parsedMessage.get(2));
 
 				// Send back player information.
-				int isCurrentPlayer = (playerInt == currentPlayer) ? 1 : 0;
-				int playerScore = game.getPlayers()[playerInt].getScore();
-
-				Player playerPlayer = game.getPlayers()[playerInt];
-				int numMeeplesPlaced = game.getNumMeeplesPlaced(playerPlayer);
-
-				output = "INFO" + ";player;" + playerInt + ";currentPlayer;"
-						+ isCurrentPlayer + ";score;" + playerScore
-						+ ";meeplesPlaced;" + numMeeplesPlaced;
-
-				return output;
+				return createPlayerInfoMessage(player);
 			}
 		}
 
@@ -133,14 +208,9 @@ public class GameProtocol implements SocketProtocol {
 			}
 
 			game = new Game(numPlayers);
-
-			output = "INIT" + ";currentPlayer;" + currentPlayer
-					+ ";gameBoardWidth;" + game.getBoardWidth()
-					+ ";gameBoardHeight;" + game.getBoardHeight();
-
 			gameState = GameState.DRAW_TILE;
 
-			return output;
+			return makeInitMsg(currentPlayer);
 
 		}
 
@@ -162,16 +232,14 @@ public class GameProtocol implements SocketProtocol {
 				// player and letting the client know what the result was.
 				Player player = game.getPlayers()[currentPlayer];
 				game.drawTile(player);
-
-				Tile tile = player.getCurrentTile();
-
-				output = "DRAWTILE" + ";currentPlayer;" + currentPlayer
-						+ ";identifier;" + tile.getIdentifier()
-						+ ";orientation;" + tile.getOrientation();
-
 				gameState = GameState.PLACE_TILE;
 
-				return output;
+				// Get variables to make the message & return it.
+				Tile tile = player.getCurrentTile();
+				String identifier = tile.getIdentifier();
+				int orientation = tile.getOrientation();
+
+				return makeDrawTileMsg(currentPlayer, identifier, orientation);
 			}
 		}
 
@@ -208,14 +276,12 @@ public class GameProtocol implements SocketProtocol {
 					Player player = game.getPlayers()[currentPlayer];
 					int err = game.placeTile(player, xBoard, yBoard);
 
-					output = "PLACETILE" + ";currentPlayer;" + currentPlayer
-							+ ";xBoard;" + xBoard + ";yBoard;" + yBoard
-							+ ";error;" + err;
-
 					if (err == 0) {
 						lastMove = gameState;
 						gameState = GameState.SCORE_PLAYERS;
 					}
+
+					return makePlaceTileMsg(currentPlayer, xBoard, yBoard, err);
 				}
 
 				if (parsedMessage.get(0).equals("ROTATETILE")) {
@@ -237,11 +303,8 @@ public class GameProtocol implements SocketProtocol {
 						err = 1;
 					}
 
-					output = "ROTATETILE" + ";currentPlayer;" + currentPlayer
-							+ ";direction;" + direction + ";error;" + err;
+					return makeRotateTileMsg(currentPlayer, direction, err);
 				}
-
-				return output;
 			}
 		}
 
@@ -283,10 +346,6 @@ public class GameProtocol implements SocketProtocol {
 				int err;
 				err = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
 
-				output = "PLACEMEEPLE" + ";currentPlayer;" + currentPlayer
-						+ ";xBoard;" + xBoard + ";yBoard;" + yBoard + ";xTile;"
-						+ xTile + ";yTile;" + yTile + ";error;" + err;
-
 				if (err == 0) {
 					lastMove = gameState;
 					gameState = GameState.SCORE_PLAYERS;
@@ -294,7 +353,8 @@ public class GameProtocol implements SocketProtocol {
 					gameState = lastMove;
 				}
 
-				return output;
+				return makePlaceMeepleMsg(currentPlayer, xBoard, yBoard, xTile,
+						yTile, err);
 			}
 		}
 
@@ -307,34 +367,10 @@ public class GameProtocol implements SocketProtocol {
 
 				if (parsedMessage.get(1).equals("over")) {
 
-					int isGameOver = Integer.parseInt(parsedMessage.get(2));
-					boolean gameOver = (isGameOver == 0) ? false : true;
-
-					// If there are still tiles or the game isn't in an end
-					// state then the game isn't over.. even if the client says
-					// it is.
-					if ((!game.isDrawPileEmpty() || gameState != GameState.END_GAME)
-							&& gameOver) {
-						return SocketProtocol.NAK;
-					}
-
+					// TODO; game is never over when scoring after tile
+					// placement
 					ArrayList<BoardPosition> removedMeeples;
-					removedMeeples = game.score(gameOver);
-
-					output = "SCORE;over;" + isGameOver;
-
-					for (int i = 0; i < removedMeeples.size(); i++) {
-
-						BoardPosition meeplePosition = removedMeeples.get(i);
-
-						if (meeplePosition != null) {
-							output = output.concat(";meeple;xBoard;"
-									+ meeplePosition.xBoard + ";yBoard;"
-									+ meeplePosition.yBoard + ";xTile;"
-									+ meeplePosition.xTile + ";yTile;"
-									+ meeplePosition.yTile);
-						}
-					}
+					removedMeeples = game.score(game.isDrawPileEmpty());
 
 					// From here we can either advance to the end turn state, or
 					// the place meeple state.
@@ -342,7 +378,7 @@ public class GameProtocol implements SocketProtocol {
 					// placement if need be.
 					gameState = GameState.END_TURN;
 
-					return output;
+					return makeScoreMsg(removedMeeples);
 				}
 			}
 		}
