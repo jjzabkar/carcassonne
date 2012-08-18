@@ -160,13 +160,11 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
-	private ArrayList<String> makeArrayMsg(String... messages) {
+	private ArrayList<String> makeArray(String... messages) {
 
 		ArrayList<String> ret = new ArrayList<String>();
 
-		for (int i = 0; i < messages.length; i++) {
-			ret.add(messages[i]);
-		}
+		ret.addAll(Arrays.asList(messages));
 
 		return ret;
 	}
@@ -189,7 +187,7 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(1).equals("game")) {
 
 				// Send back game information.
-				return makeArrayMsg(makeGameInfoMsg());
+				return makeArray(makeGameInfoMsg());
 			}
 
 			if (parsedMessage.get(1).equals("player")) {
@@ -198,7 +196,7 @@ public class GameProtocol implements SocketProtocol {
 				int player = Integer.parseInt(parsedMessage.get(2));
 
 				// Send back player information.
-				return makeArrayMsg(makePlayerInfoMsg(player));
+				return makeArray(makePlayerInfoMsg(player));
 			}
 		}
 
@@ -208,7 +206,7 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.START_GAME == gameState) {
 
 			if (!parsedMessage.get(0).equals("INIT")) {
-				return makeArrayMsg(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("numPlayers")) {
@@ -218,14 +216,14 @@ public class GameProtocol implements SocketProtocol {
 			game = new Game(numPlayers);
 			gameState = GameState.DRAW_TILE;
 
-			return makeArrayMsg(makeInitMsg(currentPlayer));
+			return makeArray(makeInitMsg(currentPlayer));
 
 		}
 
 		if (GameState.DRAW_TILE == gameState) {
 
 			if (!parsedMessage.get(0).equals("DRAWTILE")) {
-				return makeArrayMsg(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -233,7 +231,7 @@ public class GameProtocol implements SocketProtocol {
 				// The client is telling us that a different player is taking
 				// a tile than we told them. This is incorrect.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArrayMsg(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.NAK);
 				}
 
 				// Otherwise continue the game by drawing a tile for the current
@@ -247,7 +245,7 @@ public class GameProtocol implements SocketProtocol {
 				String identifier = tile.getIdentifier();
 				int orientation = tile.getOrientation();
 
-				return makeArrayMsg(makeDrawTileMsg(currentPlayer, identifier,
+				return makeArray(makeDrawTileMsg(currentPlayer, identifier,
 						orientation));
 			}
 		}
@@ -256,7 +254,7 @@ public class GameProtocol implements SocketProtocol {
 
 			if (!parsedMessage.get(0).equals("PLACETILE")
 					&& !parsedMessage.get(0).equals("ROTATETILE")) {
-				return makeArrayMsg(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -264,7 +262,7 @@ public class GameProtocol implements SocketProtocol {
 				// Again, check the player the client is telling us that's
 				// playing is actually the player whose turn it is.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArrayMsg(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.NAK);
 				}
 
 				// Check what the client wants us to do.
@@ -287,7 +285,7 @@ public class GameProtocol implements SocketProtocol {
 						err = 1;
 					}
 
-					return makeArrayMsg(makeRotateTileMsg(currentPlayer,
+					return makeArray(makeRotateTileMsg(currentPlayer,
 							direction, err));
 				}
 
@@ -328,7 +326,7 @@ public class GameProtocol implements SocketProtocol {
 						return ret;
 
 					} else {
-						return makeArrayMsg(SocketProtocol.NAK);
+						return makeArray(SocketProtocol.NAK);
 					}
 				}
 			}
@@ -355,14 +353,14 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
-				return makeArrayMsg(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the client is synchronized wrt/ player turn.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArrayMsg(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.NAK);
 				}
 
 				// If everything is good; we're synchronized, continue.
@@ -416,7 +414,7 @@ public class GameProtocol implements SocketProtocol {
 					return ret;
 
 				} else {
-					return makeArrayMsg(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.NAK);
 				}
 
 			}
@@ -425,9 +423,9 @@ public class GameProtocol implements SocketProtocol {
 		// End game state.
 		if (GameState.END_GAME == gameState) {
 
-			return makeArrayMsg(SocketProtocol.EXIT);
+			return makeArray(SocketProtocol.EXIT);
 		}
 
-		return makeArrayMsg(SocketProtocol.NAK);
+		return makeArray(SocketProtocol.NAK);
 	}
 }
