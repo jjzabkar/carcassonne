@@ -15,57 +15,110 @@ import java.util.ArrayList;
  */
 public class MultiSocketServerThread extends Thread {
 
-	private Socket clientSocket = null;
+	private ArrayList<Socket> clientSockets = null;
+	private int client = 0;
 	private SocketProtocol protocol = null;
 
-	public MultiSocketServerThread(Socket clientSocket, SocketProtocol protocol) {
+	private ArrayList<PrintWriter> clientWriters = new ArrayList<PrintWriter>();
+	private ArrayList<BufferedReader> clientReaders = new ArrayList<BufferedReader>();
+
+	public MultiSocketServerThread(ArrayList<Socket> clientSockets, int client,
+			SocketProtocol protocol) {
+
 		super("MultiSocketServerThread");
 
-		this.clientSocket = clientSocket;
+		this.clientSockets = clientSockets;
+		this.client = client;
 		this.protocol = protocol;
+	}
+
+	public synchronized void updateClientList() {
+
+		clientWriters.clear();
+		clientReaders.clear();
+
+		for (int i = 0; i < clientSockets.size(); i++) {
+
+			try {
+				Socket clientSocket = clientSockets.get(i);
+
+				OutputStream outStream = clientSocket.getOutputStream();
+				InputStream inStream = clientSocket.getInputStream();
+				InputStreamReader inStreamReader = new InputStreamReader(
+						inStream);
+
+				clientWriters.add(i, new PrintWriter(outStream, true));
+				clientReaders.add(i, new BufferedReader(inStreamReader));
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	@Override
 	public void run() {
 
-		PrintWriter clientWriter = null;
-		BufferedReader clientReader = null;
-
 		String inputLine;
-		ArrayList<String> outputLine;
+		ArrayList<String> outputLines;
+
+		updateClientList();
 
 		try {
 
-			OutputStream clientOutputStream = clientSocket.getOutputStream();
-			InputStream clientInputStream = clientSocket.getInputStream();
-
-			clientWriter = new PrintWriter(clientOutputStream, true);
-
-			InputStreamReader isr = new InputStreamReader(clientInputStream);
-			clientReader = new BufferedReader(isr);
-
 			// Get the response, process it, and send back the next message.
-			while ((inputLine = clientReader.readLine()) != null) {
+			while ((inputLine = clientReaders.get(client).readLine()) != null) {
 
-				outputLine = protocol.processInput(inputLine);
+				outputLines = protocol.processInput(inputLine);
 
-				for (int i = 0; i < outputLine.size(); i++) {
-					clientWriter.println(outputLine.get(i));
-				}
+				for (int i = 0; i < outputLines.size(); i++) {
 
-				if (outputLine.equals(SocketProtocol.EXIT)) {
-					break;
+					String outLine = outputLines.get(i);
+					String messageRecipient = null;
+					String[] outLineArray = outLine.split(";");
+
+					if (outLineArray[0].equals(SocketProtocol.replySender)) {
+
+						messageRecipient = SocketProtocol.replySender;
+
+					} else if (outLineArray[0].equals(SocketProtocol.replyAll)) {
+
+						messageRecipient = SocketProtocol.replyAll;
+					}
+
+					// Remove the message recipient header from the message as
+					// it is forwarded to the actual clients.
+					int beginIndex = outLine.indexOf(";") + 1;
+					outLine = outLine.substring(beginIndex);
+
+					// Depending on our message header either send the message
+					// to the sender, or to all clients.
+					if (messageRecipient.equals(SocketProtocol.replySender)) {
+
+						clientWriters.get(client).println(outLine);
+
+					} else if (messageRecipient.equals(SocketProtocol.replyAll)) {
+
+						for (int j = 0; j < clientWriters.size(); j++) {
+							clientWriters.get(j).println(outLine);
+						}
+					}
+
+					if (outLine.equals(SocketProtocol.EXIT)) {
+						break;
+					}
 				}
 			}
 
-			clientWriter.close();
-			clientReader.close();
+			for (int i = 0; i < clientWriters.size(); i++) {
+				clientWriters.get(i).close();
+			}
 
-			clientSocket.close();
+			for (int i = 0; i < clientReaders.size(); i++) {
+				clientReaders.get(i).close();
+			}
+
+			clientSockets.get(client).close();
 
 		} catch (Exception e) {
-
 		}
-
 	}
 }

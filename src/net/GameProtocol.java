@@ -1,7 +1,10 @@
 package net;
 
+import java.awt.Color;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import model.BoardPosition;
 import model.Game;
@@ -20,6 +23,15 @@ public class GameProtocol implements SocketProtocol {
 	//
 	// Note: Any messages sent at the wrong time or other errors will cause the
 	// server to return SocketProtocol.NAK ("NAK").
+	//
+	// JOINLOBBY
+	//
+	// LEAVELOBBY
+	//
+	// ASSIGNPLAYER;player;<int>
+	//
+	// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
+	//
 	//
 	//
 	// INIT;numPlayers;<int>
@@ -65,17 +77,131 @@ public class GameProtocol implements SocketProtocol {
 
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 
+	// Pre-game variables.
+	private ArrayList<PlayerStruct> lobbyPlayers = new ArrayList<PlayerStruct>();
+	private ArrayList<Color> availablePlayerColors = new ArrayList<Color>() {
+
+		private static final long serialVersionUID = -5941480684523828148L;
+
+		{
+			add(Color.black);
+			add(Color.blue);
+			add(Color.yellow);
+			add(Color.red);
+			add(Color.green);
+		}
+	};
+
+	class PlayerStruct {
+
+		PlayerStruct(int numberRep, String name, String color) {
+			this.numberRep = numberRep;
+			this.name = name;
+			this.color = color;
+		}
+
+		private int numberRep;
+		private String name;
+		private String color;
+	}
+
+	// In-game variables.
 	private Game game;
 	private GameState gameState = GameState.START_GAME;
-	private int numPlayers;
 	private int currentPlayer = 0;
 
+	// Pre-game
+	// TODO client message to update a player information
+	private String makeAssignPlayerMsg(int numberRep) {
+
+		String output = SocketProtocol.replySender + ";ASSIGNPLAYER"
+				+ ";player;" + numberRep;
+
+		return output;
+	}
+
+	private String makeUpdateLobbyMsg() {
+
+		String output = SocketProtocol.replyAll + ";UPDATELOBBY";
+
+		for (int i = 0; i < lobbyPlayers.size(); i++) {
+
+			int numberRep = lobbyPlayers.get(i).numberRep;
+			String name = lobbyPlayers.get(i).name;
+			String color = lobbyPlayers.get(i).color;
+
+			output = output + ";player;" + numberRep + ";name;" + name
+					+ ";color;" + color;
+		}
+
+		return output;
+	}
+
+	private int getFreePlayerSlot() {
+
+		// Find which player slot is not used.
+		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>();
+		int candidateSlot = 0;
+
+		for (int i = 0; i < lobbyPlayers.size(); i++) {
+			usedPlayerSlots.add(lobbyPlayers.get(i).numberRep);
+		}
+
+		Collections.sort(usedPlayerSlots);
+
+		for (int i = 0; i < usedPlayerSlots.size(); i++) {
+			if (usedPlayerSlots.get(i).intValue() == candidateSlot) {
+				candidateSlot++;
+			} else {
+				break;
+			}
+		}
+
+		return candidateSlot;
+	}
+
+	private void addPlayer(int numberRep) {
+
+		Color color = availablePlayerColors.remove(0);
+		DecimalFormat df = new DecimalFormat("000");
+
+		String r = df.format(color.getRed());
+		String g = df.format(color.getGreen());
+		String b = df.format(color.getBlue());
+		String rgb = r + g + b;
+
+		PlayerStruct p;
+		p = new PlayerStruct(numberRep, "Player " + numberRep, rgb);
+		lobbyPlayers.add(p);
+	}
+
+	private void removePlayer(int numberRep) {
+
+		for (int i = 0; i < lobbyPlayers.size(); i++) {
+			if (lobbyPlayers.get(i).numberRep == numberRep) {
+
+				// Retrieve used color.
+				String colorString = lobbyPlayers.get(i).color;
+				int r = Integer.parseInt(colorString.substring(0, 3));
+				int g = Integer.parseInt(colorString.substring(3, 6));
+				int b = Integer.parseInt(colorString.substring(6, 9));
+				Color color = new Color(r, g, b);
+				availablePlayerColors.add(color);
+
+				lobbyPlayers.remove(i);
+			}
+		}
+	}
+
+	// In-game
+	// TODO; we will have to change client notification in future
 	private String makeGameInfoMsg() {
 
 		int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
 
-		String output = "INFO;game" + ";currentPlayer;" + currentPlayer
-				+ ";drawPileEmpty;" + isDrawPileEmpty;
+		String output = SocketProtocol.replySender + ";INFO;game"
+				+ ";currentPlayer;" + currentPlayer + ";drawPileEmpty;"
+				+ isDrawPileEmpty;
 
 		return output;
 	}
@@ -88,18 +214,19 @@ public class GameProtocol implements SocketProtocol {
 		Player playerModel = game.getPlayers()[player];
 		int numMeeplesPlaced = game.getNumMeeplesPlaced(playerModel);
 
-		String output = "INFO" + ";player;" + player + ";currentPlayer;"
-				+ isCurrentPlayer + ";score;" + playerScore + ";meeplesPlaced;"
-				+ numMeeplesPlaced;
+		String output = SocketProtocol.replySender + ";INFO" + ";player;"
+				+ player + ";currentPlayer;" + isCurrentPlayer + ";score;"
+				+ playerScore + ";meeplesPlaced;" + numMeeplesPlaced;
 
 		return output;
 	}
 
 	private String makeInitMsg(int player) {
 
-		String output = "INIT" + ";currentPlayer;" + player
-				+ ";gameBoardWidth;" + game.getBoardWidth()
-				+ ";gameBoardHeight;" + game.getBoardHeight();
+		String output = SocketProtocol.replySender + ";INIT"
+				+ ";currentPlayer;" + player + ";gameBoardWidth;"
+				+ game.getBoardWidth() + ";gameBoardHeight;"
+				+ game.getBoardHeight();
 
 		return output;
 	}
@@ -107,8 +234,9 @@ public class GameProtocol implements SocketProtocol {
 	private String makeDrawTileMsg(int player, String identifier,
 			int orientation) {
 
-		String output = "DRAWTILE" + ";currentPlayer;" + player
-				+ ";identifier;" + identifier + ";orientation;" + orientation;
+		String output = SocketProtocol.replySender + ";DRAWTILE"
+				+ ";currentPlayer;" + player + ";identifier;" + identifier
+				+ ";orientation;" + orientation;
 
 		return output;
 	}
@@ -116,16 +244,18 @@ public class GameProtocol implements SocketProtocol {
 	private String makePlaceTileMsg(int player, int xBoard, int yBoard,
 			int error) {
 
-		String output = "PLACETILE" + ";currentPlayer;" + player + ";xBoard;"
-				+ xBoard + ";yBoard;" + yBoard + ";error;" + error;
+		String output = SocketProtocol.replySender + ";PLACETILE"
+				+ ";currentPlayer;" + player + ";xBoard;" + xBoard + ";yBoard;"
+				+ yBoard + ";error;" + error;
 
 		return output;
 	}
 
 	private String makeRotateTileMsg(int player, String direction, int error) {
 
-		String output = "ROTATETILE" + ";currentPlayer;" + player
-				+ ";direction;" + direction + ";error;" + error;
+		String output = SocketProtocol.replySender + ";ROTATETILE"
+				+ ";currentPlayer;" + player + ";direction;" + direction
+				+ ";error;" + error;
 
 		return output;
 	}
@@ -133,16 +263,17 @@ public class GameProtocol implements SocketProtocol {
 	private String makePlaceMeepleMsg(int player, int xBoard, int yBoard,
 			int xTile, int yTile, int error) {
 
-		String output = "PLACEMEEPLE" + ";currentPlayer;" + player + ";xBoard;"
-				+ xBoard + ";yBoard;" + yBoard + ";xTile;" + xTile + ";yTile;"
-				+ yTile + ";error;" + error;
+		String output = SocketProtocol.replySender + ";PLACEMEEPLE"
+				+ ";currentPlayer;" + player + ";xBoard;" + xBoard + ";yBoard;"
+				+ yBoard + ";xTile;" + xTile + ";yTile;" + yTile + ";error;"
+				+ error;
 
 		return output;
 	}
 
 	private String makeScoreMsg(ArrayList<BoardPosition> removedMeeples) {
 
-		String output = "SCORE";
+		String output = SocketProtocol.replySender + ";SCORE";
 
 		for (int i = 0; i < removedMeeples.size(); i++) {
 
@@ -162,11 +293,7 @@ public class GameProtocol implements SocketProtocol {
 
 	private ArrayList<String> makeArray(String... messages) {
 
-		ArrayList<String> ret = new ArrayList<String>();
-
-		ret.addAll(Arrays.asList(messages));
-
-		return ret;
+		return new ArrayList<String>(Arrays.asList(messages));
 	}
 
 	public ArrayList<String> processInput(String input) {
@@ -181,29 +308,41 @@ public class GameProtocol implements SocketProtocol {
 		parsedMessage.clear();
 		parsedMessage.addAll(Arrays.asList(input.split(";")));
 
-		// Request for info; could be for game or player info.
-		if (parsedMessage.get(0).equals("INFO")) {
+		if (parsedMessage.get(0).equals("JOINLOBBY")) {
 
-			if (parsedMessage.get(1).equals("game")) {
-
-				// Send back game information.
-				return makeArray(makeGameInfoMsg());
+			// Assign a player to the client which has joined the lobby.
+			if (lobbyPlayers.size() >= 5) {
+				return makeArray(SocketProtocol.NAK);
 			}
 
-			if (parsedMessage.get(1).equals("player")) {
+			int playerSlot = getFreePlayerSlot();
+			addPlayer(playerSlot);
 
-				// Get which player the client is inquiring about.
-				int player = Integer.parseInt(parsedMessage.get(2));
+			String assignPlayer = makeAssignPlayerMsg(playerSlot);
 
-				// Send back player information.
-				return makeArray(makePlayerInfoMsg(player));
-			}
+			// Send all the clients a message to update their lobbies.
+			String updateLobby = makeUpdateLobbyMsg();
+
+			return makeArray(assignPlayer, updateLobby);
+		}
+
+		if (parsedMessage.get(0).equals("LEAVELOBBY")) {
+			// Free the player which left the lobby.
+			int playerSlot = Integer.parseInt(parsedMessage.get(2));
+			removePlayer(playerSlot);
+
+			// Send all the clients a message to update their lobbies.
+			String updateLobby = makeUpdateLobbyMsg();
+
+			return makeArray(updateLobby);
 		}
 
 		// If the game is just starting then we need to send over initialization
 		// info. The gameboard width, height (# of tiles), the player whose turn
 		// it is, &c.
 		if (GameState.START_GAME == gameState) {
+
+			int numPlayers = 0;
 
 			if (!parsedMessage.get(0).equals("INIT")) {
 				return makeArray(SocketProtocol.NAK);
@@ -337,7 +476,7 @@ public class GameProtocol implements SocketProtocol {
 			// The player decided to end their turn after placing a tile.
 			if (parsedMessage.get(0).equals("DRAWTILE")) {
 
-				currentPlayer = (currentPlayer + 1) % numPlayers;
+				currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 				gameState = GameState.DRAW_TILE;
 			}
 
@@ -409,7 +548,7 @@ public class GameProtocol implements SocketProtocol {
 					ret.add(makeGameInfoMsg());
 
 					gameState = GameState.DRAW_TILE;
-					currentPlayer = (currentPlayer + 1) % numPlayers;
+					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 
 					return ret;
 
