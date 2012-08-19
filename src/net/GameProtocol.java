@@ -26,7 +26,7 @@ public class GameProtocol implements SocketProtocol {
 	//
 	// JOINLOBBY
 	//
-	// LEAVELOBBY
+	// LEAVELOBBY;player;<int>
 	//
 	// ASSIGNPLAYER;player;<int>
 	//
