@@ -72,7 +72,7 @@ public class MultiSocketServerThread extends Thread {
 				for (int i = 0; i < outputLines.size(); i++) {
 
 					String outLine = outputLines.get(i);
-					String messageRecipient = null;
+					String messageRecipient = SocketProtocol.replyAll;
 					String[] outLineArray = outLine.split(";");
 
 					if (outLineArray[0].equals(SocketProtocol.replySender)) {
@@ -85,7 +85,8 @@ public class MultiSocketServerThread extends Thread {
 					}
 
 					// Remove the message recipient header from the message as
-					// it is forwarded to the actual clients.
+					// it is forwarded to the actual clients. If ';' isn't in
+					// the string, then outline is set to itself.
 					int beginIndex = outLine.indexOf(";") + 1;
 					outLine = outLine.substring(beginIndex);
 

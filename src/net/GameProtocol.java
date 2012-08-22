@@ -199,7 +199,7 @@ public class GameProtocol implements SocketProtocol {
 
 		int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
 
-		String output = SocketProtocol.replySender + ";INFO;game"
+		String output = SocketProtocol.replyAll + ";INFO;game"
 				+ ";currentPlayer;" + currentPlayer + ";drawPileEmpty;"
 				+ isDrawPileEmpty;
 
@@ -214,19 +214,18 @@ public class GameProtocol implements SocketProtocol {
 		Player playerModel = game.getPlayers()[player];
 		int numMeeplesPlaced = game.getNumMeeplesPlaced(playerModel);
 
-		String output = SocketProtocol.replySender + ";INFO" + ";player;"
-				+ player + ";currentPlayer;" + isCurrentPlayer + ";score;"
-				+ playerScore + ";meeplesPlaced;" + numMeeplesPlaced;
+		String output = SocketProtocol.replyAll + ";INFO" + ";player;" + player
+				+ ";currentPlayer;" + isCurrentPlayer + ";score;" + playerScore
+				+ ";meeplesPlaced;" + numMeeplesPlaced;
 
 		return output;
 	}
 
 	private String makeInitMsg(int player) {
 
-		String output = SocketProtocol.replySender + ";INIT"
-				+ ";currentPlayer;" + player + ";gameBoardWidth;"
-				+ game.getBoardWidth() + ";gameBoardHeight;"
-				+ game.getBoardHeight();
+		String output = SocketProtocol.replyAll + ";INIT" + ";currentPlayer;"
+				+ player + ";gameBoardWidth;" + game.getBoardWidth()
+				+ ";gameBoardHeight;" + game.getBoardHeight();
 
 		return output;
 	}
@@ -234,7 +233,7 @@ public class GameProtocol implements SocketProtocol {
 	private String makeDrawTileMsg(int player, String identifier,
 			int orientation) {
 
-		String output = SocketProtocol.replySender + ";DRAWTILE"
+		String output = SocketProtocol.replyAll + ";DRAWTILE"
 				+ ";currentPlayer;" + player + ";identifier;" + identifier
 				+ ";orientation;" + orientation;
 
@@ -244,7 +243,7 @@ public class GameProtocol implements SocketProtocol {
 	private String makePlaceTileMsg(int player, int xBoard, int yBoard,
 			int error) {
 
-		String output = SocketProtocol.replySender + ";PLACETILE"
+		String output = SocketProtocol.replyAll + ";PLACETILE"
 				+ ";currentPlayer;" + player + ";xBoard;" + xBoard + ";yBoard;"
 				+ yBoard + ";error;" + error;
 
@@ -253,7 +252,7 @@ public class GameProtocol implements SocketProtocol {
 
 	private String makeRotateTileMsg(int player, String direction, int error) {
 
-		String output = SocketProtocol.replySender + ";ROTATETILE"
+		String output = SocketProtocol.replyAll + ";ROTATETILE"
 				+ ";currentPlayer;" + player + ";direction;" + direction
 				+ ";error;" + error;
 
@@ -263,7 +262,7 @@ public class GameProtocol implements SocketProtocol {
 	private String makePlaceMeepleMsg(int player, int xBoard, int yBoard,
 			int xTile, int yTile, int error) {
 
-		String output = SocketProtocol.replySender + ";PLACEMEEPLE"
+		String output = SocketProtocol.replyAll + ";PLACEMEEPLE"
 				+ ";currentPlayer;" + player + ";xBoard;" + xBoard + ";yBoard;"
 				+ yBoard + ";xTile;" + xTile + ";yTile;" + yTile + ";error;"
 				+ error;
@@ -273,7 +272,7 @@ public class GameProtocol implements SocketProtocol {
 
 	private String makeScoreMsg(ArrayList<BoardPosition> removedMeeples) {
 
-		String output = SocketProtocol.replySender + ";SCORE";
+		String output = SocketProtocol.replyAll + ";SCORE";
 
 		for (int i = 0; i < removedMeeples.size(); i++) {
 
@@ -472,6 +471,16 @@ public class GameProtocol implements SocketProtocol {
 		}
 
 		if (GameState.END_TURN == gameState) {
+
+			if (parsedMessage.get(0).equals("ENDTURN")) {
+
+				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+					return makeArray(SocketProtocol.NAK);
+				}
+
+				return makeArray(SocketProtocol.replyAll
+						+ ";ENDTURN;currentPlayer;" + parsedMessage.get(2));
+			}
 
 			// The player decided to end their turn after placing a tile.
 			if (parsedMessage.get(0).equals("DRAWTILE")) {
