@@ -32,6 +32,7 @@ public class GameProtocol implements SocketProtocol {
 	//
 	// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
 	//
+	// UPDATEPLAYER;player;<int>;name;<string>;color;<string:(RGB)>
 	//
 	//
 	// INIT;numPlayers;<int>
@@ -77,7 +78,7 @@ public class GameProtocol implements SocketProtocol {
 
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 
-	// Pre-game variables.
+	// Pre-game variables (lobby).
 	private ArrayList<PlayerStruct> lobbyPlayers = new ArrayList<PlayerStruct>();
 	private ArrayList<Color> availablePlayerColors = new ArrayList<Color>() {
 
@@ -110,8 +111,7 @@ public class GameProtocol implements SocketProtocol {
 	private GameState gameState = GameState.START_GAME;
 	private int currentPlayer = 0;
 
-	// Pre-game
-	// TODO client message to update a player information
+	// Pre-game messages.
 	private String makeAssignPlayerMsg(int numberRep) {
 
 		String output = SocketProtocol.replySender + ";ASSIGNPLAYER"
@@ -137,64 +137,7 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
-	private int getFreePlayerSlot() {
-
-		// Find which player slot is not used.
-		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>();
-		int candidateSlot = 0;
-
-		for (int i = 0; i < lobbyPlayers.size(); i++) {
-			usedPlayerSlots.add(lobbyPlayers.get(i).numberRep);
-		}
-
-		Collections.sort(usedPlayerSlots);
-
-		for (int i = 0; i < usedPlayerSlots.size(); i++) {
-			if (usedPlayerSlots.get(i).intValue() == candidateSlot) {
-				candidateSlot++;
-			} else {
-				break;
-			}
-		}
-
-		return candidateSlot;
-	}
-
-	private void addPlayer(int numberRep) {
-
-		Color color = availablePlayerColors.remove(0);
-		DecimalFormat df = new DecimalFormat("000");
-
-		String r = df.format(color.getRed());
-		String g = df.format(color.getGreen());
-		String b = df.format(color.getBlue());
-		String rgb = r + g + b;
-
-		PlayerStruct p;
-		p = new PlayerStruct(numberRep, "Player " + numberRep, rgb);
-		lobbyPlayers.add(p);
-	}
-
-	private void removePlayer(int numberRep) {
-
-		for (int i = 0; i < lobbyPlayers.size(); i++) {
-			if (lobbyPlayers.get(i).numberRep == numberRep) {
-
-				// Retrieve used color.
-				String colorString = lobbyPlayers.get(i).color;
-				int r = Integer.parseInt(colorString.substring(0, 3));
-				int g = Integer.parseInt(colorString.substring(3, 6));
-				int b = Integer.parseInt(colorString.substring(6, 9));
-				Color color = new Color(r, g, b);
-				availablePlayerColors.add(color);
-
-				lobbyPlayers.remove(i);
-			}
-		}
-	}
-
-	// In-game
-	// TODO; we will have to change client notification in future
+	// In-game messages.
 	private String makeGameInfoMsg() {
 
 		int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
@@ -290,11 +233,139 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
+	// Utility functions.
+	/**
+	 * Add a player to the list of players in the lobby.
+	 * 
+	 * @param numberRep
+	 *            The number representation of the player (0-4).
+	 */
+	private void addPlayer(int numberRep) {
+
+		Color color = availablePlayerColors.remove(0);
+		String rgb = colorToString(color);
+
+		PlayerStruct p;
+		p = new PlayerStruct(numberRep, "Player " + numberRep, rgb);
+		lobbyPlayers.add(p);
+	}
+
+	/**
+	 * Remove a player from the list of the players in the lobby.
+	 * 
+	 * @param numberRep
+	 *            The number representation of the player (0-4).
+	 */
+	private void removePlayer(int numberRep) {
+
+		for (int i = 0; i < lobbyPlayers.size(); i++) {
+			if (lobbyPlayers.get(i).numberRep == numberRep) {
+
+				// Retrieve used color.
+				String colorString = lobbyPlayers.get(i).color;
+				Color color = stringToColor(colorString);
+				availablePlayerColors.add(0, color);
+
+				lobbyPlayers.remove(i);
+			}
+		}
+	}
+
+	/**
+	 * Convert a Color to a String of length nine consisting of an RGB value.
+	 * Each individual color value (R, G, B) is a string of length three,
+	 * containing a value from "000" to "255".
+	 * 
+	 * @param color
+	 *            A Color to be converted to a String representation.
+	 * 
+	 * @return A String representing the input Color.
+	 */
+	private String colorToString(Color color) {
+
+		DecimalFormat df = new DecimalFormat("000");
+
+		String r = df.format(color.getRed());
+		String g = df.format(color.getGreen());
+		String b = df.format(color.getBlue());
+		String rgb = r + g + b;
+
+		return rgb;
+	}
+
+	/**
+	 * Convert a String of length nine to a Color. The string consists of an RGB
+	 * value; with each being 3 characters each containing a value from "000" to
+	 * "255".
+	 * 
+	 * @param string
+	 *            The String to be converted to a Color.
+	 * 
+	 * @return A Color representing the input String.
+	 */
+	private Color stringToColor(String string) {
+
+		int r = Integer.parseInt(string.substring(0, 3));
+		int g = Integer.parseInt(string.substring(3, 6));
+		int b = Integer.parseInt(string.substring(6, 9));
+
+		return new Color(r, g, b);
+	}
+
+	/**
+	 * Return the next free number representation for a player.
+	 * 
+	 * @return An integer representing the number (Id) for a new player.
+	 */
+	private int getFreePlayerSlot() {
+
+		// Find which player slot is not used. To do this record all used slots,
+		// sort them, and then run through until we find a slot (number) which
+		// is not used.
+		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>();
+		int candidateSlot = 0;
+
+		for (int i = 0; i < lobbyPlayers.size(); i++) {
+			usedPlayerSlots.add(lobbyPlayers.get(i).numberRep);
+		}
+
+		Collections.sort(usedPlayerSlots);
+
+		for (int i = 0; i < usedPlayerSlots.size(); i++) {
+			if (usedPlayerSlots.get(i).intValue() == candidateSlot) {
+				candidateSlot++;
+			}
+		}
+
+		return candidateSlot;
+	}
+
+	/**
+	 * Given an array of messages, create an ArrayList of them.
+	 * 
+	 * @param messages
+	 *            An array of messages (strings).
+	 * 
+	 * @return An ArrayList containing the input array in the same order.
+	 */
 	private ArrayList<String> makeArray(String... messages) {
 
 		return new ArrayList<String>(Arrays.asList(messages));
 	}
 
+	/**
+	 * Process input received from a game client/user. Depending on the game
+	 * state, carry out an appropriate action, and return any relevant updates
+	 * to the client(s)/user(s).
+	 * 
+	 * @param input
+	 *            A string message which represents a game action (see message
+	 *            format at the top of this file).
+	 * 
+	 * @return An ArrayList of string messages to return to the
+	 *         client(s)/user(s).
+	 */
+	@Override
 	public ArrayList<String> processInput(String input) {
 
 		// First we have some actions which are able to be called at any point
@@ -311,7 +382,7 @@ public class GameProtocol implements SocketProtocol {
 
 			// Assign a player to the client which has joined the lobby.
 			if (lobbyPlayers.size() >= 5) {
-				return makeArray(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 			}
 
 			int playerSlot = getFreePlayerSlot();
@@ -323,6 +394,26 @@ public class GameProtocol implements SocketProtocol {
 			String updateLobby = makeUpdateLobbyMsg();
 
 			return makeArray(assignPlayer, updateLobby);
+		}
+
+		if (parsedMessage.get(0).equals("UPDATEPLAYER")) {
+
+			int numberRep = Integer.parseInt(parsedMessage.get(2));
+			String name = parsedMessage.get(4);
+			String color = parsedMessage.get(6);
+
+			for (int i = 0; i < lobbyPlayers.size(); i++) {
+
+				PlayerStruct lobbyPlayer = lobbyPlayers.get(i);
+
+				if (lobbyPlayer.numberRep == numberRep) {
+					lobbyPlayer.name = name;
+					lobbyPlayer.color = color;
+				}
+			}
+
+			String updateLobby = makeUpdateLobbyMsg();
+			return makeArray(updateLobby);
 		}
 
 		if (parsedMessage.get(0).equals("LEAVELOBBY")) {
@@ -344,7 +435,7 @@ public class GameProtocol implements SocketProtocol {
 			int numPlayers = 0;
 
 			if (!parsedMessage.get(0).equals("INIT")) {
-				return makeArray(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("numPlayers")) {
@@ -355,13 +446,12 @@ public class GameProtocol implements SocketProtocol {
 			gameState = GameState.DRAW_TILE;
 
 			return makeArray(makeInitMsg(currentPlayer));
-
 		}
 
 		if (GameState.DRAW_TILE == gameState) {
 
 			if (!parsedMessage.get(0).equals("DRAWTILE")) {
-				return makeArray(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -369,7 +459,8 @@ public class GameProtocol implements SocketProtocol {
 				// The client is telling us that a different player is taking
 				// a tile than we told them. This is incorrect.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.replySender,
+							SocketProtocol.NAK);
 				}
 
 				// Otherwise continue the game by drawing a tile for the current
@@ -392,7 +483,7 @@ public class GameProtocol implements SocketProtocol {
 
 			if (!parsedMessage.get(0).equals("PLACETILE")
 					&& !parsedMessage.get(0).equals("ROTATETILE")) {
-				return makeArray(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -400,7 +491,8 @@ public class GameProtocol implements SocketProtocol {
 				// Again, check the player the client is telling us that's
 				// playing is actually the player whose turn it is.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.replySender,
+							SocketProtocol.NAK);
 				}
 
 				// Check what the client wants us to do.
@@ -464,7 +556,8 @@ public class GameProtocol implements SocketProtocol {
 						return ret;
 
 					} else {
-						return makeArray(SocketProtocol.NAK);
+						return makeArray(SocketProtocol.replySender,
+								SocketProtocol.NAK);
 					}
 				}
 			}
@@ -475,7 +568,8 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(0).equals("ENDTURN")) {
 
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.replySender,
+							SocketProtocol.NAK);
 				}
 
 				return makeArray(SocketProtocol.replyAll
@@ -501,14 +595,15 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
-				return makeArray(SocketProtocol.NAK);
+				return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the client is synchronized wrt/ player turn.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.replySender,
+							SocketProtocol.NAK);
 				}
 
 				// If everything is good; we're synchronized, continue.
@@ -562,18 +657,18 @@ public class GameProtocol implements SocketProtocol {
 					return ret;
 
 				} else {
-					return makeArray(SocketProtocol.NAK);
+					return makeArray(SocketProtocol.replySender,
+							SocketProtocol.NAK);
 				}
-
 			}
 		}
 
 		// End game state.
 		if (GameState.END_GAME == gameState) {
 
-			return makeArray(SocketProtocol.EXIT);
+			return makeArray(SocketProtocol.replyAll, SocketProtocol.EXIT);
 		}
 
-		return makeArray(SocketProtocol.NAK);
+		return makeArray(SocketProtocol.replySender, SocketProtocol.NAK);
 	}
 }
