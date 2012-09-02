@@ -20,18 +20,22 @@ public class MultiSocketServerThread extends Thread {
 	private int client = 0;
 	private SocketProtocol protocol = null;
 
+	private Hashtable<Integer, MultiSocketServerThread> serverSockets = null;
 	private Hashtable<Integer, Socket> clientSockets = null;
 	private Hashtable<Integer, PrintWriter> clientWriters;
 	private Hashtable<Integer, BufferedReader> clientReaders;
 
-	public MultiSocketServerThread(Hashtable<Integer, Socket> clientSockets,
-			int client, SocketProtocol protocol) {
+	public MultiSocketServerThread(
+			Hashtable<Integer, MultiSocketServerThread> serverSockets,
+			Hashtable<Integer, Socket> clientSockets, int client,
+			SocketProtocol protocol) {
 
 		super("MultiSocketServerThread");
 
 		this.client = client;
 		this.protocol = protocol;
 
+		this.serverSockets = serverSockets;
 		this.clientSockets = clientSockets;
 		clientWriters = new Hashtable<Integer, PrintWriter>();
 		clientReaders = new Hashtable<Integer, BufferedReader>();
@@ -42,11 +46,11 @@ public class MultiSocketServerThread extends Thread {
 		clientWriters.clear();
 		clientReaders.clear();
 
-		Iterator<Integer> cSockets = clientSockets.keySet().iterator();
+		Iterator<Integer> clientSocketIter = clientSockets.keySet().iterator();
 
-		while (cSockets.hasNext()) {
+		while (clientSocketIter.hasNext()) {
 
-			Integer client = cSockets.next();
+			Integer client = clientSocketIter.next();
 
 			try {
 				Socket clientSocket = clientSockets.get(client);
@@ -110,27 +114,45 @@ public class MultiSocketServerThread extends Thread {
 
 					} else if (messageRecipient.equals(SocketProtocol.replyAll)) {
 
-						for (int j = 0; j < clientWriters.size(); j++) {
-							clientWriters.get(j).println(outLine);
+						Iterator<Integer> clientWriterIter;
+						clientWriterIter = clientWriters.keySet().iterator();
+
+						while (clientWriterIter.hasNext()) {
+							Integer clientWriter = clientWriterIter.next();
+							clientWriters.get(clientWriter).println(outLine);
 						}
 					}
 
 					if (outLine.equals(SocketProtocol.EXIT)) {
-						break;
+						// Close clientWriter & reader for the client.
+						clientWriters.get(client).close();
+						clientReaders.get(client).close();
+
+						clientWriters.remove(client);
+						clientReaders.remove(client);
+
+						// Close the client socket.
+						// Remove the client from the list.
+						clientSockets.get(client).close();
+						clientSockets.remove(client);
+
+						// Remove the server from the list.
+						// Server & Client are given the same ID.
+						serverSockets.remove(client);
+
+						// Update the client list for other servers in the game.
+						Iterator<Integer> servSocketIter;
+						servSocketIter = serverSockets.keySet().iterator();
+
+						while (servSocketIter.hasNext()) {
+							Integer server = servSocketIter.next();
+							serverSockets.get(server).updateClientList();
+						}
+
+						return;
 					}
 				}
 			}
-
-			// TODO
-			for (int i = 0; i < clientWriters.size(); i++) {
-				clientWriters.get(i).close();
-			}
-
-			for (int i = 0; i < clientReaders.size(); i++) {
-				clientReaders.get(i).close();
-			}
-
-			clientSockets.get(client).close();
 
 		} catch (Exception e) {
 		}

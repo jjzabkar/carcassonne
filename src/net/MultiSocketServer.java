@@ -3,6 +3,7 @@ package net;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -54,18 +55,22 @@ public class MultiSocketServer {
 
 			while (true) {
 
-				clients.put(currentClientID, serverSocket.accept());
+				Socket client = serverSocket.accept();
+				clients.put(currentClientID, client);
 
 				MultiSocketServerThread serverThread;
-				serverThread = new MultiSocketServerThread(clients,
+				serverThread = new MultiSocketServerThread(servers, clients,
 						currentClientID, socketProtocol);
 				serverThread.start();
 
 				// When a new client is connected we get each server to update
 				// its client list. We don't update the just added server's
 				// client list as it's called explicitly in the thread itself.
-				for (int i = 0; i < servers.size(); i++) {
-					servers.get(i).updateClientList();
+				Iterator<Integer> servSocketIter = servers.keySet().iterator();
+
+				while (servSocketIter.hasNext()) {
+					Integer server = servSocketIter.next();
+					servers.get(server).updateClientList();
 				}
 
 				servers.put(currentClientID, serverThread);
