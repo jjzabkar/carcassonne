@@ -30,11 +30,12 @@ public class MultiSocketServer {
 	 * @param protocol
 	 *            The protocol to run on the clients.
 	 */
-	public MultiSocketServer(int port, SocketProtocol protocol) {
+	public MultiSocketServer(int port, Class<? extends SocketProtocol> protocol) {
 
 		// Bind the server to the port.
 		try {
 			ServerSocket serverSocket = new ServerSocket(port);
+			SocketProtocol sp = protocol.newInstance();
 			int numClients = 0;
 
 			while (numClients < MAX_NUM_CLIENTS) {
@@ -43,7 +44,7 @@ public class MultiSocketServer {
 
 				MultiSocketServerThread serverThread;
 				serverThread = new MultiSocketServerThread(clients, numClients,
-						protocol);
+						sp);
 				serverThread.start();
 
 				// When a new client is connected we get each server to update
