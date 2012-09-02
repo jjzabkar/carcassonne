@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -15,21 +17,24 @@ import java.util.ArrayList;
  */
 public class MultiSocketServerThread extends Thread {
 
-	private ArrayList<Socket> clientSockets = null;
 	private int client = 0;
 	private SocketProtocol protocol = null;
 
-	private ArrayList<PrintWriter> clientWriters = new ArrayList<PrintWriter>();
-	private ArrayList<BufferedReader> clientReaders = new ArrayList<BufferedReader>();
+	private Hashtable<Integer, Socket> clientSockets = null;
+	private Hashtable<Integer, PrintWriter> clientWriters;
+	private Hashtable<Integer, BufferedReader> clientReaders;
 
-	public MultiSocketServerThread(ArrayList<Socket> clientSockets, int client,
-			SocketProtocol protocol) {
+	public MultiSocketServerThread(Hashtable<Integer, Socket> clientSockets,
+			int client, SocketProtocol protocol) {
 
 		super("MultiSocketServerThread");
 
-		this.clientSockets = clientSockets;
 		this.client = client;
 		this.protocol = protocol;
+
+		this.clientSockets = clientSockets;
+		clientWriters = new Hashtable<Integer, PrintWriter>();
+		clientReaders = new Hashtable<Integer, BufferedReader>();
 	}
 
 	public synchronized void updateClientList() {
@@ -37,19 +42,24 @@ public class MultiSocketServerThread extends Thread {
 		clientWriters.clear();
 		clientReaders.clear();
 
-		for (int i = 0; i < clientSockets.size(); i++) {
+		Iterator<Integer> cSockets = clientSockets.keySet().iterator();
+
+		while (cSockets.hasNext()) {
+
+			Integer client = cSockets.next();
 
 			try {
-				Socket clientSocket = clientSockets.get(i);
+				Socket clientSocket = clientSockets.get(client);
 
 				OutputStream outStream = clientSocket.getOutputStream();
 				InputStream inStream = clientSocket.getInputStream();
 				InputStreamReader inStreamReader = new InputStreamReader(
 						inStream);
 
-				clientWriters.add(i, new PrintWriter(outStream, true));
-				clientReaders.add(i, new BufferedReader(inStreamReader));
+				clientWriters.put(client, new PrintWriter(outStream, true));
+				clientReaders.put(client, new BufferedReader(inStreamReader));
 			} catch (Exception e) {
+				// TODO
 			}
 		}
 	}
@@ -82,6 +92,8 @@ public class MultiSocketServerThread extends Thread {
 					} else if (outLineArray[0].equals(SocketProtocol.replyAll)) {
 
 						messageRecipient = SocketProtocol.replyAll;
+					} else {
+						// TODO
 					}
 
 					// Remove the message recipient header from the message as
@@ -109,6 +121,7 @@ public class MultiSocketServerThread extends Thread {
 				}
 			}
 
+			// TODO
 			for (int i = 0; i < clientWriters.size(); i++) {
 				clientWriters.get(i).close();
 			}

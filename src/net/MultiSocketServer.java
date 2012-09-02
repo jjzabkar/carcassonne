@@ -2,7 +2,7 @@ package net;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
@@ -11,19 +11,22 @@ import java.util.ArrayList;
  */
 public class MultiSocketServer {
 
-	private final int MAX_NUM_CLIENTS = 5;
+	private int currentClientID = 0;
 
-	private ArrayList<MultiSocketServerThread> servers = new ArrayList<MultiSocketServerThread>();
-	private ArrayList<Socket> clients = new ArrayList<Socket>();
+	private int port;
+	private Class<? extends SocketProtocol> protocol;
+
+	private Hashtable<Integer, MultiSocketServerThread> servers;
+	private Hashtable<Integer, Socket> clients;
 
 	/**
 	 * Constructor for the Server.
 	 * 
-	 * Allow MAX_NUM_CLIENTS clients to connect to the server. With each
-	 * connection we create a new thread to server the client, as well as
-	 * passing in the list of all clients so that messages can be multicast if
-	 * need be. When a new client is connected, we call on each thread to update
-	 * its client list.
+	 * Allow clients to connect to the server. With each connection we create a
+	 * new thread to serve the client, as well as passing in the list of all
+	 * clients so that messages can be sent to all clients if need be. When a
+	 * new client is connected, we call on each thread to update its client
+	 * list.
 	 * 
 	 * @param port
 	 *            The port number to run the server on.
@@ -32,19 +35,30 @@ public class MultiSocketServer {
 	 */
 	public MultiSocketServer(int port, Class<? extends SocketProtocol> protocol) {
 
-		// Bind the server to the port.
+		this.port = port;
+		this.protocol = protocol;
+
+		servers = new Hashtable<Integer, MultiSocketServerThread>();
+		clients = new Hashtable<Integer, Socket>();
+		run();
+	}
+
+	// TODO? max number of clients
+	// TODO? max number of clients per server (multiple games)
+
+	public void run() {
+
 		try {
 			ServerSocket serverSocket = new ServerSocket(port);
-			SocketProtocol sp = protocol.newInstance();
-			int numClients = 0;
+			SocketProtocol socketProtocol = protocol.newInstance();
 
-			while (numClients < MAX_NUM_CLIENTS) {
+			while (true) {
 
-				clients.add(serverSocket.accept());
+				clients.put(currentClientID, serverSocket.accept());
 
 				MultiSocketServerThread serverThread;
-				serverThread = new MultiSocketServerThread(clients, numClients,
-						sp);
+				serverThread = new MultiSocketServerThread(clients,
+						currentClientID, socketProtocol);
 				serverThread.start();
 
 				// When a new client is connected we get each server to update
@@ -54,14 +68,12 @@ public class MultiSocketServer {
 					servers.get(i).updateClientList();
 				}
 
-				servers.add(serverThread);
-				numClients++;
+				servers.put(currentClientID, serverThread);
+				currentClientID++;
 			}
 
-			serverSocket.close();
-
 		} catch (Exception e) {
-
+			// TODO
 		}
 	}
 }
