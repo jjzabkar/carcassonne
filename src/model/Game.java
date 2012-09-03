@@ -75,15 +75,6 @@ public class Game {
 	}
 
 	/**
-	 * Return whether or not the game has started.
-	 * 
-	 * @return whether there has been a tile placed yet or not.
-	 */
-	public boolean hasGameStarted() {
-		return gameBoard.hasGameStarted();
-	}
-
-	/**
 	 * Allow a player to place a meeple on the game board.
 	 * 
 	 * @param player

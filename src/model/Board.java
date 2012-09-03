@@ -15,6 +15,7 @@ import java.util.Iterator;
 public class Board {
 
 	private Tile[][] gameBoard;
+	private boolean isBoardEmpty = true;
 
 	// The board will keep track of the relationship between meeples and their
 	// position on it.
@@ -62,6 +63,8 @@ public class Board {
 			gameBoard[yBoard][xBoard] = tile;
 			player.setCurrentTile(null);
 			player.setLastTilePlacedPosition(xBoard, yBoard);
+
+			isBoardEmpty = false;
 
 			return 0;
 		}
@@ -170,28 +173,7 @@ public class Board {
 		boolean sidesMatch = topMatches && bottomMatches && rightMatches
 				&& leftMatches;
 
-		return (free && adjacent && sidesMatch) || !hasGameStarted();
-	}
-
-	/**
-	 * Answer whether there has been a tile placed yet or not.
-	 * 
-	 * @return True if any board positions are not null, false otherwise.
-	 */
-	public boolean hasGameStarted() {
-
-		boolean gameStarted = false;
-
-		// Check if there has already been a tile placed on the board.
-		for (int i = 0; i < gameBoard.length; i++) {
-			for (int j = 0; j < gameBoard[i].length; j++) {
-				if (gameBoard[j][i] != null) {
-					gameStarted = true;
-				}
-			}
-		}
-
-		return gameStarted;
+		return (free && adjacent && sidesMatch) || isBoardEmpty;
 	}
 
 	/**
