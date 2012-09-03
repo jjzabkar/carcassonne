@@ -1,6 +1,7 @@
 package net;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -22,9 +23,26 @@ public class MultiSocketServerThread extends Thread {
 
 	private Hashtable<Integer, MultiSocketServerThread> serverSockets = null;
 	private Hashtable<Integer, Socket> clientSockets = null;
-	private Hashtable<Integer, PrintWriter> clientWriters;
-	private Hashtable<Integer, BufferedReader> clientReaders;
+	private Hashtable<Integer, PrintWriter> clientWriters = null;
+	private Hashtable<Integer, BufferedReader> clientReaders = null;
 
+	/**
+	 * Constructor for MultiSocketServerThread. This class is created by a
+	 * MultiSocketServer, and is meant to connect directly to a client. It also
+	 * maintains a list of the other servers in order to tell them update
+	 * themselves when the associated client exits, and a list of the other
+	 * clients in order to send messages to all connected clients.
+	 * 
+	 * @param serverSockets
+	 *            A Hashtable of all servers.
+	 * @param clientSockets
+	 *            A Hashtable of all clients.
+	 * @param client
+	 *            An integer key which represents the client associated with
+	 *            this server.
+	 * @param protocol
+	 *            The message protocol to be followed.
+	 */
 	public MultiSocketServerThread(
 			Hashtable<Integer, MultiSocketServerThread> serverSockets,
 			Hashtable<Integer, Socket> clientSockets, int client,
@@ -41,6 +59,10 @@ public class MultiSocketServerThread extends Thread {
 		clientReaders = new Hashtable<Integer, BufferedReader>();
 	}
 
+	/**
+	 * Update the client list for a server. This clears the client readers &
+	 * writers and rebuilds them based on the clientSockets list.
+	 */
 	public synchronized void updateClientList() {
 
 		clientWriters.clear();
@@ -51,10 +73,9 @@ public class MultiSocketServerThread extends Thread {
 		while (clientSocketIter.hasNext()) {
 
 			Integer client = clientSocketIter.next();
+			Socket clientSocket = clientSockets.get(client);
 
 			try {
-				Socket clientSocket = clientSockets.get(client);
-
 				OutputStream outStream = clientSocket.getOutputStream();
 				InputStream inStream = clientSocket.getInputStream();
 				InputStreamReader inStreamReader = new InputStreamReader(
@@ -62,9 +83,68 @@ public class MultiSocketServerThread extends Thread {
 
 				clientWriters.put(client, new PrintWriter(outStream, true));
 				clientReaders.put(client, new BufferedReader(inStreamReader));
-			} catch (Exception e) {
+
+			} catch (IOException e) {
+				// Getting either (or both) of the output and input streams has
+				// failed. In this case we'll remove the offending socket.
 				// TODO
 			}
+		}
+	}
+
+	/**
+	 * Remove the specified client from the list. This closes any associated
+	 * readers & writers along with closing the socket itself. The removeServer
+	 * method should follow this to remove the corresponding server.
+	 * 
+	 * @param client
+	 *            An integer key which represents the client to remove (they're
+	 *            stored in a Hashtable).
+	 */
+	private void removeClient(int client) {
+
+		// Close clientWriter & reader for the client.
+		clientWriters.get(client).close();
+		try {
+			clientReaders.get(client).close();
+		} catch (IOException io) {
+			// Working on removing references of the object anyway; it should
+			// be garbage collected eventually.
+		}
+
+		clientWriters.remove(client);
+		clientReaders.remove(client);
+
+		// Close the client socket.
+		// Remove the client from the list.
+		try {
+			clientSockets.get(client).close();
+		} catch (IOException io) {
+			// Working on removing references of the object anyway; it should
+			// be garbage collected eventually.
+		}
+		clientSockets.remove(client);
+	}
+
+	/**
+	 * Remove the specified server from the list, and update all servers to have
+	 * this change reflected.
+	 * 
+	 * @param server
+	 *            An integer key which represents the server to remove (they're
+	 *            stored in a Hashtable).
+	 */
+	private void removeServer(int server) {
+
+		// Remove the server from the list.
+		serverSockets.remove(server);
+
+		// Update the client list for other servers in the game.
+		Iterator<Integer> serverSocketIter = serverSockets.keySet().iterator();
+
+		while (serverSocketIter.hasNext()) {
+			Integer serverToUpdate = serverSocketIter.next();
+			serverSockets.get(serverToUpdate).updateClientList();
 		}
 	}
 
@@ -73,6 +153,10 @@ public class MultiSocketServerThread extends Thread {
 
 		String inputLine;
 		ArrayList<String> outputLines;
+
+		String outLine;
+		String[] outLineArray;
+		String messageRecipient;
 
 		updateClientList();
 
@@ -85,9 +169,8 @@ public class MultiSocketServerThread extends Thread {
 
 				for (int i = 0; i < outputLines.size(); i++) {
 
-					String outLine = outputLines.get(i);
-					String messageRecipient = SocketProtocol.replyAll;
-					String[] outLineArray = outLine.split(";");
+					outLine = outputLines.get(i);
+					outLineArray = outLine.split(";");
 
 					if (outLineArray[0].equals(SocketProtocol.replySender)) {
 
@@ -97,7 +180,8 @@ public class MultiSocketServerThread extends Thread {
 
 						messageRecipient = SocketProtocol.replyAll;
 					} else {
-						// TODO
+						// If we don't get a well formed message then skip it.
+						continue;
 					}
 
 					// Remove the message recipient header from the message as
@@ -124,37 +208,18 @@ public class MultiSocketServerThread extends Thread {
 					}
 
 					if (outLine.equals(SocketProtocol.EXIT)) {
-						// Close clientWriter & reader for the client.
-						clientWriters.get(client).close();
-						clientReaders.get(client).close();
 
-						clientWriters.remove(client);
-						clientReaders.remove(client);
-
-						// Close the client socket.
-						// Remove the client from the list.
-						clientSockets.get(client).close();
-						clientSockets.remove(client);
-
-						// Remove the server from the list.
-						// Server & Client are given the same ID.
-						serverSockets.remove(client);
-
-						// Update the client list for other servers in the game.
-						Iterator<Integer> servSocketIter;
-						servSocketIter = serverSockets.keySet().iterator();
-
-						while (servSocketIter.hasNext()) {
-							Integer server = servSocketIter.next();
-							serverSockets.get(server).updateClientList();
-						}
-
+						removeClient(client);
+						removeServer(client); // Server & Client have equal ID.
 						return;
 					}
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (IOException io) {
+			// Readline has created an exception in the main loop. Close down
+			// the system and remove all related sockets, readers, writers, etc.
+			// TODO
 		}
 	}
 }
