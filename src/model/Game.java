@@ -41,6 +41,11 @@ public class Game {
 	 */
 	public void drawTile(Player player) {
 		drawPile.draw(player);
+
+		// Re-draw if we get a tile which is not able to be placed.
+		while (!gameBoard.canPlaceTile(player)) {
+			drawPile.draw(player);
+		}
 	}
 
 	/**

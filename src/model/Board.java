@@ -70,6 +70,46 @@ public class Board {
 	}
 
 	/**
+	 * Check if it is possible for a tile to be placed on the board.
+	 * 
+	 * @param player
+	 *            The player which is placing the tile.
+	 * 
+	 * @return false if the tile can not be placed, true otherwise.
+	 */
+	public boolean canPlaceTile(Player player) {
+
+		Tile tile = player.getCurrentTile();
+		boolean canPlaceTile = false;
+
+		if (tile == null) {
+			return false;
+		}
+
+		// For each position (excluding the borders) check the neighbor tiles to
+		// see if the current tile can be placed.
+		for (int i = 1; i < gameBoard.length - 1; i++) {
+			for (int j = 1; j < gameBoard[i].length - 1; j++) {
+
+				// Check if the tile can be placed in all orientations.
+				// To keep the ui rep. same as the model rep., always rotate
+				// enough to bring back to initial position (4 times).
+				for (int k = 0; k < 4; k++) {
+					canPlaceTile |= isTilePosValid(tile, j, i);
+					tile.rotateClockwise();
+				}
+
+				// Speed things up; return if we already know the answer.
+				if (canPlaceTile) {
+					return canPlaceTile;
+				}
+			}
+		}
+
+		return canPlaceTile;
+	}
+
+	/**
 	 * Verifies whether a tile can be placed at a specified board position.
 	 * 
 	 * There are three separate conditions which have to be met. The first is

@@ -289,27 +289,27 @@ public class DrawPile {
 	/**
 	 * Allow a player to take a tile from the draw pile.
 	 * 
-	 * @param aPlayer
+	 * @param player
 	 *            The player which receives the tile.
 	 * @return a non-zero integer if there are no tiles left in the pile, zero
 	 *         otherwise.
 	 */
-	public int draw(Player aPlayer) {
+	public int draw(Player player) {
 
-		if (this.tiles.isEmpty()) {
+		if (tiles.isEmpty()) {
 			return 1;
 		}
 
 		if (firstTurn) {
-			aPlayer.setCurrentTile(new Tile(firstDrawnTile, "CR"));
-			this.firstTurn = false;
+			player.setCurrentTile(new Tile(firstDrawnTile, "CR"));
+			firstTurn = false;
 
 		} else {
-			aPlayer.setCurrentTile(this.tiles.remove(0));
+			player.setCurrentTile(tiles.remove(0));
 		}
 
 		// For now, let's just re-shuffle the tiles after every draw.
-		Collections.shuffle(this.tiles, new Random(System.nanoTime()));
+		Collections.shuffle(tiles, new Random(System.nanoTime()));
 
 		return 0;
 	}
