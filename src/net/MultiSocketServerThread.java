@@ -29,7 +29,7 @@ public class MultiSocketServerThread extends Thread {
 	/**
 	 * Constructor for MultiSocketServerThread. This class is created by a
 	 * MultiSocketServer, and is meant to connect directly to a client. It also
-	 * maintains a list of the other servers in order to tell them update
+	 * maintains a list of the other servers in order to tell them to update
 	 * themselves when the associated client exits, and a list of the other
 	 * clients in order to send messages to all connected clients.
 	 * 
@@ -55,6 +55,7 @@ public class MultiSocketServerThread extends Thread {
 
 		this.serverSockets = serverSockets;
 		this.clientSockets = clientSockets;
+
 		clientWriters = new Hashtable<Integer, PrintWriter>();
 		clientReaders = new Hashtable<Integer, BufferedReader>();
 	}
