@@ -15,7 +15,7 @@ public class Game {
 	public Game(int numPlayers) {
 		// TODO input checking on number of players
 		// Initialize the players.
-		this.initPlayers(numPlayers);
+		initPlayers(numPlayers);
 	}
 
 	/**
@@ -26,10 +26,10 @@ public class Game {
 	 */
 	private void initPlayers(int numPlayers) {
 
-		this.players = new Player[numPlayers];
+		players = new Player[numPlayers];
 
 		for (int i = 0; i < numPlayers; i++) {
-			this.players[i] = new Player();
+			players[i] = new Player();
 		}
 	}
 
@@ -122,28 +122,48 @@ public class Game {
 
 		ArrayList<BoardPosition> meeples = new ArrayList<BoardPosition>();
 
-		meeples.addAll(gameBoard.scoreCloisters(this.players, hasGameEnded));
-		meeples.addAll(gameBoard.scoreRoads(this.players, hasGameEnded));
-		meeples.addAll(gameBoard.scoreCities(this.players, hasGameEnded));
+		meeples.addAll(gameBoard.scoreCloisters(players, hasGameEnded));
+		meeples.addAll(gameBoard.scoreRoads(players, hasGameEnded));
+		meeples.addAll(gameBoard.scoreCities(players, hasGameEnded));
 
 		if (hasGameEnded) {
-			meeples.addAll(gameBoard.scoreFields(this.players));
+			meeples.addAll(gameBoard.scoreFields(players));
 		}
 
 		return meeples;
 	}
 
+	/**
+	 * Allow a player to leave the game before it has ended.
+	 * 
+	 * The player which is leaving the game will have their score set to zero,
+	 * their meeples removed from the board, and they will be removed from turn
+	 * rotation.
+	 * 
+	 * @param player
+	 *            The player that is leaving the game.
+	 */
+	public void exitGame(Player player) {
+
+		gameBoard.removeMeeples(player);
+
+		// This is going to be interesting; the game protocol uses the player's
+		// position in the array to identify them. Perhaps this should be
+		// converted to a hash map. (this was already done in gameui for ui
+		// elements bound to a specific user).
+	}
+
 	public Player[] getPlayers() {
-		return this.players;
+		return players;
 	}
 
 	public int getNumPlayers() {
-		return this.players.length;
+		return players.length;
 	}
 
 	// Pass this off to the gameboard as it keeps track of positioning.
 	public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
-		return this.gameBoard.getMeeple(xBoard, yBoard, xTile, yTile);
+		return gameBoard.getMeeple(xBoard, yBoard, xTile, yTile);
 	}
 
 	// Pass off info about the board, used for ui to calculate the canvas size.

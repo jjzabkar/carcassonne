@@ -237,6 +237,11 @@ public class Board {
 		return 1;
 	}
 
+	// TODO: this.
+	public int removeMeeples(Player player) {
+		return 0;
+	}
+
 	/**
 	 * Find the number of meeples which are in play for a player.
 	 * 
