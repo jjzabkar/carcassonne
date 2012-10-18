@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Game {
 	private Board gameBoard = new Board();
 	private DrawPile drawPile = new DrawPile();
-	private Player[] players;
+	private ArrayList<Player> players = new ArrayList<Player>();
 
 	public Game(int numPlayers) {
 		// TODO input checking on number of players
@@ -26,10 +26,8 @@ public class Game {
 	 */
 	private void initPlayers(int numPlayers) {
 
-		players = new Player[numPlayers];
-
 		for (int i = 0; i < numPlayers; i++) {
-			players[i] = new Player();
+			players.add(new Player());
 		}
 	}
 
@@ -153,12 +151,12 @@ public class Game {
 		// elements bound to a specific user).
 	}
 
-	public Player[] getPlayers() {
+	public ArrayList<Player> getPlayers() {
 		return players;
 	}
 
 	public int getNumPlayers() {
-		return players.length;
+		return players.size();
 	}
 
 	// Pass this off to the gameboard as it keeps track of positioning.

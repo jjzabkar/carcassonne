@@ -2,6 +2,9 @@ package tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+
 import model.Board;
 import model.Meeple;
 import model.Player;
@@ -264,7 +267,10 @@ public class BoardTest {
 		err = board.placeTile(player, 5, 4);
 		assertEquals(0, err);
 
-		board.scoreRoads(new Player[] { player }, false);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreRoads(playersList, false);
 		assertEquals(2, player.getScore());
 	}
 
@@ -281,7 +287,10 @@ public class BoardTest {
 		err = board.placeMeeple(player, 4, 4, 5, 3);
 		assertEquals(0, err);
 
-		board.scoreRoads(new Player[] { player }, true);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreRoads(playersList, true);
 		assertEquals(1, player.getScore());
 	}
 
@@ -307,7 +316,10 @@ public class BoardTest {
 		err = board.placeTile(player, 3, 4);
 		assertEquals(0, err);
 
-		board.scoreCities(new Player[] { player }, false);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreCities(playersList, false);
 		assertEquals(4, player.getScore());
 	}
 
@@ -324,7 +336,10 @@ public class BoardTest {
 		err = board.placeMeeple(player, 4, 4, 0, 1);
 		assertEquals(0, err);
 
-		board.scoreCities(new Player[] { player }, true);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreCities(playersList, true);
 		assertEquals(1, player.getScore());
 	}
 
@@ -358,7 +373,11 @@ public class BoardTest {
 		err = board.placeMeeple(player2, 5, 3, 4, 6);
 		assertEquals(0, err);
 
-		board.scoreCities(new Player[] { player, player2 }, false);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+		playersList.add(player2);
+
+		board.scoreCities(playersList, false);
 		assertEquals(6, player.getScore());
 		assertEquals(0, player2.getScore());
 	}
@@ -417,7 +436,10 @@ public class BoardTest {
 		err = board.placeTile(player, 5, 5);
 		assertEquals(0, err);
 
-		board.scoreCloisters(new Player[] { player }, false);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreCloisters(playersList, false);
 		assertEquals(9, player.getScore());
 		// TODO meeple should also have been removed from the tile.
 	}
@@ -447,7 +469,10 @@ public class BoardTest {
 		err = board.placeTile(player, 7, 5);
 		assertEquals(0, err);
 
-		board.scoreCloisters(new Player[] { player }, true);
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreCloisters(playersList, true);
 		assertEquals(3, player.getScore());
 	}
 
@@ -476,7 +501,10 @@ public class BoardTest {
 		err = board.placeTile(player, 7, 6);
 		assertEquals(0, err);
 
-		board.scoreFields(new Player[] { player });
+		ArrayList<Player> playersList = new ArrayList<Player>();
+		playersList.add(player);
+
+		board.scoreFields(playersList);
 		assertEquals(3, player.getScore());
 	}
 

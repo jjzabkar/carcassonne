@@ -462,7 +462,7 @@ public class Board {
 	 * @return an ArrayList of BoardPosition which represent meeples that have
 	 *         been removed from the board.
 	 */
-	public ArrayList<BoardPosition> scoreCloisters(Player[] players,
+	public ArrayList<BoardPosition> scoreCloisters(ArrayList<Player> players,
 			boolean hasGameEnded) {
 
 		ArrayList<BoardPosition> removedMeeples = new ArrayList<BoardPosition>();
@@ -519,9 +519,11 @@ public class Board {
 					// Find out which player owns the meeple.
 					Player scorer = null;
 
-					for (int i = 0; i < players.length; i++) {
-						if (players[i].getMeeples().contains(meeple)) {
-							scorer = players[i];
+					for (int i = 0; i < players.size(); i++) {
+						Player player = players.get(i);
+
+						if (player.getMeeples().contains(meeple)) {
+							scorer = player;
 						}
 					}
 
@@ -553,7 +555,7 @@ public class Board {
 	 * @return an ArrayList of BoardPosition which represent meeples that have
 	 *         been removed from the board.
 	 */
-	public ArrayList<BoardPosition> scoreCities(Player[] players,
+	public ArrayList<BoardPosition> scoreCities(ArrayList<Player> players,
 			boolean hasGameEnded) {
 		return genericScore(players, TileType.CITY, hasGameEnded);
 	}
@@ -568,7 +570,7 @@ public class Board {
 	 * @return an ArrayList of BoardPosition which represent meeples that have
 	 *         been removed from the board.
 	 */
-	public ArrayList<BoardPosition> scoreRoads(Player[] players,
+	public ArrayList<BoardPosition> scoreRoads(ArrayList<Player> players,
 			boolean hasGameEnded) {
 		return genericScore(players, TileType.ROAD, hasGameEnded);
 	}
@@ -586,7 +588,7 @@ public class Board {
 	 * @return An ArrayList of players that will receive the points for the
 	 *         feature.
 	 */
-	private ArrayList<Player> getFeatureScorers(Player[] players,
+	private ArrayList<Player> getFeatureScorers(ArrayList<Player> players,
 			ArrayList<Meeple> meeplesOnFeature) {
 
 		// For each player check if they own each meeple on the feature; if they
@@ -604,9 +606,9 @@ public class Board {
 		ArrayList<Player> scoringPlayers = new ArrayList<Player>();
 		int max = 0;
 
-		for (int i = 0; i < players.length; i++) {
+		for (int i = 0; i < players.size(); i++) {
 
-			Player player = players[i];
+			Player player = players.get(i);
 
 			for (int j = 0; j < meeplesOnFeature.size(); j++) {
 
@@ -667,7 +669,7 @@ public class Board {
 	 * @return an ArrayList of BoardPosition which represent meeples that have
 	 *         been removed from the board.
 	 */
-	private ArrayList<BoardPosition> genericScore(Player[] players,
+	private ArrayList<BoardPosition> genericScore(ArrayList<Player> players,
 			TileType scoreTileType, boolean hasGameEnded) {
 
 		// Initialize the variables which will hold information about the
@@ -916,7 +918,7 @@ public class Board {
 	// castle to the field being explored. If there is, then check if it is a
 	// completed castle and add points, & the castle for future checking.
 	//
-	public ArrayList<BoardPosition> scoreFields(Player[] players) {
+	public ArrayList<BoardPosition> scoreFields(ArrayList<Player> players) {
 
 		// Initialize the variables which will hold information about the
 		// specific feature. These are reset for each feature.

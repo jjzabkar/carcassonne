@@ -152,9 +152,9 @@ public class GameProtocol implements SocketProtocol {
 	private String makePlayerInfoMsg(int player) {
 
 		int isCurrentPlayer = (player == currentPlayer) ? 1 : 0;
-		int playerScore = game.getPlayers()[player].getScore();
+		int playerScore = game.getPlayers().get(currentPlayer).getScore();
 
-		Player playerModel = game.getPlayers()[player];
+		Player playerModel = game.getPlayers().get(currentPlayer);
 		int numMeeplesPlaced = game.getNumMeeplesPlaced(playerModel);
 
 		String output = SocketProtocol.replyAll + ";INFO" + ";player;" + player
@@ -477,7 +477,7 @@ public class GameProtocol implements SocketProtocol {
 
 				// Otherwise continue the game by drawing a tile for the current
 				// player and letting the client know what the result was.
-				Player player = game.getPlayers()[currentPlayer];
+				Player player = game.getPlayers().get(currentPlayer);
 				game.drawTile(player);
 				gameState = GameState.PLACE_TILE;
 
@@ -516,7 +516,7 @@ public class GameProtocol implements SocketProtocol {
 						direction = parsedMessage.get(4);
 					}
 
-					Player player = game.getPlayers()[currentPlayer];
+					Player player = game.getPlayers().get(currentPlayer);
 
 					if (direction.equals("clockwise")) {
 						player.getCurrentTile().rotateClockwise();
@@ -544,7 +544,7 @@ public class GameProtocol implements SocketProtocol {
 						yBoard = Integer.parseInt(parsedMessage.get(6));
 					}
 
-					Player player = game.getPlayers()[currentPlayer];
+					Player player = game.getPlayers().get(currentPlayer);
 					int err = game.placeTile(player, xBoard, yBoard);
 
 					if (err == 0) {
@@ -633,7 +633,7 @@ public class GameProtocol implements SocketProtocol {
 					yTile = Integer.parseInt(parsedMessage.get(10));
 				}
 
-				Player player = game.getPlayers()[currentPlayer];
+				Player player = game.getPlayers().get(currentPlayer);
 
 				int err;
 				err = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
