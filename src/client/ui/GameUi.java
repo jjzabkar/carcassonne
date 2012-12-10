@@ -40,6 +40,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import server.net.GameProtocol;
+import server.net.MultiSocketServer;
+
 import client.model.MessageSender;
 import client.net.SocketClient;
 import client.net.SocketProtocol;
@@ -48,8 +51,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, SocketProtocol, MessageSender {
 
 	private static final long serialVersionUID = 1L;
-
-	// Socket client for communicating with the server.
+	
+	// Network settings, and server to be created if hosting the game.
+	private MultiSocketServer gameServer = null;
 	private SocketClient gameClient = null;
 	private String server = "localhost";
 	private int port = 4444;
@@ -197,12 +201,18 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		titleLabel.setVerticalTextPosition(JLabel.BOTTOM);
 		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
-
-		JButton playButton = new JButton("Multiplayer");
-		playButton.setVerticalTextPosition(AbstractButton.CENTER);
-		playButton.setHorizontalTextPosition(AbstractButton.CENTER);
-		playButton.setActionCommand("enterLobby");
-		playButton.addActionListener(this);
+		
+		JButton hostGameButton = new JButton("Host Game");
+		hostGameButton.setVerticalTextPosition(AbstractButton.CENTER);
+		hostGameButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		hostGameButton.setActionCommand("hostGame");
+		hostGameButton.addActionListener(this);
+		
+		JButton joinGameButton = new JButton("Join Game");
+		joinGameButton.setVerticalTextPosition(AbstractButton.CENTER);
+		joinGameButton.setHorizontalTextPosition(AbstractButton.CENTER);
+		joinGameButton.setActionCommand("joinGame");
+		joinGameButton.addActionListener(this);
 
 		JButton optionsButton = new JButton("Options");
 		optionsButton.setVerticalTextPosition(AbstractButton.CENTER);
@@ -227,8 +237,10 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gc.gridwidth = 2;
 		gc.gridheight = 1;
 		gc.fill = GridBagConstraints.HORIZONTAL;
-		titleContainer.add(playButton, gc);
+		titleContainer.add(hostGameButton, gc);
 		gc.gridy = 1;
+		titleContainer.add(joinGameButton, gc);
+		gc.gridy = 2;
 		gc.gridwidth = 1;
 		gc.fill = GridBagConstraints.NONE;
 		gc.insets = new Insets(2, 2, 20, 2);
@@ -710,7 +722,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			// Exit the program.
 			System.exit(0);
 
-		} else if ("enterLobby".equals(e.getActionCommand())) {
+		} else if ("hostGame".equals(e.getActionCommand())
+				|| "joinGame".equals(e.getActionCommand())) {
+			
+			if ("hostGame".equals(e.getActionCommand())) {
+				// Start up Server.
+				gameServer = new MultiSocketServer(port, GameProtocol.class);
+				server = "localhost";
+			}
 
 			// Start up client.
 			gameClient = new SocketClient(server, port, this);
