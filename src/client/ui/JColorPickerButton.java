@@ -12,12 +12,6 @@ import javax.swing.JComponent;
 
 import client.model.MessageSender;
 
-
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-08
- */
 class JColorPickerButton extends JComponent implements MouseListener,
 		MessageSender {
 

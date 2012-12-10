@@ -2,11 +2,6 @@ package client.ui;
 
 import java.awt.Color;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-09
- */
 class PlayerUi {
 
 	private String name;

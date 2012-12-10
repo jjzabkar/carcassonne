@@ -11,11 +11,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-011
- */
 public class MultiSocketServerThread extends Thread {
 
 	private int client = 0;

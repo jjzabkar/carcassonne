@@ -2,11 +2,6 @@ package server.model;
 
 import java.util.ArrayList;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-06-08
- */
 public class Game {
 	private Board gameBoard = new Board();
 	private DrawPile drawPile = new DrawPile();

@@ -5,11 +5,7 @@ package server.model;
  * needed. It is used in to keep track of meeple placement, and in the
  * scoring functions.
  */
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-05
- */
+
 public class BoardPosition {
 
 	public final int xBoard;

@@ -13,12 +13,6 @@ import javax.swing.JTextField;
 
 import client.model.MessageSender;
 
-
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-08
- */
 public class JPlayerSettingsPanel extends JPanel implements MessageSender {
 
 	private static final long serialVersionUID = 6618698655712246824L;

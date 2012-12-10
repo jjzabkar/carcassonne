@@ -1,6 +1,5 @@
 package server.tests;
 
-
 import org.junit.Test;
 
 import server.model.Meeple;

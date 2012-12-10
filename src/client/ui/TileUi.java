@@ -3,11 +3,6 @@ package client.ui;
 import java.awt.Color;
 import java.awt.Graphics;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-05
- */
 public class TileUi implements DrawableInterface {
 
 	private enum TileType {

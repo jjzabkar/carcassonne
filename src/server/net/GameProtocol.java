@@ -12,12 +12,6 @@ import server.model.GameState;
 import server.model.Player;
 import server.model.Tile;
 
-
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-05
- */
 public class GameProtocol implements SocketProtocol {
 
 	// Message format is as follows (client sends followed by server replies):

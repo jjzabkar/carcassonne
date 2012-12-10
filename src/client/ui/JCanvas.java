@@ -6,11 +6,6 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.1
- * @since 2011-11-21
- */
 class JCanvas extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private ArrayList<DrawableInterface> components = new ArrayList<DrawableInterface>();

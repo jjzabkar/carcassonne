@@ -9,11 +9,6 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-10
- */
 public class JPlayerStatusPanel extends JPanel {
 
 	private static final long serialVersionUID = -8476267311237741566L;

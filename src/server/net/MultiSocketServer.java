@@ -5,11 +5,6 @@ import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-08-011
- */
 public class MultiSocketServer {
 
 	private int currentClientID = 0;

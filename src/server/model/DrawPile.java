@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-07-02
- */
 public class DrawPile {
 
 	private ArrayList<Tile> tiles = new ArrayList<Tile>();

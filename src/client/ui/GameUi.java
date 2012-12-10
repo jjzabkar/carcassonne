@@ -44,12 +44,6 @@ import client.model.MessageSender;
 import client.net.SocketClient;
 import client.net.SocketProtocol;
 
-
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-06-28
- */
 public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, SocketProtocol, MessageSender {
 

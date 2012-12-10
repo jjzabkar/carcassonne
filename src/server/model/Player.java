@@ -3,11 +3,6 @@ package server.model;
 import java.awt.Point;
 import java.util.ArrayList;
 
-/**
- * @author Andrew Wylie <andrew.dale.wylie@gmail.com>
- * @version 1.0
- * @since 2012-06-08
- */
 public class Player {
 
 	public final static int NUM_MEEPLES = 7;
