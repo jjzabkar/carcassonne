@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-public class MultiSocketServer {
+public class MultiSocketServer extends Thread {
 
 	private int currentClientID = 0;
 
@@ -36,7 +36,6 @@ public class MultiSocketServer {
 
 		servers = new Hashtable<Integer, MultiSocketServerThread>();
 		clients = new Hashtable<Integer, Socket>();
-		run();
 	}
 
 	// TODO? max number of clients

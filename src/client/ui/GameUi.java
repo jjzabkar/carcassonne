@@ -728,6 +728,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			if ("hostGame".equals(e.getActionCommand())) {
 				// Start up Server.
 				gameServer = new MultiSocketServer(port, GameProtocol.class);
+				gameServer.start();
 				server = "localhost";
 			}
 
