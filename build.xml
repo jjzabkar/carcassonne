@@ -4,7 +4,7 @@
     <property name="src.dir" location="${basedir}/src" />
     <property name="build.dir" location="${basedir}/bin" />
 
-	<property name="resources.dir" value="resources" />
+	<property name="resources.dir" value="client/resources" />
     <property name="lib.dir" location="${basedir}/lib" />
     <property name="docs.dir" location="${basedir}/docs" />
     <property name="dist.dir" location="${basedir}/dist" />
