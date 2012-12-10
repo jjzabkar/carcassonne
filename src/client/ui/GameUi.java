@@ -76,7 +76,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// UI settings.
 	private String title = "Carcassonne";
-	private URL iconUrl = getClass().getResource("/client.resources/icon.png");
+	private URL iconUrl = getClass().getResource("/client/resources/icon.png");
 	private Image iconImage = Toolkit.getDefaultToolkit().getImage(iconUrl);
 
 	private String[] windowedResolutions = { "800 x 600", "1024 x 768",
@@ -564,7 +564,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Create the buttons for tile manipulation & turn/window control.
 		// Draw Pile.
-		URL drawTileUrl = getClass().getResource("/client.resources/tile-back.jpg");
+		URL drawTileUrl = getClass().getResource("/client/resources/tile-back.jpg");
 		ImageIcon drawTileImage = new ImageIcon(drawTileUrl);
 
 		int drawTileWidth = drawTileImage.getIconWidth();
