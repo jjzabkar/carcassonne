@@ -1,17 +1,18 @@
-package tests;
+package server.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 
-import model.Board;
-import model.Meeple;
-import model.Player;
-import model.Tile;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import server.model.Board;
+import server.model.Meeple;
+import server.model.Player;
+import server.model.Tile;
 
 public class BoardTest {
 

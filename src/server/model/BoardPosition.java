@@ -1,4 +1,4 @@
-package model;
+package server.model;
 
 /*
  * This class is used to keep track of a board position any time it is

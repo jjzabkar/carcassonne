@@ -1,7 +1,7 @@
-package model;
+package server.model;
 
-import net.GameProtocol;
-import net.MultiSocketServer;
+import server.net.GameProtocol;
+import server.net.MultiSocketServer;
 
 public class ServerMain {
 

@@ -1,4 +1,4 @@
-package net;
+package server.net;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import model.BoardPosition;
-import model.Game;
-import model.GameState;
-import model.Player;
-import model.Tile;
+import server.model.BoardPosition;
+import server.model.Game;
+import server.model.GameState;
+import server.model.Player;
+import server.model.Tile;
+
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>

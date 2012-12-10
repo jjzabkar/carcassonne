@@ -1,8 +1,9 @@
-package tests;
+package server.tests;
 
-import model.Meeple;
 
 import org.junit.Test;
+
+import server.model.Meeple;
 
 public class MeepleTest {
 

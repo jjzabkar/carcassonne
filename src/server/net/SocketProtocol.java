@@ -1,4 +1,4 @@
-package net;
+package server.net;
 
 import java.util.ArrayList;
 

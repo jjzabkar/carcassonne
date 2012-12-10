@@ -1,4 +1,4 @@
-package model;
+package server.model;
 
 /**
  * @author Andrew Wylie <andrew.dale.wylie@gmail.com>

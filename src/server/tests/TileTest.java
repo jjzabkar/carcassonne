@@ -1,12 +1,13 @@
-package tests;
+package server.tests;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import model.Tile;
-import model.TileType;
 
 import org.junit.Test;
+
+import server.model.Tile;
+import server.model.TileType;
 
 public class TileTest {
 
