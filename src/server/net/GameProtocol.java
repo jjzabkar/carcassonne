@@ -1,10 +1,13 @@
 package server.net;
 
 import java.awt.Color;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import server.model.BoardPosition;
 import server.model.Game;
@@ -71,7 +74,12 @@ public class GameProtocol implements SocketProtocol {
 	// game state to a proper state based on a few properties of our game. This
 	// allows us to not over-complicate the message passing protocol.
 
+	private HashSet<PrintWriter> senders = new HashSet<PrintWriter>();
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
+	
+	public void addSender(PrintWriter pw) {
+		senders.add(pw);
+	}
 
 	// Pre-game variables (lobby).
 	private ArrayList<PlayerStruct> lobbyPlayers = new ArrayList<PlayerStruct>();
@@ -351,6 +359,27 @@ public class GameProtocol implements SocketProtocol {
 
 		return new ArrayList<String>(Arrays.asList(messages));
 	}
+	
+	private ArrayList<String> disseminateMessage(String replyTo,
+			PrintWriter sender, ArrayList<String> processedMessage) {
+		// Finally return the proper message.
+		if (replyTo.equals(SocketProtocol.replyAll)) {
+			
+			Iterator<PrintWriter> printWriterIter = senders.iterator();
+			
+			while (printWriterIter.hasNext()) {
+				PrintWriter aSender = printWriterIter.next();
+				if (!aSender.equals(sender)) {
+					for (int i = 0; i < processedMessage.size(); i++) {
+						aSender.println(processedMessage.get(i));
+					}
+				}
+			}
+			
+		}
+
+		return processedMessage;
+	}
 
 	/**
 	 * Process input received from a game client/user. Depending on the game
@@ -365,7 +394,7 @@ public class GameProtocol implements SocketProtocol {
 	 *         client(s)/user(s).
 	 */
 	@Override
-	public ArrayList<String> processInput(String input) {
+	public ArrayList<String> processInput(PrintWriter sender, String input) {
 
 		// First we have some actions which are able to be called at any point
 		// during the game. These are requests for info about the game and any
@@ -376,6 +405,14 @@ public class GameProtocol implements SocketProtocol {
 		// duplicated code.
 		parsedMessage.clear();
 		parsedMessage.addAll(Arrays.asList(input.split(";")));
+		
+		// Split out the headers which determine who receives the message.
+		String replyTo = SocketProtocol.replySender;
+		
+		if (parsedMessage.get(0).equals(SocketProtocol.replyAll)
+				|| parsedMessage.get(0).equals(SocketProtocol.replySender)) {
+			replyTo = parsedMessage.remove(0);
+		}
 
 		// Allow a player to exit the game (lobby).
 		if (parsedMessage.get(0).equals(SocketProtocol.EXIT)) {
@@ -383,14 +420,14 @@ public class GameProtocol implements SocketProtocol {
 			String closeClient = SocketProtocol.replySender + ";"
 					+ SocketProtocol.EXIT;
 
-			return makeArray(closeClient);
+			return disseminateMessage(replyTo, sender, makeArray(closeClient));
 		}
 
 		if (parsedMessage.get(0).equals("JOINLOBBY")) {
 
 			// Assign a player to the client which has joined the lobby.
 			if (lobbyPlayers.size() >= 5) {
-				return makeArray(errorMsg);
+				return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 			}
 
 			int playerSlot = getFreePlayerSlot();
@@ -401,7 +438,7 @@ public class GameProtocol implements SocketProtocol {
 			// Send all the clients a message to update their lobbies.
 			String updateLobby = makeUpdateLobbyMsg();
 
-			return makeArray(assignPlayer, updateLobby);
+			return disseminateMessage(replyTo, sender, makeArray(assignPlayer, updateLobby));
 		}
 
 		if (parsedMessage.get(0).equals("UPDATEPLAYER")) {
@@ -421,7 +458,7 @@ public class GameProtocol implements SocketProtocol {
 			}
 
 			String updateLobby = makeUpdateLobbyMsg();
-			return makeArray(updateLobby);
+			return disseminateMessage(replyTo, sender, makeArray(updateLobby));
 		}
 
 		if (parsedMessage.get(0).equals("LEAVELOBBY")) {
@@ -432,7 +469,7 @@ public class GameProtocol implements SocketProtocol {
 			// Send all the clients a message to update their lobbies.
 			String updateLobby = makeUpdateLobbyMsg();
 
-			return makeArray(updateLobby);
+			return disseminateMessage(replyTo, sender, makeArray(updateLobby));
 		}
 
 		// If the game is just starting then we need to send over initialization
@@ -443,7 +480,7 @@ public class GameProtocol implements SocketProtocol {
 			int numPlayers = 0;
 
 			if (!parsedMessage.get(0).equals("INIT")) {
-				return makeArray(errorMsg);
+				return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 			}
 
 			if (parsedMessage.get(1).equals("numPlayers")) {
@@ -453,13 +490,13 @@ public class GameProtocol implements SocketProtocol {
 			game = new Game(numPlayers);
 			gameState = GameState.DRAW_TILE;
 
-			return makeArray(makeInitMsg(currentPlayer));
+			return disseminateMessage(replyTo, sender, makeArray(makeInitMsg(currentPlayer)));
 		}
 
 		if (GameState.DRAW_TILE == gameState) {
 
 			if (!parsedMessage.get(0).equals("DRAWTILE")) {
-				return makeArray(errorMsg);
+				return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -467,7 +504,7 @@ public class GameProtocol implements SocketProtocol {
 				// The client is telling us that a different player is taking
 				// a tile than we told them. This is incorrect.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(errorMsg);
+					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 				}
 
 				// Otherwise continue the game by drawing a tile for the current
@@ -481,8 +518,8 @@ public class GameProtocol implements SocketProtocol {
 				String identifier = tile.getIdentifier();
 				int orientation = tile.getOrientation();
 
-				return makeArray(makeDrawTileMsg(currentPlayer, identifier,
-						orientation));
+				return disseminateMessage(replyTo, sender, makeArray(makeDrawTileMsg(currentPlayer, identifier,
+						orientation)));
 			}
 		}
 
@@ -490,7 +527,7 @@ public class GameProtocol implements SocketProtocol {
 
 			if (!parsedMessage.get(0).equals("PLACETILE")
 					&& !parsedMessage.get(0).equals("ROTATETILE")) {
-				return makeArray(errorMsg);
+				return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -498,7 +535,7 @@ public class GameProtocol implements SocketProtocol {
 				// Again, check the player the client is telling us that's
 				// playing is actually the player whose turn it is.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(errorMsg);
+					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 				}
 
 				// Check what the client wants us to do.
@@ -521,8 +558,8 @@ public class GameProtocol implements SocketProtocol {
 						err = 1;
 					}
 
-					return makeArray(makeRotateTileMsg(currentPlayer,
-							direction, err));
+					return disseminateMessage(replyTo, sender, makeArray(makeRotateTileMsg(currentPlayer,
+							direction, err)));
 				}
 
 				if (parsedMessage.get(0).equals("PLACETILE")) {
@@ -562,7 +599,7 @@ public class GameProtocol implements SocketProtocol {
 						return ret;
 
 					} else {
-						return makeArray(errorMsg);
+						return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 					}
 				}
 			}
@@ -573,11 +610,11 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(0).equals("ENDTURN")) {
 
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(errorMsg);
+					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 				}
 
-				return makeArray(SocketProtocol.replyAll
-						+ ";ENDTURN;currentPlayer;" + parsedMessage.get(2));
+				return disseminateMessage(replyTo, sender, makeArray(SocketProtocol.replyAll
+						+ ";ENDTURN;currentPlayer;" + parsedMessage.get(2)));
 			}
 
 			// The player decided to end their turn after placing a tile.
@@ -593,20 +630,20 @@ public class GameProtocol implements SocketProtocol {
 				gameState = GameState.PLACE_MEEPLE;
 			}
 
-			return processInput(input);
+			return processInput(sender, input);
 		}
 
 		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
-				return makeArray(errorMsg);
+				return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the client is synchronized wrt/ player turn.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return makeArray(errorMsg);
+					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 				}
 
 				// If everything is good; we're synchronized, continue.
@@ -660,7 +697,7 @@ public class GameProtocol implements SocketProtocol {
 					return ret;
 
 				} else {
-					return makeArray(errorMsg);
+					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 				}
 			}
 		}
@@ -669,9 +706,9 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.END_GAME == gameState) {
 			String endGameMsg = SocketProtocol.replyAll + ";"
 					+ SocketProtocol.EXIT;
-			return makeArray(endGameMsg);
+			return disseminateMessage(replyTo, sender, makeArray(endGameMsg));
 		}
-
-		return makeArray(errorMsg);
+		
+		return disseminateMessage(replyTo, sender, makeArray(errorMsg));
 	}
 }
