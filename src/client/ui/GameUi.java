@@ -52,8 +52,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	private static final long serialVersionUID = 1L;
 	
-	// Network settings, and server to be created if hosting the game.
-	private MultiSocketServer gameServer = null;
+	// Network settings.
 	private SocketClient gameClient = null;
 	private String server = "localhost";
 	private int port = 4444;
@@ -726,9 +725,11 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 				|| "joinGame".equals(e.getActionCommand())) {
 			
 			if ("hostGame".equals(e.getActionCommand())) {
+				
 				// Start up Server.
-				gameServer = new MultiSocketServer(port, GameProtocol.class);
-				gameServer.start();
+				new MultiSocketServer(port, GameProtocol.class).start();
+				
+				// Reset the server hostname in case it was changed.
 				server = "localhost";
 			}
 
