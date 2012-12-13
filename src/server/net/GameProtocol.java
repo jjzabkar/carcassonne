@@ -596,7 +596,7 @@ public class GameProtocol implements SocketProtocol {
 
 						gameState = GameState.END_TURN;
 
-						return ret;
+						return disseminateMessage(replyTo, sender, ret);
 
 					} else {
 						return disseminateMessage(replyTo, sender, makeArray(errorMsg));
@@ -694,7 +694,7 @@ public class GameProtocol implements SocketProtocol {
 					gameState = GameState.DRAW_TILE;
 					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 
-					return ret;
+					return disseminateMessage(replyTo, sender, ret);
 
 				} else {
 					return disseminateMessage(replyTo, sender, makeArray(errorMsg));
