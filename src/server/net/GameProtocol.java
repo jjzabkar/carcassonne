@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import server.model.BoardPosition;
@@ -103,7 +102,7 @@ public class GameProtocol implements SocketProtocol {
 	
 	@Override
 	public int getMaxConnections() {
-		return 5;
+		return game.getMaxPlayers();
 	}
 	
 	@Override
@@ -462,7 +461,7 @@ public class GameProtocol implements SocketProtocol {
 		if (parsedMessage.get(0).equals("JOINLOBBY")) {
 
 			// Assign a player to the client which has joined the lobby.
-			if (lobbyPlayers.size() >= 5) {
+			if (lobbyPlayers.size() >= game.getMaxPlayers()) {
 				return disseminateMessages(sender, errorMsg);
 			}
 

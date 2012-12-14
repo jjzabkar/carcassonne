@@ -153,6 +153,10 @@ public class Game {
 	public int getNumPlayers() {
 		return players.size();
 	}
+	
+	public int getMaxPlayers() {
+		return 5;
+	}
 
 	// Pass this off to the gameboard as it keeps track of positioning.
 	public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
