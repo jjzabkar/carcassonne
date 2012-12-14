@@ -27,8 +27,6 @@ public class MultiSocketServer extends Thread {
 		this.protocol = protocol;
 	}
 
-	// TODO? max number of clients
-
 	public void run() {
 
 		try {

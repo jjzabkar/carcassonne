@@ -8,8 +8,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
 
 public class MultiSocketServerThread extends Thread {
 
