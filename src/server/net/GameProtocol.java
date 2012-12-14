@@ -111,7 +111,6 @@ public class GameProtocol implements SocketProtocol {
 	}
 
 	// Pre-game variables (lobby).
-	//TODO
 	private HashMap<Integer, PlayerStruct> lobbyPlayers = new HashMap<Integer, PlayerStruct>();
 	
 	private final Color[] colors = {Color.black, Color.blue, Color.green, Color.red, Color.yellow};
@@ -142,7 +141,6 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
-	//TODO
 	private String[] makeUpdateLobbyMsg() {
 
 		String message = "UPDATELOBBY";
@@ -281,7 +279,6 @@ public class GameProtocol implements SocketProtocol {
 	 * @param numberRep
 	 *            The number representation of the player (0-4).
 	 */
-	// TODO
 	private void addPlayer(int numberRep) {
 
 		String rgb = colorToString(availablePlayerColors.remove(0));
@@ -295,7 +292,6 @@ public class GameProtocol implements SocketProtocol {
 	 * @param numberRep
 	 *            The number representation of the player (0-4).
 	 */
-	// TODO
 	private void removePlayer(int numberRep) {
 		
 		PlayerStruct player = lobbyPlayers.get(numberRep);
@@ -349,7 +345,6 @@ public class GameProtocol implements SocketProtocol {
 	 * 
 	 * @return An integer representing the number (Id) for a new player.
 	 */
-	// TODO
 	private int getFreePlayerSlot() {
 
 		// Find which player slot is not used. To do this record all used slots,
@@ -441,7 +436,7 @@ public class GameProtocol implements SocketProtocol {
 		if (parsedMessage.get(0).equals("JOINLOBBY")) {
 
 			// Assign a player to the client which has joined the lobby.
-			if (lobbyPlayers.size() >= game.getMaxPlayers()) {
+			if (lobbyPlayers.size() >= Game.getMaxPlayers()) {
 				return disseminateMessages(sender, errorMsg);
 			}
 
@@ -462,7 +457,6 @@ public class GameProtocol implements SocketProtocol {
 			String name = parsedMessage.get(4);
 			String color = parsedMessage.get(6);
 
-			// TODO
 			// Set the new values.
 			PlayerStruct player = lobbyPlayers.get(numberRep);
 			player.name = name;
