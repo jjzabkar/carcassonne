@@ -1,6 +1,6 @@
 package server.net;
 
-import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 
 public interface SocketProtocol {
@@ -21,13 +21,13 @@ public interface SocketProtocol {
 	 * @param sender
 	 *     A PrintWriter object which is tied to the sender object.
 	 */
-	public void addSender(PrintWriter sender);
+	public void addSender(Socket sender);
 	
 	/**
 	 * The sender provides a way to identify itself against the list of
 	 * senders which are added. 
 	 */
-	public ArrayList<String> processInput(PrintWriter sender, String input);
+	public ArrayList<String> processInput(Socket sender, String input);
 	
 	/**
 	 * Get the maximum number of allowed client connections to this protocol.

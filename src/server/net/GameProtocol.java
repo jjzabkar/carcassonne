@@ -1,14 +1,17 @@
 package server.net;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import server.model.BoardPosition;
 import server.model.Game;
@@ -75,16 +78,30 @@ public class GameProtocol implements SocketProtocol {
 	// game state to a proper state based on a few properties of our game. This
 	// allows us to not over-complicate the message passing protocol.
 
-	private HashSet<PrintWriter> senders = new HashSet<PrintWriter>();
+	private HashSet<Socket> senders = new HashSet<Socket>();
+	private HashMap<Socket, PrintWriter> writers = new HashMap<Socket, PrintWriter>();
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 	
 	@Override
-	public void addSender(PrintWriter pw) {
+	public void addSender(Socket pw) {
 		senders.add(pw);
+		
+		try {
+			OutputStream outStream = pw.getOutputStream();
+			PrintWriter writer = new PrintWriter(outStream, true);
+			
+			writers.put(pw, writer);
+
+		} catch (IOException e) {
+			// Getting the output stream has
+			// failed. 
+			// TODO
+		}
 	}
 	
-	private void removeSender(PrintWriter pw) {
+	private void removeSender(Socket pw) {
 		senders.remove(pw);
+		writers.remove(pw);
 		// TODO: close socket/ writer connections
 	}
 	
@@ -384,7 +401,7 @@ public class GameProtocol implements SocketProtocol {
 	// TODO: I want to make this simpler. Perhaps move String[]... to
 	// ArrayList<String>... to make it easier to split apart the recipient and
 	// message.
-	private ArrayList<String> disseminateMessages(PrintWriter sender, String[]... processedMessages) {
+	private ArrayList<String> disseminateMessages(Socket sender, String[]... processedMessages) {
 
 		ArrayList<String> messages = new ArrayList<String>();
 		
@@ -396,14 +413,14 @@ public class GameProtocol implements SocketProtocol {
 			
 			if (recipient.equals(SocketProtocol.replyAll)) {
 
-				Iterator<PrintWriter> printWriterIter = senders.iterator();
+				Iterator<Socket> sendersIter = senders.iterator();
 				
-				while (printWriterIter.hasNext()) {
+				while (sendersIter.hasNext()) {
 					
-					PrintWriter aSender = printWriterIter.next();
+					Socket aSender = sendersIter.next();
 					
 					if (!aSender.equals(sender)) {
-						aSender.println(currentMessage);
+						writers.get(aSender).println(currentMessage);
 					}
 				}
 			}
@@ -425,7 +442,7 @@ public class GameProtocol implements SocketProtocol {
 	 *         client(s)/user(s).
 	 */
 	@Override
-	public ArrayList<String> processInput(PrintWriter sender, String input) {
+	public ArrayList<String> processInput(Socket sender, String input) {
 
 		// First we have some actions which are able to be called at any point
 		// during the game. These are requests for info about the game and any

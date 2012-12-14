@@ -34,10 +34,7 @@ public class MultiSocketServerThread extends Thread {
 
 		this.clientSocket = clientSocket;
 		this.protocol = protocol;
-
-		createMessagers();
-		
-		this.protocol.addSender(clientWriter);
+		this.protocol.addSender(clientSocket);
 	}
 
 	/**
@@ -81,13 +78,15 @@ public class MultiSocketServerThread extends Thread {
 		String inputLine;
 		ArrayList<String> outputLines;
 		String outLine;
+
+		createMessagers();
 		
 		try {
 
 			// Get the response, process it, and send back the next message.
 			while ((inputLine = clientReader.readLine()) != null) {
 
-				outputLines = protocol.processInput(clientWriter, inputLine);
+				outputLines = protocol.processInput(clientSocket, inputLine);
 
 				for (int i = 0; i < outputLines.size(); i++) {
 
