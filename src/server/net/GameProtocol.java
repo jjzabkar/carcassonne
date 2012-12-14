@@ -81,12 +81,12 @@ public class GameProtocol implements SocketProtocol {
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 	
 	@Override
-	public void addSender(Socket pw) {
+	public void addSender(Socket socket) {
 		try {
-			OutputStream outStream = pw.getOutputStream();
+			OutputStream outStream = socket.getOutputStream();
 			PrintWriter writer = new PrintWriter(outStream, true);
 			
-			writers.put(pw, writer);
+			writers.put(socket, writer);
 
 		} catch (IOException e) {
 			// Getting the output stream has
@@ -95,14 +95,14 @@ public class GameProtocol implements SocketProtocol {
 		}
 	}
 	
-	private void removeSender(Socket pw) {
-		writers.remove(pw);
+	private void removeSender(Socket socket) {
+		writers.remove(socket);
 		// TODO: close socket/ writer connections
 	}
 	
 	@Override
 	public int getMaxConnections() {
-		return game.getMaxPlayers();
+		return Game.getMaxPlayers();
 	}
 	
 	@Override

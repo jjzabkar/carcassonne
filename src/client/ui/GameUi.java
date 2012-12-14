@@ -727,6 +727,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			if ("hostGame".equals(e.getActionCommand())) {
 				
 				// Start up Server.
+				// TODO perhaps server should stop when hosting player
+				// leaves the game lobby? failover?
 				new MultiSocketServer(port, GameProtocol.class).start();
 				
 				// Reset the server hostname in case it was changed.
