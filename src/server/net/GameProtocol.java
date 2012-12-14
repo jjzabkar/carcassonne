@@ -111,29 +111,19 @@ public class GameProtocol implements SocketProtocol {
 	}
 
 	// Pre-game variables (lobby).
-	private ArrayList<PlayerStruct> lobbyPlayers = new ArrayList<PlayerStruct>();
-	private ArrayList<Color> availablePlayerColors = new ArrayList<Color>() {
-
-		private static final long serialVersionUID = -5941480684523828148L;
-
-		{
-			add(Color.black);
-			add(Color.blue);
-			add(Color.yellow);
-			add(Color.red);
-			add(Color.green);
-		}
-	};
+	//TODO
+	private HashMap<Integer, PlayerStruct> lobbyPlayers = new HashMap<Integer, PlayerStruct>();
+	
+	private final Color[] colors = {Color.black, Color.blue, Color.green, Color.red, Color.yellow};
+	private ArrayList<Color> availablePlayerColors = new ArrayList<Color>(Arrays.asList(colors));
 
 	class PlayerStruct {
 
-		PlayerStruct(int numberRep, String name, String color) {
-			this.numberRep = numberRep;
+		PlayerStruct(String name, String color) {
 			this.name = name;
 			this.color = color;
 		}
 
-		private int numberRep;
 		private String name;
 		private String color;
 	}
@@ -152,18 +142,20 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
+	//TODO
 	private String[] makeUpdateLobbyMsg() {
 
 		String message = "UPDATELOBBY";
 
-		for (int i = 0; i < lobbyPlayers.size(); i++) {
-
-			int numberRep = lobbyPlayers.get(i).numberRep;
-			String name = lobbyPlayers.get(i).name;
-			String color = lobbyPlayers.get(i).color;
-
-			message += ";player;" + numberRep + ";name;" + name
-					+ ";color;" + color;
+		Iterator<Integer> playersIter = lobbyPlayers.keySet().iterator();
+		
+		while (playersIter.hasNext()) {
+			
+			Integer numberRep = playersIter.next();
+			PlayerStruct player = lobbyPlayers.get(numberRep);
+			
+			message += ";player;" + numberRep + ";name;" + player.name
+					+ ";color;" + player.color;
 		}
 		
 		String[] output = {SocketProtocol.replyAll, message};
@@ -289,14 +281,12 @@ public class GameProtocol implements SocketProtocol {
 	 * @param numberRep
 	 *            The number representation of the player (0-4).
 	 */
+	// TODO
 	private void addPlayer(int numberRep) {
 
-		Color color = availablePlayerColors.remove(0);
-		String rgb = colorToString(color);
-
-		PlayerStruct p;
-		p = new PlayerStruct(numberRep, "Player " + numberRep, rgb);
-		lobbyPlayers.add(p);
+		String rgb = colorToString(availablePlayerColors.remove(0));
+		String name = "Player " + numberRep;
+		lobbyPlayers.put(numberRep, new PlayerStruct(name, rgb));
 	}
 
 	/**
@@ -305,19 +295,12 @@ public class GameProtocol implements SocketProtocol {
 	 * @param numberRep
 	 *            The number representation of the player (0-4).
 	 */
+	// TODO
 	private void removePlayer(int numberRep) {
-
-		for (int i = 0; i < lobbyPlayers.size(); i++) {
-			if (lobbyPlayers.get(i).numberRep == numberRep) {
-
-				// Retrieve used color.
-				String colorString = lobbyPlayers.get(i).color;
-				Color color = stringToColor(colorString);
-				availablePlayerColors.add(0, color);
-
-				lobbyPlayers.remove(i);
-			}
-		}
+		
+		PlayerStruct player = lobbyPlayers.get(numberRep);
+		availablePlayerColors.add(0, stringToColor(player.color));
+		lobbyPlayers.remove(numberRep);
 	}
 
 	/**
@@ -366,20 +349,17 @@ public class GameProtocol implements SocketProtocol {
 	 * 
 	 * @return An integer representing the number (Id) for a new player.
 	 */
+	// TODO
 	private int getFreePlayerSlot() {
 
 		// Find which player slot is not used. To do this record all used slots,
 		// sort them, and then run through until we find a slot (number) which
 		// is not used.
-		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>();
-		int candidateSlot = 0;
-
-		for (int i = 0; i < lobbyPlayers.size(); i++) {
-			usedPlayerSlots.add(lobbyPlayers.get(i).numberRep);
-		}
-
+		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>(lobbyPlayers.keySet());
 		Collections.sort(usedPlayerSlots);
-
+		
+		int candidateSlot = 0;
+		
 		for (int i = 0; i < usedPlayerSlots.size(); i++) {
 			if (usedPlayerSlots.get(i).intValue() == candidateSlot) {
 				candidateSlot++;
@@ -482,17 +462,12 @@ public class GameProtocol implements SocketProtocol {
 			String name = parsedMessage.get(4);
 			String color = parsedMessage.get(6);
 
-			for (int i = 0; i < lobbyPlayers.size(); i++) {
+			// TODO
+			// Set the new values.
+			PlayerStruct player = lobbyPlayers.get(numberRep);
+			player.name = name;
+			player.color = color;
 
-				PlayerStruct lobbyPlayer = lobbyPlayers.get(i);
-
-				if (lobbyPlayer.numberRep == numberRep) {
-					lobbyPlayer.name = name;
-					lobbyPlayer.color = color;
-				}
-			}
-
-			// TODO: rename sender to messageOriginator... better meaning
 			String[] updateLobby = makeUpdateLobbyMsg();
 			return disseminateMessages(sender, updateLobby);
 		}
