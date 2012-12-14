@@ -38,7 +38,16 @@ public class MultiSocketServer extends Thread {
 			while (true) {
 
 				Socket client = serverSocket.accept();
-				new MultiSocketServerThread(client, socketProtocol).start();
+				
+				int maxConnections = socketProtocol.getMaxConnections();
+				int numConnections = socketProtocol.getNumConnections();
+				
+				if (numConnections < maxConnections) {
+					new MultiSocketServerThread(client, socketProtocol).start();
+				} else {
+					// TODO: something.. send a message to client saying game
+					// is full.?
+				}
 			}
 
 		} catch (Exception e) {

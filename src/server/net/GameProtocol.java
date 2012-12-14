@@ -78,8 +78,24 @@ public class GameProtocol implements SocketProtocol {
 	private HashSet<PrintWriter> senders = new HashSet<PrintWriter>();
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 	
+	@Override
 	public void addSender(PrintWriter pw) {
 		senders.add(pw);
+	}
+	
+	private void removeSender(PrintWriter pw) {
+		senders.remove(pw);
+		// TODO: close socket/ writer connections
+	}
+	
+	@Override
+	public int getMaxConnections() {
+		return 5;
+	}
+	
+	@Override
+	public int getNumConnections() {
+		return senders.size();
 	}
 
 	// Pre-game variables (lobby).
