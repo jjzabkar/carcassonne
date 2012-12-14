@@ -19,7 +19,7 @@ public interface SocketProtocol {
 	 * senders, though which are affected by the actions of the current sender. 
 	 * 
 	 * @param sender
-	 *     A PrintWriter object which is tied to the sender object.
+	 *     A Socket object which is tied to the sender object.
 	 */
 	public void addSender(Socket sender);
 	

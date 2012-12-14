@@ -78,14 +78,11 @@ public class GameProtocol implements SocketProtocol {
 	// game state to a proper state based on a few properties of our game. This
 	// allows us to not over-complicate the message passing protocol.
 
-	private HashSet<Socket> senders = new HashSet<Socket>();
 	private HashMap<Socket, PrintWriter> writers = new HashMap<Socket, PrintWriter>();
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
 	
 	@Override
 	public void addSender(Socket pw) {
-		senders.add(pw);
-		
 		try {
 			OutputStream outStream = pw.getOutputStream();
 			PrintWriter writer = new PrintWriter(outStream, true);
@@ -100,7 +97,6 @@ public class GameProtocol implements SocketProtocol {
 	}
 	
 	private void removeSender(Socket pw) {
-		senders.remove(pw);
 		writers.remove(pw);
 		// TODO: close socket/ writer connections
 	}
@@ -112,7 +108,7 @@ public class GameProtocol implements SocketProtocol {
 	
 	@Override
 	public int getNumConnections() {
-		return senders.size();
+		return writers.size();
 	}
 
 	// Pre-game variables (lobby).
@@ -413,7 +409,7 @@ public class GameProtocol implements SocketProtocol {
 			
 			if (recipient.equals(SocketProtocol.replyAll)) {
 
-				Iterator<Socket> sendersIter = senders.iterator();
+				Iterator<Socket> sendersIter = writers.keySet().iterator();
 				
 				while (sendersIter.hasNext()) {
 					
