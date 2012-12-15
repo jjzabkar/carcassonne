@@ -103,10 +103,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return endTurnButton;
 	}
 
-	public JButton getDrawTileButton() {
-		return drawTileButton;
-	}
-
 	public void showMessageDialog(String text) {
 		JOptionPane.showMessageDialog(this, text);
 	}
@@ -1137,7 +1133,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 */
 	public void drawTile(int currentPlayer, String identifier, int orientation) {
 
-		if (getGameState() != GameState.DRAW_TILE) {
+		if (gameState != GameState.DRAW_TILE) {
 			return;
 		}
 
@@ -1155,15 +1151,33 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		drawTileButton.setEnabled(false);
 	}
 
-	public void rotateTileClockwise() {
+	/**
+	 * Allow a player to rotate the tile that they have drawn (but not placed
+	 * yet).
+	 * 
+	 * @param currentPlayer
+	 *            the player whose turn it is.
+	 * @param direction
+	 *            the direction to rotate the tile. This can be "clockwise" or
+	 *            "counterClockwise".
+	 * @param error
+	 *            whether or not there has been an error.
+	 */
+	// TODO: remove error?
+	public void rotateTile(int currentPlayer, String direction, int error) {
 
-		currentTile.rotateClockwise();
-		currentTilePanel.repaint();
-	}
+		if (gameState != GameState.PLACE_TILE || error == 1) {
+			return;
+		}
 
-	public void rotateTileCounterClockwise() {
+		if (direction.equals("clockwise")) {
+			currentTile.rotateClockwise();
+		}
 
-		currentTile.rotateCounterClockwise();
+		if (direction.equals("counterClockwise")) {
+			currentTile.rotateCounterClockwise();
+		}
+
 		currentTilePanel.repaint();
 	}
 

@@ -72,6 +72,16 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.drawTile(currentPlayer, identifier, orientation);
 		}
 
+		// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>;error;<int:(0|1)>
+		if (message.get(0).equals("ROTATETILE")) {
+
+			int currentPlayer = Integer.parseInt(message.get(2));
+			String direction = message.get(4);
+			int error = Integer.parseInt(message.get(6));
+
+			gameUi.rotateTile(currentPlayer, direction, error);
+		}
+
 		// Place tile
 		if (message.get(0).equals("PLACETILE")
 				&& gameUi.getGameState() == GameState.PLACE_TILE) {
@@ -100,21 +110,6 @@ public class ClientProtocol implements SocketProtocol {
 			} else {
 				// TODO: better error handling
 				gameUi.showMessageDialog("Can't place tile there.");
-			}
-		}
-
-		// Tile rotation.
-		if (message.get(0).equals("ROTATETILE")
-				&& gameUi.getGameState() == GameState.PLACE_TILE) {
-
-			// Clockwise
-			if (message.get(4).equals("clockwise")) {
-				gameUi.rotateTileClockwise();
-			}
-
-			// CounterClockwise
-			if (message.get(4).equals("counterClockwise")) {
-				gameUi.rotateTileCounterClockwise();
 			}
 		}
 
