@@ -39,6 +39,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import server.model.Game;
 import server.net.GameProtocol;
 import server.net.MultiSocketServer;
 import client.model.ClientProtocol;
@@ -57,7 +58,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private int port = 4444;
 
 	// Game settings & info.
-	private final int maxNumPlayers = 5;
 	private TileUi currentTile = null;
 	private GameState gameState = GameState.GAME_START;
 	private int tileSize = TileUi.tileSize * TileUi.tileTypeSize;
@@ -820,10 +820,10 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			HashMap<Integer, PlayerUi> players = getPlayersFromLobby();
 
 			// Check that we have a correct amount of players.
-			if (players.size() > maxNumPlayers) {
+			if (players.size() > Game.getMaxPlayers()) {
 
 				JOptionPane.showMessageDialog(this, "A game can have at most "
-						+ maxNumPlayers + " players.");
+						+ Game.getMaxPlayers() + " players.");
 
 				return;
 			}
