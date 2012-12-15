@@ -2,8 +2,6 @@ package server.net;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Hashtable;
-import java.util.Iterator;
 
 public class MultiSocketServer extends Thread {
 
@@ -36,10 +34,10 @@ public class MultiSocketServer extends Thread {
 			while (true) {
 
 				Socket client = serverSocket.accept();
-				
+
 				int maxConnections = socketProtocol.getMaxConnections();
 				int numConnections = socketProtocol.getNumConnections();
-				
+
 				if (numConnections < maxConnections) {
 					new MultiSocketServerThread(client, socketProtocol).start();
 				} else {

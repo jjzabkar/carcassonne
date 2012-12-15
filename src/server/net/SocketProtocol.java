@@ -16,33 +16,32 @@ public interface SocketProtocol {
 	 * Allow a sender to be added to the socket protocol's list of senders.
 	 * 
 	 * This can be useful to send messages to clients which are not the current
-	 * senders, though which are affected by the actions of the current sender. 
+	 * senders, though which are affected by the actions of the current sender.
 	 * 
 	 * @param sender
-	 *     A Socket object which is tied to the sender object.
+	 *            A Socket object which is tied to the sender object.
 	 */
 	public void addSender(Socket sender);
-	
+
 	/**
-	 * The sender provides a way to identify itself against the list of
-	 * senders which are added. 
+	 * The sender provides a way to identify itself against the list of senders
+	 * which are added.
 	 */
 	public ArrayList<String> processInput(Socket sender, String input);
-	
+
 	/**
 	 * Get the maximum number of allowed client connections to this protocol.
 	 * 
-	 * @return
-	 *     an integer representing the maximum number of allowed connections.
+	 * @return an integer representing the maximum number of allowed
+	 *         connections.
 	 */
 	public int getMaxConnections();
-	
+
 	/**
 	 * Get the current number of clients connected to this protocol.
-	 *  
-	 * @return
-	 *     an integer representing the current number of connections.
+	 * 
+	 * @return an integer representing the current number of connections.
 	 */
 	public int getNumConnections();
-	
+
 }

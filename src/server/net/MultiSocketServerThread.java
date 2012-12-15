@@ -36,14 +36,14 @@ public class MultiSocketServerThread extends Thread {
 	}
 
 	/**
-	 * Remove the client. This closes the associated
-	 * readers & writers along with closing the socket itself.
+	 * Remove the client. This closes the associated readers & writers along
+	 * with closing the socket itself.
 	 */
 	private void removeClient() {
 
 		// Close the writer for the client.
 		clientWriter.close();
-		
+
 		// Attempt to close the reader and socket for the client.
 		try {
 			clientReader.close();
@@ -53,12 +53,12 @@ public class MultiSocketServerThread extends Thread {
 			// be garbage collected eventually.
 		}
 	}
-	
+
 	private void createMessagers() {
 		try {
 			OutputStream outStream = clientSocket.getOutputStream();
 			clientWriter = new PrintWriter(outStream, true);
-			
+
 			InputStream inStream = clientSocket.getInputStream();
 			InputStreamReader inStreamReader = new InputStreamReader(inStream);
 			clientReader = new BufferedReader(inStreamReader);
@@ -78,7 +78,7 @@ public class MultiSocketServerThread extends Thread {
 		String outLine;
 
 		createMessagers();
-		
+
 		try {
 
 			// Get the response, process it, and send back the next message.
@@ -89,7 +89,7 @@ public class MultiSocketServerThread extends Thread {
 				for (int i = 0; i < outputLines.size(); i++) {
 
 					outLine = outputLines.get(i);
-					
+
 					clientWriter.println(outLine);
 
 					if (outLine.equals(SocketProtocol.EXIT)) {

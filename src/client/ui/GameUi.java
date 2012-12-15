@@ -42,7 +42,6 @@ import javax.swing.text.Document;
 
 import server.net.GameProtocol;
 import server.net.MultiSocketServer;
-
 import client.model.MessageSender;
 import client.net.SocketClient;
 import client.net.SocketProtocol;
@@ -51,7 +50,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, SocketProtocol, MessageSender {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	// Network settings.
 	private SocketClient gameClient = null;
 	private String server = "localhost";
@@ -200,13 +199,13 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		titleLabel.setVerticalTextPosition(JLabel.BOTTOM);
 		titleLabel.setHorizontalTextPosition(JLabel.CENTER);
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
-		
+
 		JButton hostGameButton = new JButton("Host Game");
 		hostGameButton.setVerticalTextPosition(AbstractButton.CENTER);
 		hostGameButton.setHorizontalTextPosition(AbstractButton.CENTER);
 		hostGameButton.setActionCommand("hostGame");
 		hostGameButton.addActionListener(this);
-		
+
 		JButton joinGameButton = new JButton("Join Game");
 		joinGameButton.setVerticalTextPosition(AbstractButton.CENTER);
 		joinGameButton.setHorizontalTextPosition(AbstractButton.CENTER);
@@ -563,7 +562,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Create the buttons for tile manipulation & turn/window control.
 		// Draw Pile.
-		URL drawTileUrl = getClass().getResource("/client/resources/tile-back.jpg");
+		URL drawTileUrl = getClass().getResource(
+				"/client/resources/tile-back.jpg");
 		ImageIcon drawTileImage = new ImageIcon(drawTileUrl);
 
 		int drawTileWidth = drawTileImage.getIconWidth();
@@ -723,14 +723,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		} else if ("hostGame".equals(e.getActionCommand())
 				|| "joinGame".equals(e.getActionCommand())) {
-			
+
 			if ("hostGame".equals(e.getActionCommand())) {
-				
+
 				// Start up Server.
 				// TODO perhaps server should stop when hosting player
 				// leaves the game lobby? failover?
 				new MultiSocketServer(port, GameProtocol.class).start();
-				
+
 				// Reset the server hostname in case it was changed.
 				server = "localhost";
 			}

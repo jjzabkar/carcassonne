@@ -153,7 +153,7 @@ public class Game {
 	public int getNumPlayers() {
 		return players.size();
 	}
-	
+
 	public static int getMaxPlayers() {
 		return 5;
 	}
