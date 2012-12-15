@@ -990,6 +990,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// TODO: disable end turn button on non-current player
 
+	// TODO: incorrect state when player attempts to place meeple on claimed
+	// feature
+
 	public void updateLobby(ArrayList<String> message) {
 
 		HashMap<Integer, JPlayerSettingsPanel> receivedPlayers;
