@@ -610,6 +610,11 @@ public class GameProtocol implements SocketProtocol {
 					Player player = game.getPlayers().get(currentPlayer);
 					int err = game.placeTile(player, xBoard, yBoard);
 
+					// TODO: instead of sending error message on error, we want
+					// to send back the placetile message indicating an error
+					// so that the user sees an error message. In this case,
+					// don't advance game state, and only send message back to
+					// sender; not all players.
 					if (err == 0) {
 
 						// TODO: can this be simplified?
