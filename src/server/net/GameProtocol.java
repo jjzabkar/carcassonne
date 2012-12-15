@@ -178,10 +178,10 @@ public class GameProtocol implements SocketProtocol {
 
 	private String[] makePlayerInfoMsg(int player) {
 
-		int isCurrentPlayer = (player == currentPlayer) ? 1 : 0;
-		int playerScore = game.getPlayers().get(currentPlayer).getScore();
+		Player playerModel = game.getPlayers().get(player);
 
-		Player playerModel = game.getPlayers().get(currentPlayer);
+		int isCurrentPlayer = (player == currentPlayer) ? 1 : 0;
+		int playerScore = playerModel.getScore();
 		int numMeeplesPlaced = game.getNumMeeplesPlaced(playerModel);
 
 		String message = "INFO;player;" + player + ";currentPlayer;"
