@@ -17,7 +17,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,12 +41,13 @@ import javax.swing.text.Document;
 
 import server.net.GameProtocol;
 import server.net.MultiSocketServer;
+import client.model.ClientProtocol;
 import client.model.MessageSender;
 import client.net.SocketClient;
 import client.net.SocketProtocol;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
-		DocumentListener, SocketProtocol, MessageSender {
+		DocumentListener, MessageSender {
 
 	private static final long serialVersionUID = 1L;
 
@@ -68,6 +68,61 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	private int player = 0; // The player who this client represents.
 	private int currentPlayer = 0; // The player whose turn it currently is.
+
+	// Accessors & mutators for above variables.
+
+	public void updateGameState(GameState state) {
+		gameState = state;
+	}
+
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	public void exit() {
+		gameClient = null;
+	}
+
+	public void setPlayer(int player) {
+		this.player = player;
+	}
+
+	public int getPlayer() {
+		return player;
+	}
+
+	public int getNumPlayers() {
+		return players.size();
+	}
+
+	public void setCurrentPlayer(int currentPlayer) {
+		this.currentPlayer = currentPlayer;
+	}
+
+	public int getCurrentPlayer() {
+		return currentPlayer;
+	}
+
+	public void setGameDimension(int width, int height) {
+		gameBoardWidth = width;
+		gameBoardHeight = height;
+	}
+
+	public JButton getEndTurnButton() {
+		return endTurnButton;
+	}
+
+	public JButton getDrawTileButton() {
+		return drawTileButton;
+	}
+
+	public void showMessageDialog(String text) {
+		JOptionPane.showMessageDialog(this, text);
+	}
+
+	public HashMap<Integer, JPlayerStatusPanel> getPlayerStatusPanels() {
+		return playerStatusPanels;
+	}
 
 	// Each menu screen (including the game screen) is contained within their
 	// own JPanel's, which are set as the frame content pane when appropriate.
@@ -736,7 +791,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			}
 
 			// Start up client.
-			gameClient = new SocketClient(server, port, this);
+			ClientProtocol clientProtocol = new ClientProtocol(this);
+			gameClient = new SocketClient(server, port, clientProtocol);
 
 			if (gameClient.bind() == 1) {
 				JOptionPane.showMessageDialog(this,
@@ -931,250 +987,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		}
 	}
 
-	// Variables to keep track of scoring process; after all the player's scores
-	// are updated then we can end the current players turn if they don't have
-	// any meeples left.
-	private int numPlayerScoresUpdated = 0;
-	private boolean currentPlayerHasMeeplesLeft = true;
-
-	// TODO; current player checking, error checking.
-	// Handle messages;
-	@Override
-	public String processInput(String input) {
-
-		// Do some coercion on the data.
-		ArrayList<String> message;
-		message = new ArrayList<String>(Arrays.asList(input.split(";")));
-
-		// PRE-GAME
-
-		if (message.get(0).equals(SocketProtocol.EXIT)) {
-			gameClient = null;
-		}
-
-		if (message.get(0).equals("ASSIGNPLAYER")) {
-
-			if (message.get(1).equals("player")) {
-				player = Integer.parseInt(message.get(2));
-			}
-		}
-
-		if (message.get(0).equals("UPDATELOBBY")) {
-			updateLobby(message);
-		}
-
-		// IN-GAME
-
-		// Start Game
-		if (message.get(0).equals("INIT") && gameState == GameState.GAME_START) {
-
-			if (message.get(1).equals("currentPlayer")) {
-				currentPlayer = Integer.parseInt(message.get(2));
-			}
-			if (message.get(3).equals("gameBoardWidth")) {
-				gameBoardWidth = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("gameBoardHeight")) {
-				gameBoardHeight = Integer.parseInt(message.get(6));
-			}
-
-			startGame();
-
-			gameState = GameState.DRAW_TILE;
-			endTurnButton.setEnabled(false);
-		}
-
-		// Draw Tile
-		if (message.get(0).equals("DRAWTILE")
-				&& gameState == GameState.DRAW_TILE) {
-
-			String identifier = "";
-			int orientation = 0;
-
-			if (message.get(3).equals("identifier")) {
-				identifier = message.get(4);
-			}
-			if (message.get(5).equals("orientation")) {
-				orientation = Integer.parseInt(message.get(6));
-			}
-
-			drawTile(identifier, orientation);
-
-			gameState = GameState.PLACE_TILE;
-			drawTileButton.setEnabled(false);
-		}
-
-		// Place tile
-		if (message.get(0).equals("PLACETILE")
-				&& gameState == GameState.PLACE_TILE) {
-
-			int err = 0;
-			int xBoard = 0;
-			int yBoard = 0;
-
-			if (message.get(3).equals("xBoard")) {
-				xBoard = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("yBoard")) {
-				yBoard = Integer.parseInt(message.get(6));
-			}
-			if (message.get(7).equals("error")) {
-				err = Integer.parseInt(message.get(8));
-			}
-
-			// If no error draw the tile on the gameboard and remove it
-			// from the currentTile area.
-			if (err == 0) {
-
-				placeTile(xBoard, yBoard);
-				gameState = GameState.SCORE_PLACE_TILE;
-
-			} else {
-				// TODO: better error handling
-				JOptionPane.showMessageDialog(this, "Can't place tile there.");
-			}
-		}
-
-		// Tile rotation.
-		if (message.get(0).equals("ROTATETILE")
-				&& gameState == GameState.PLACE_TILE) {
-
-			// Clockwise
-			if (message.get(4).equals("clockwise")) {
-				rotateTileClockwise();
-			}
-
-			// CounterClockwise
-			if (message.get(4).equals("counterClockwise")) {
-				rotateTileCounterClockwise();
-			}
-		}
-
-		// Place meeple
-		if (message.get(0).equals("PLACEMEEPLE")) {
-
-			int err = 0;
-			int xBoard = 0;
-			int yBoard = 0;
-			int xTile = 0;
-			int yTile = 0;
-
-			if (message.get(3).equals("xBoard")) {
-				xBoard = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("yBoard")) {
-				yBoard = Integer.parseInt(message.get(6));
-			}
-			if (message.get(7).equals("xTile")) {
-				xTile = Integer.parseInt(message.get(8));
-			}
-			if (message.get(9).equals("yTile")) {
-				yTile = Integer.parseInt(message.get(10));
-			}
-			if (message.get(11).equals("error")) {
-				err = Integer.parseInt(message.get(12));
-			}
-
-			if (err == 0) {
-
-				placeMeeple(xBoard, yBoard, xTile, yTile);
-				gameState = GameState.SCORE_PLACE_MEEPLE;
-
-			} else {
-				// TODO: better error handling
-				JOptionPane.showMessageDialog(this, "Can't place meeple there");
-			}
-		}
-
-		if (gameState == GameState.SCORE_PLACE_TILE
-				|| gameState == GameState.SCORE_PLACE_MEEPLE) {
-
-			// Remove meeples.
-			if (message.get(0).equals("SCORE")) {
-				scoreRemoveMeeples(message);
-			}
-
-			// Update player info.
-			if (message.get(0).equals("INFO")
-					&& message.get(1).equals("player")) {
-
-				int player = 0;
-				int playerScore = 0;
-				int meeplesPlaced = 0;
-
-				if (message.get(1).equals("player")) {
-					player = Integer.parseInt(message.get(2));
-				}
-				if (message.get(5).equals("score")) {
-					playerScore = Integer.parseInt(message.get(6));
-				}
-				if (message.get(7).equals("meeplesPlaced")) {
-					meeplesPlaced = Integer.parseInt(message.get(8));
-				}
-
-				playerStatusPanels.get(player).setScore(playerScore);
-
-				// Each players info is sent after a scoring action;
-				// after scoring all players, if the current player has no
-				// meeples to place then end their turn.
-				numPlayerScoresUpdated++;
-
-				if (meeplesPlaced == 7 && this.player == player) {
-					currentPlayerHasMeeplesLeft = false;
-				}
-
-				if (numPlayerScoresUpdated == players.size()) {
-
-					numPlayerScoresUpdated = 0;
-
-					// Also end the player's turn if they are at the meeple
-					// scoring state.
-					if (!currentPlayerHasMeeplesLeft
-							|| gameState == GameState.SCORE_PLACE_MEEPLE) {
-
-						currentPlayerHasMeeplesLeft = true;
-
-						String msg = "ENDTURN;currentPlayer;" + player;
-						sendMessage(msg);
-
-						gameState = GameState.DRAW_TILE;
-						endTurn(currentPlayer);
-
-					} else {
-
-						gameState = GameState.PLACE_MEEPLE;
-						endTurnButton.setEnabled(true);
-					}
-				}
-			}
-		}
-
-		if (message.get(0).equals("ENDTURN")) {
-
-			gameState = GameState.DRAW_TILE;
-			endTurn(Integer.parseInt(message.get(2)));
-		}
-
-		// Info
-		if (message.get(0).equals("INFO") && message.get(1).equals("game")) {
-
-			boolean drawPileEmpty = false;
-
-			if (message.get(4).equals("drawPileEmpty")) {
-
-				int isDrawPileEmpty = Integer.parseInt(message.get(5));
-				drawPileEmpty = (isDrawPileEmpty == 0) ? false : true;
-			}
-
-			if (drawPileEmpty) {
-
-				gameState = GameState.GAME_END;
-			}
-		}
-
-		return null;
-	}
-
 	// TODO: one client leaving only removes him from the game,
 
 	// TODO: game continues when a player leaves.. all their meeples are removed
@@ -1187,9 +999,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// TODO: disable end turn button on non-current player
 
-	// TODO: look into what stops too many players from entering a game
-
-	private void updateLobby(ArrayList<String> message) {
+	public void updateLobby(ArrayList<String> message) {
 
 		HashMap<Integer, JPlayerSettingsPanel> receivedPlayers;
 		receivedPlayers = new HashMap<Integer, JPlayerSettingsPanel>();
@@ -1283,7 +1093,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return players;
 	}
 
-	private void startGame() {
+	public void startGame() {
 
 		// Users which didn't click the button to start game need values init'd.
 		players = getPlayersFromLobby();
@@ -1297,7 +1107,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		repaint();
 	}
 
-	private void drawTile(String identifier, int orientation) {
+	public void drawTile(String identifier, int orientation) {
 
 		TileUi tileUi = new TileUi(identifier, orientation);
 
@@ -1307,13 +1117,13 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		currentTilePanel.repaint();
 	}
 
-	private void rotateTileClockwise() {
+	public void rotateTileClockwise() {
 
 		currentTile.rotateClockwise();
 		currentTilePanel.repaint();
 	}
 
-	private void rotateTileCounterClockwise() {
+	public void rotateTileCounterClockwise() {
 
 		currentTile.rotateCounterClockwise();
 		currentTilePanel.repaint();
@@ -1329,7 +1139,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param yBoard
 	 *            the y board position to place the tile.
 	 */
-	private void placeTile(int xBoard, int yBoard) {
+	public void placeTile(int xBoard, int yBoard) {
 
 		currentTile.setx(xBoard * tileSize);
 		currentTile.sety(yBoard * tileSize);
@@ -1356,7 +1166,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param yTile
 	 *            the y tile position to place the meeple.
 	 */
-	private void placeMeeple(int xBoard, int yBoard, int xTile, int yTile) {
+	public void placeMeeple(int xBoard, int yBoard, int xTile, int yTile) {
 
 		int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
 		int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
@@ -1376,7 +1186,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param player
 	 *            the player who's turn is ending (numberRep).
 	 */
-	private void endTurn(int player) {
+	public void endTurn(int player) {
 
 		currentPlayer = (player + 1) % players.size();
 		showCurrentPlayer(currentPlayer);
@@ -1392,7 +1202,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the semi-parsed message (split into an ArrayList at
 	 *            semi-colons).
 	 */
-	private void scoreRemoveMeeples(ArrayList<String> message) {
+	public void scoreRemoveMeeples(ArrayList<String> message) {
 
 		for (int i = 1; i < message.size(); i = i + 9) {
 
