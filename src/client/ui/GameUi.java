@@ -1085,8 +1085,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	}
 
 	/**
-	 * Start a game. This method receives all relevant info to move a client
-	 * from the lobby into a game which has just been started.
+	 * Start a game. This method receives all relevant info to move clients from
+	 * the lobby into a game which has just been started.
 	 * 
 	 * @param currentPlayer
 	 *            the player which will have the first turn.
@@ -1096,6 +1096,10 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the height of the game board in tiles.
 	 */
 	public void startGame(int currentPlayer, int width, int height) {
+
+		if (gameState != GameState.GAME_START) {
+			return;
+		}
 
 		this.currentPlayer = currentPlayer;
 		gameBoardWidth = width;
@@ -1117,14 +1121,35 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameState = GameState.DRAW_TILE;
 	}
 
-	public void drawTile(String identifier, int orientation) {
+	/**
+	 * Allow a user to draw a tile. This method receives the player which has
+	 * drawn the tile along with any information needed to identify the tile.
+	 * 
+	 * @param currentPlayer
+	 *            the player whose turn it is.
+	 * @param identifier
+	 *            the tile identifier.
+	 * @param orientation
+	 *            the tile orientation.
+	 */
+	public void drawTile(int currentPlayer, String identifier, int orientation) {
 
+		if (getGameState() != GameState.DRAW_TILE) {
+			return;
+		}
+
+		// Create the tile and add it to the Gui.
 		TileUi tileUi = new TileUi(identifier, orientation);
 
 		currentTile = tileUi;
 
 		currentTilePanel.add(tileUi);
 		currentTilePanel.repaint();
+
+		// After drawing a tile the user must place it. Update game state and
+		// disable the draw tile button.
+		gameState = GameState.PLACE_TILE;
+		drawTileButton.setEnabled(false);
 	}
 
 	public void rotateTileClockwise() {

@@ -50,7 +50,7 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.updateLobby(message);
 		}
 
-		// IN-GAME
+		// In-game messages.
 
 		// INIT;currentPlayer;<int>;gameBoardWidth;<int>;gameBoardHeight;<int>
 		if (message.get(0).equals("INIT")) {
@@ -62,24 +62,14 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.startGame(currentPlayer, width, height);
 		}
 
-		// Draw Tile
-		if (message.get(0).equals("DRAWTILE")
-				&& gameUi.getGameState() == GameState.DRAW_TILE) {
+		// DRAWTILE;currentPlayer;<int>;identifier;<string>;orientation;<int:[0-3]>
+		if (message.get(0).equals("DRAWTILE")) {
 
-			String identifier = "";
-			int orientation = 0;
+			int currentPlayer = Integer.parseInt(message.get(2));
+			String identifier = message.get(4);
+			int orientation = Integer.parseInt(message.get(6));
 
-			if (message.get(3).equals("identifier")) {
-				identifier = message.get(4);
-			}
-			if (message.get(5).equals("orientation")) {
-				orientation = Integer.parseInt(message.get(6));
-			}
-
-			gameUi.drawTile(identifier, orientation);
-
-			gameUi.updateGameState(GameState.PLACE_TILE);
-			gameUi.getDrawTileButton().setEnabled(false);
+			gameUi.drawTile(currentPlayer, identifier, orientation);
 		}
 
 		// Place tile
