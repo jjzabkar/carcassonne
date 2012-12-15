@@ -1163,10 +1163,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param error
 	 *            whether or not there has been an error.
 	 */
-	// TODO: remove error?
-	public void rotateTile(int currentPlayer, String direction, int error) {
+	public void rotateTile(int currentPlayer, String direction) {
 
-		if (gameState != GameState.PLACE_TILE || error == 1) {
+		if (gameState != GameState.PLACE_TILE) {
 			return;
 		}
 

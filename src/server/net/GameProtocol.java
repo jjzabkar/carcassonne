@@ -43,7 +43,7 @@ public class GameProtocol implements SocketProtocol {
 	// DRAWTILE;currentPlayer;<int>;identifier;<string>;orientation;<int:[0-3]>
 	//
 	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>
-	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>;error;<int:(0|1)>
+	// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>
 	//
 	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>
 	// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;error;<int:(0|1)>
@@ -226,10 +226,10 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
-	private String[] makeRotateTileMsg(int player, String direction, int error) {
+	private String[] makeRotateTileMsg(int player, String direction) {
 
 		String message = "ROTATETILE;currentPlayer;" + player + ";direction;"
-				+ direction + ";error;" + error;
+				+ direction;
 
 		String[] output = { SocketProtocol.replyAll, message };
 
@@ -583,14 +583,14 @@ public class GameProtocol implements SocketProtocol {
 
 					if (direction.equals("clockwise")) {
 						player.getCurrentTile().rotateClockwise();
-					} else if (direction.equals("counterClockwise")) {
+					}
+
+					if (direction.equals("counterClockwise")) {
 						player.getCurrentTile().rotateCounterClockwise();
-					} else {
-						err = 1;
 					}
 
 					String[] rotateTileMsg = makeRotateTileMsg(currentPlayer,
-							direction, err);
+							direction);
 					return disseminateMessages(sender, rotateTileMsg);
 				}
 

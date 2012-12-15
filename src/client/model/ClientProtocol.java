@@ -72,14 +72,13 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.drawTile(currentPlayer, identifier, orientation);
 		}
 
-		// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>;error;<int:(0|1)>
+		// ROTATETILE;currentPlayer;<int>;direction;<string:(clockwise|counterClockwise)>
 		if (message.get(0).equals("ROTATETILE")) {
 
 			int currentPlayer = Integer.parseInt(message.get(2));
 			String direction = message.get(4);
-			int error = Integer.parseInt(message.get(6));
 
-			gameUi.rotateTile(currentPlayer, direction, error);
+			gameUi.rotateTile(currentPlayer, direction);
 		}
 
 		// Place tile
