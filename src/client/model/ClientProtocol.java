@@ -81,35 +81,15 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.rotateTile(currentPlayer, direction);
 		}
 
-		// Place tile
-		if (message.get(0).equals("PLACETILE")
-				&& gameUi.getGameState() == GameState.PLACE_TILE) {
+		// PLACETILE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;error;<int:(0|1)>
+		if (message.get(0).equals("PLACETILE")) {
 
-			int err = 0;
-			int xBoard = 0;
-			int yBoard = 0;
+			int currentPlayer = Integer.parseInt(message.get(2));
+			int xBoard = Integer.parseInt(message.get(4));
+			int yBoard = Integer.parseInt(message.get(6));
+			int err = Integer.parseInt(message.get(8));
 
-			if (message.get(3).equals("xBoard")) {
-				xBoard = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("yBoard")) {
-				yBoard = Integer.parseInt(message.get(6));
-			}
-			if (message.get(7).equals("error")) {
-				err = Integer.parseInt(message.get(8));
-			}
-
-			// If no error draw the tile on the gameboard and remove it
-			// from the currentTile area.
-			if (err == 0) {
-
-				gameUi.placeTile(xBoard, yBoard);
-				gameUi.updateGameState(GameState.SCORE_PLACE_TILE);
-
-			} else {
-				// TODO: better error handling
-				gameUi.showMessageDialog("Can't place tile there.");
-			}
+			gameUi.placeTile(currentPlayer, xBoard, yBoard, err);
 		}
 
 		// Place meeple

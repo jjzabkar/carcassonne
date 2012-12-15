@@ -1182,25 +1182,37 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	/**
 	 * Function called after parsing the place tile message. It carries out any
-	 * actions necessary to actually place the tile wrt/ the ui. It also does
-	 * any actions needed for game state changes.
+	 * actions necessary to actually place for the tile ui. It also does any
+	 * actions needed for game state changes.
 	 * 
 	 * @param xBoard
 	 *            the x board position to place the tile.
 	 * @param yBoard
 	 *            the y board position to place the tile.
 	 */
-	public void placeTile(int xBoard, int yBoard) {
+	public void placeTile(int currentPlayer, int xBoard, int yBoard, int error) {
 
+		if (error == 1) {
+			showMessageDialog("Can't place tile there.");
+			return;
+		}
+
+		if (gameState != GameState.PLACE_TILE) {
+			return;
+		}
+
+		// Transfer the tile from the current tile panel to the game board.
+		currentTilePanel.clear();
 		currentTile.setx(xBoard * tileSize);
 		currentTile.sety(yBoard * tileSize);
-
 		gameBoardWindow.add(currentTile);
-		currentTilePanel.clear();
 		currentTile = null;
 
 		gameBoardWindow.repaint();
 		currentTilePanel.repaint();
+
+		// Update the game state.
+		gameState = GameState.SCORE_PLACE_TILE;
 	}
 
 	/**

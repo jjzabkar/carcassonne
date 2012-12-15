@@ -572,7 +572,6 @@ public class GameProtocol implements SocketProtocol {
 				// Check what the client wants us to do.
 				if (parsedMessage.get(0).equals("ROTATETILE")) {
 
-					int err = 0;
 					String direction = "clockwise";
 
 					if (parsedMessage.get(3).equals("direction")) {
