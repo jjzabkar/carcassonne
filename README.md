@@ -2,7 +2,7 @@
 
 ## Overview
 
-A very broken, poorly thought out software version of the popular game Carcassonne. Currently, the project is realized using a modified server/client architecture.
+A somewhat broken, decently thought out software version of the popular game Carcassonne. Currently, the project is realized using a modified server/client architecture.
 
 ## Setup
 
