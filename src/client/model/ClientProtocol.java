@@ -7,6 +7,9 @@ import client.net.SocketProtocol;
 import client.ui.GameState;
 import client.ui.GameUi;
 
+// Adapter class which receives the returned messages from the server.
+// The received messages are processed, followed by the client being told to
+// update itself.
 public class ClientProtocol implements SocketProtocol {
 
 	private GameUi gameUi = null;
@@ -49,27 +52,14 @@ public class ClientProtocol implements SocketProtocol {
 
 		// IN-GAME
 
-		// Start Game
-		if (message.get(0).equals("INIT")
-				&& gameUi.getGameState() == GameState.GAME_START) {
+		// INIT;currentPlayer;<int>;gameBoardWidth;<int>;gameBoardHeight;<int>
+		if (message.get(0).equals("INIT")) {
 
-			int width = 0;
-			int height = 0;
-			if (message.get(1).equals("currentPlayer")) {
-				gameUi.setCurrentPlayer(Integer.parseInt(message.get(2)));
-			}
-			if (message.get(3).equals("gameBoardWidth")) {
-				width = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("gameBoardHeight")) {
-				height = Integer.parseInt(message.get(6));
-			}
+			int currentPlayer = Integer.parseInt(message.get(2));
+			int width = Integer.parseInt(message.get(4));
+			int height = Integer.parseInt(message.get(6));
 
-			gameUi.setGameDimension(width, height);
-			gameUi.startGame();
-
-			gameUi.updateGameState(GameState.DRAW_TILE);
-			gameUi.getEndTurnButton().setEnabled(false);
+			gameUi.startGame(currentPlayer, width, height);
 		}
 
 		// Draw Tile

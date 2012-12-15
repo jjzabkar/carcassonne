@@ -95,17 +95,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return players.size();
 	}
 
-	public void setCurrentPlayer(int currentPlayer) {
-		this.currentPlayer = currentPlayer;
-	}
-
 	public int getCurrentPlayer() {
 		return currentPlayer;
-	}
-
-	public void setGameDimension(int width, int height) {
-		gameBoardWidth = width;
-		gameBoardHeight = height;
 	}
 
 	public JButton getEndTurnButton() {
@@ -1093,18 +1084,37 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return players;
 	}
 
-	public void startGame() {
+	/**
+	 * Start a game. This method receives all relevant info to move a client
+	 * from the lobby into a game which has just been started.
+	 * 
+	 * @param currentPlayer
+	 *            the player which will have the first turn.
+	 * @param width
+	 *            the width of the game board in tiles.
+	 * @param height
+	 *            the height of the game board in tiles.
+	 */
+	public void startGame(int currentPlayer, int width, int height) {
+
+		this.currentPlayer = currentPlayer;
+		gameBoardWidth = width;
+		gameBoardHeight = height;
 
 		// Users which didn't click the button to start game need values init'd.
 		players = getPlayersFromLobby();
 
 		initGameScreen();
 		showCurrentPlayer(currentPlayer);
+		endTurnButton.setEnabled(false);
 
 		// Switch to the correct content pane.
 		setContentPane(gameContentPane);
 		validate();
 		repaint();
+
+		// Update the game state.
+		gameState = GameState.DRAW_TILE;
 	}
 
 	public void drawTile(String identifier, int orientation) {
