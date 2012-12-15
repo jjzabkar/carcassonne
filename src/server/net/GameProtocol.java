@@ -276,6 +276,25 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
+	private String[] makeEndTurnMsg(int currentPlayer) {
+
+		String message = "ENDTURN;currentPlayer;" + currentPlayer;
+		String[] output = { SocketProtocol.replyAll, message };
+		return output;
+	}
+
+	private String[] makeEndGameMsg() {
+
+		String[] output = { SocketProtocol.replyAll, SocketProtocol.EXIT };
+		return output;
+	}
+
+	private String[] makeCloseClientMsg() {
+
+		String[] output = { SocketProtocol.replySender, SocketProtocol.EXIT };
+		return output;
+	}
+
 	// Utility functions.
 	/**
 	 * Add a player to the list of players in the lobby.
@@ -354,8 +373,8 @@ public class GameProtocol implements SocketProtocol {
 		// Find which player slot is not used. To do this record all used slots,
 		// sort them, and then run through until we find a slot (number) which
 		// is not used.
-		ArrayList<Integer> usedPlayerSlots = new ArrayList<Integer>(
-				lobbyPlayers.keySet());
+		ArrayList<Integer> usedPlayerSlots;
+		usedPlayerSlots = new ArrayList<Integer>(lobbyPlayers.keySet());
 		Collections.sort(usedPlayerSlots);
 
 		int candidateSlot = 0;
@@ -433,10 +452,8 @@ public class GameProtocol implements SocketProtocol {
 		// Allow a player to exit the game (lobby).
 		if (parsedMessage.get(0).equals(SocketProtocol.EXIT)) {
 
-			String[] closeClient = { SocketProtocol.replySender,
-					SocketProtocol.EXIT };
-
-			return disseminateMessages(sender, closeClient);
+			String[] closeClientMsg = makeCloseClientMsg();
+			return disseminateMessages(sender, closeClientMsg);
 		}
 
 		if (parsedMessage.get(0).equals("JOINLOBBY")) {
@@ -498,6 +515,7 @@ public class GameProtocol implements SocketProtocol {
 				numPlayers = Integer.parseInt(parsedMessage.get(2));
 			}
 
+			// TODO
 			game = new Game(numPlayers);
 			gameState = GameState.DRAW_TILE;
 
@@ -629,9 +647,8 @@ public class GameProtocol implements SocketProtocol {
 					return disseminateMessages(sender, makeErrorMsg());
 				}
 
-				String endTurn = "ENDTURN;currentPlayer;"
-						+ parsedMessage.get(2);
-				String[] endTurnMsg = { SocketProtocol.replyAll, endTurn };
+				String[] endTurnMsg = makeEndTurnMsg(currentPlayer);
+
 				return disseminateMessages(sender, endTurnMsg);
 			}
 
@@ -724,12 +741,9 @@ public class GameProtocol implements SocketProtocol {
 
 		// End game state.
 		if (GameState.END_GAME == gameState) {
-			String[] endGameMsg = { SocketProtocol.replyAll,
-					SocketProtocol.EXIT };
-			return disseminateMessages(sender, endGameMsg);
+			return disseminateMessages(sender, makeEndGameMsg());
 		}
 
 		return disseminateMessages(sender, makeErrorMsg());
 	}
-
 }
