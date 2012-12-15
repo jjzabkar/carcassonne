@@ -270,9 +270,11 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
-	// Other messages.
-	private final String[] errorMsg = { SocketProtocol.replySender,
-			SocketProtocol.NAK };
+	private String[] makeErrorMsg() {
+
+		String[] output = { SocketProtocol.replySender, SocketProtocol.NAK };
+		return output;
+	}
 
 	// Utility functions.
 	/**
@@ -441,7 +443,7 @@ public class GameProtocol implements SocketProtocol {
 
 			// Assign a player to the client which has joined the lobby.
 			if (lobbyPlayers.size() >= Game.getMaxPlayers()) {
-				return disseminateMessages(sender, errorMsg);
+				return disseminateMessages(sender, makeErrorMsg());
 			}
 
 			int playerSlot = getFreePlayerSlot();
@@ -489,7 +491,7 @@ public class GameProtocol implements SocketProtocol {
 			int numPlayers = 0;
 
 			if (!parsedMessage.get(0).equals("INIT")) {
-				return disseminateMessages(sender, errorMsg);
+				return disseminateMessages(sender, makeErrorMsg());
 			}
 
 			if (parsedMessage.get(1).equals("numPlayers")) {
@@ -506,7 +508,7 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.DRAW_TILE == gameState) {
 
 			if (!parsedMessage.get(0).equals("DRAWTILE")) {
-				return disseminateMessages(sender, errorMsg);
+				return disseminateMessages(sender, makeErrorMsg());
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -514,7 +516,7 @@ public class GameProtocol implements SocketProtocol {
 				// The client is telling us that a different player is taking
 				// a tile than we told them. This is incorrect.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, errorMsg);
+					return disseminateMessages(sender, makeErrorMsg());
 				}
 
 				// Otherwise continue the game by drawing a tile for the current
@@ -538,7 +540,7 @@ public class GameProtocol implements SocketProtocol {
 
 			if (!parsedMessage.get(0).equals("PLACETILE")
 					&& !parsedMessage.get(0).equals("ROTATETILE")) {
-				return disseminateMessages(sender, errorMsg);
+				return disseminateMessages(sender, makeErrorMsg());
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
@@ -546,7 +548,7 @@ public class GameProtocol implements SocketProtocol {
 				// Again, check the player the client is telling us that's
 				// playing is actually the player whose turn it is.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, errorMsg);
+					return disseminateMessages(sender, makeErrorMsg());
 				}
 
 				// Check what the client wants us to do.
@@ -613,7 +615,7 @@ public class GameProtocol implements SocketProtocol {
 						return disseminateMessages(sender, ret);
 
 					} else {
-						return disseminateMessages(sender, errorMsg);
+						return disseminateMessages(sender, makeErrorMsg());
 					}
 				}
 			}
@@ -624,7 +626,7 @@ public class GameProtocol implements SocketProtocol {
 			if (parsedMessage.get(0).equals("ENDTURN")) {
 
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, errorMsg);
+					return disseminateMessages(sender, makeErrorMsg());
 				}
 
 				String endTurn = "ENDTURN;currentPlayer;"
@@ -652,14 +654,14 @@ public class GameProtocol implements SocketProtocol {
 		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
-				return disseminateMessages(sender, errorMsg);
+				return disseminateMessages(sender, makeErrorMsg());
 			}
 
 			if (parsedMessage.get(1).equals("currentPlayer")) {
 
 				// Again, check the client is synchronized wrt/ player turn.
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, errorMsg);
+					return disseminateMessages(sender, makeErrorMsg());
 				}
 
 				// If everything is good; we're synchronized, continue.
@@ -715,7 +717,7 @@ public class GameProtocol implements SocketProtocol {
 					return disseminateMessages(sender, ret);
 
 				} else {
-					return disseminateMessages(sender, errorMsg);
+					return disseminateMessages(sender, makeErrorMsg());
 				}
 			}
 		}
@@ -727,7 +729,7 @@ public class GameProtocol implements SocketProtocol {
 			return disseminateMessages(sender, endGameMsg);
 		}
 
-		return disseminateMessages(sender, errorMsg);
+		return disseminateMessages(sender, makeErrorMsg());
 	}
 
 }
