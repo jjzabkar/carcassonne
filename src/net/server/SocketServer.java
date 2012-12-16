@@ -1,9 +1,8 @@
-package net;
+package net.server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import net.server.SocketServerProtocol;
 
 
 public class SocketServer extends Thread {

@@ -41,11 +41,11 @@ import javax.swing.text.Document;
 
 import model.Game;
 import model.GameState;
-import net.SocketServer;
-import net.SocketClient;
 import net.client.ClientProtocol;
+import net.client.SocketClient;
 import net.client.SocketClientProtocol;
 import net.server.ServerProtocol;
+import net.server.SocketServer;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, MessageSender {
