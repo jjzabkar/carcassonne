@@ -1,9 +1,12 @@
-package client.net;
+package net;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import net.client.SocketProtocol;
+
 
 public class SocketClient {
 

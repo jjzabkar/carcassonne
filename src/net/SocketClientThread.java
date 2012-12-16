@@ -1,4 +1,4 @@
-package client.net;
+package net;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import net.client.SocketProtocol;
+
 
 // We have 2 avenues to send/receive messages from the server. We can either
 // send a message and get a message back directly (sendMessage). Or we can

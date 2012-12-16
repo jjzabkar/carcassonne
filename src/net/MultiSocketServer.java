@@ -1,7 +1,10 @@
-package server.net;
+package net;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import net.server.SocketProtocol;
+
 
 public class MultiSocketServer extends Thread {
 

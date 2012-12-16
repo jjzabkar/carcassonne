@@ -1,4 +1,4 @@
-package client.net;
+package net.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;

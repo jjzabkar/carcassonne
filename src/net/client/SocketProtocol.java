@@ -1,4 +1,4 @@
-package client.net;
+package net.client;
 
 public interface SocketProtocol {
 

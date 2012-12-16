@@ -1,4 +1,4 @@
-package server.net;
+package net.server;
 
 import java.awt.Color;
 import java.io.IOException;

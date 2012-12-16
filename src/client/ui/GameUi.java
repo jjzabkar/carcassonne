@@ -39,14 +39,15 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import net.MultiSocketServer;
+import net.SocketClient;
+import net.client.ClientProtocol;
+import net.client.SocketProtocol;
+import net.server.ServerProtocol;
+
 import model.Game;
 import model.GameState;
-import server.net.ServerProtocol;
-import server.net.MultiSocketServer;
 import client.model.MessageSender;
-import client.net.ClientProtocol;
-import client.net.SocketClient;
-import client.net.SocketProtocol;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, MessageSender {
