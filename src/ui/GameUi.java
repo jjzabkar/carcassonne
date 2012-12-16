@@ -41,7 +41,7 @@ import javax.swing.text.Document;
 
 import model.Game;
 import model.GameState;
-import net.MultiSocketServer;
+import net.SocketServer;
 import net.SocketClient;
 import net.client.ClientProtocol;
 import net.client.SocketProtocol;
@@ -772,7 +772,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 				// Start up Server.
 				// TODO perhaps server should stop when hosting player
 				// leaves the game lobby? failover?
-				new MultiSocketServer(port, ServerProtocol.class).start();
+				new SocketServer(port, ServerProtocol.class).start();
 
 				// Reset the server hostname in case it was changed.
 				server = "localhost";

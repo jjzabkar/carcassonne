@@ -6,7 +6,7 @@ import java.net.Socket;
 import net.server.SocketProtocol;
 
 
-public class MultiSocketServer extends Thread {
+public class SocketServer extends Thread {
 
 	private int port;
 	private Class<? extends SocketProtocol> protocol;
@@ -22,7 +22,7 @@ public class MultiSocketServer extends Thread {
 	 * @param protocol
 	 *            The protocol to run on the clients.
 	 */
-	public MultiSocketServer(int port, Class<? extends SocketProtocol> protocol) {
+	public SocketServer(int port, Class<? extends SocketProtocol> protocol) {
 
 		this.port = port;
 		this.protocol = protocol;
@@ -42,7 +42,7 @@ public class MultiSocketServer extends Thread {
 				int numConnections = socketProtocol.getNumConnections();
 
 				if (numConnections < maxConnections) {
-					new MultiSocketServerThread(client, socketProtocol).start();
+					new SocketServerThread(client, socketProtocol).start();
 				} else {
 					// TODO: something.. send a message to client saying game
 					// is full.?

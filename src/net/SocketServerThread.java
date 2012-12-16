@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import net.server.SocketProtocol;
 
 
-public class MultiSocketServerThread extends Thread {
+public class SocketServerThread extends Thread {
 
 	private Socket clientSocket = null;
 	private SocketProtocol protocol = null;
@@ -21,17 +21,17 @@ public class MultiSocketServerThread extends Thread {
 	private BufferedReader clientReader = null;
 
 	/**
-	 * Constructor for MultiSocketServerThread. This class is created by a
-	 * MultiSocketServer, and is meant to connect directly to a client.
+	 * Constructor for SocketServerThread. This class is created by a
+	 * SocketServer, and is meant to connect directly to a client.
 	 * 
 	 * @param clientSocket
 	 *            The socket that represents a connection to the client.
 	 * @param protocol
 	 *            The message protocol to be followed.
 	 */
-	public MultiSocketServerThread(Socket clientSocket, SocketProtocol protocol) {
+	public SocketServerThread(Socket clientSocket, SocketProtocol protocol) {
 
-		super("MultiSocketServerThread");
+		super("SocketServerThread");
 
 		this.clientSocket = clientSocket;
 		this.protocol = protocol;
