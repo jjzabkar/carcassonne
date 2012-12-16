@@ -18,7 +18,7 @@ import model.GameState;
 import model.Player;
 import model.Tile;
 
-public class GameProtocol implements SocketProtocol {
+public class ServerProtocol implements SocketProtocol {
 
 	// Message format is as follows (client sends followed by server replies):
 	//

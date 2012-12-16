@@ -1,10 +1,9 @@
-package client.model;
+package client.net;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import model.GameState;
-import client.net.SocketProtocol;
 import client.ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
