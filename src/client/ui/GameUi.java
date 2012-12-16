@@ -39,6 +39,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import model.GameState;
 import server.model.Game;
 import server.net.GameProtocol;
 import server.net.MultiSocketServer;
@@ -59,7 +60,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// Game settings & info.
 	private TileUi currentTile = null;
-	private GameState gameState = GameState.GAME_START;
+	private GameState gameState = GameState.START_GAME;
 	private int tileSize = TileUi.tileSize * TileUi.tileTypeSize;
 	private int gameBoardWidth = 0;
 	private int gameBoardHeight = 0;
@@ -713,7 +714,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	public void actionPerformed(ActionEvent e) {
 
 		// Actions for gameplay.
-		if (gameState != GameState.GAME_END && currentPlayer == player) {
+		if (gameState != GameState.END_GAME && currentPlayer == player) {
 
 			// Event handlers for tile rotation.
 			if ("rotateCW".equals(e.getActionCommand()) && currentTile != null) {
@@ -930,7 +931,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Detect if there has been a mouse click on the board canvas object.
 		if (e.getComponent() == gameBoardWindow && currentPlayer == player
-				&& gameState != GameState.GAME_END) {
+				&& gameState != GameState.END_GAME) {
 
 			// We'll do some click calculations outside of the state-specific
 			// checks to prevent code duplication. First get the clicked
@@ -1097,7 +1098,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 */
 	public void startGame(int currentPlayer, int width, int height) {
 
-		if (gameState != GameState.GAME_START) {
+		if (gameState != GameState.START_GAME) {
 			return;
 		}
 

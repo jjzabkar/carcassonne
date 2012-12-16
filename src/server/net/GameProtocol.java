@@ -12,9 +12,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import model.GameState;
 import server.model.BoardPosition;
 import server.model.Game;
-import server.model.GameState;
 import server.model.Player;
 import server.model.Tile;
 

@@ -1,5 +1,0 @@
-package client.ui;
-
-public enum GameState {
-	GAME_START, DRAW_TILE, PLACE_TILE, SCORE_PLACE_TILE, PLACE_MEEPLE, SCORE_PLACE_MEEPLE, GAME_END
-}

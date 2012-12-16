@@ -3,8 +3,8 @@ package client.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import model.GameState;
 import client.net.SocketProtocol;
-import client.ui.GameState;
 import client.ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
@@ -188,7 +188,7 @@ public class ClientProtocol implements SocketProtocol {
 
 			if (drawPileEmpty) {
 
-				gameUi.updateGameState(GameState.GAME_END);
+				gameUi.updateGameState(GameState.END_GAME);
 			}
 		}
 
