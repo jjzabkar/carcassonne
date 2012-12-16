@@ -3,8 +3,9 @@ package net.client;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import ui.GameUi;
+
 import model.GameState;
-import client.ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to

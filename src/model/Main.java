@@ -1,6 +1,6 @@
 package model;
 
-import client.ui.GameUi;
+import ui.GameUi;
 
 public class Main {
 

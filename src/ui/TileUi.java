@@ -1,4 +1,4 @@
-package client.ui;
+package ui;
 
 import java.awt.Color;
 import java.awt.Graphics;

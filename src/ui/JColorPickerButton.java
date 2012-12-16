@@ -1,4 +1,4 @@
-package client.ui;
+package ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,7 +10,6 @@ import java.util.Arrays;
 
 import javax.swing.JComponent;
 
-import client.model.MessageSender;
 
 class JColorPickerButton extends JComponent implements MouseListener,
 		MessageSender {

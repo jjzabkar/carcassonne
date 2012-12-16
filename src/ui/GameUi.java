@@ -1,4 +1,4 @@
-package client.ui;
+package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,7 +47,6 @@ import net.server.ServerProtocol;
 
 import model.Game;
 import model.GameState;
-import client.model.MessageSender;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, MessageSender {

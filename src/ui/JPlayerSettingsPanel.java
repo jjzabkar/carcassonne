@@ -1,4 +1,4 @@
-package client.ui;
+package ui;
 
 import java.awt.Color;
 import java.awt.GridBagConstraints;
@@ -11,7 +11,6 @@ import java.text.DecimalFormat;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import client.model.MessageSender;
 
 public class JPlayerSettingsPanel extends JPanel implements MessageSender {
 
