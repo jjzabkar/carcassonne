@@ -1,11 +1,12 @@
-package server.tests;
+package model.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import model.Player;
+import model.Tile;
+
 import org.junit.Test;
 
-import server.model.Player;
-import server.model.Tile;
 
 public class PlayerTest {
 

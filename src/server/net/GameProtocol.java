@@ -12,11 +12,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import model.BoardPosition;
+import model.Game;
 import model.GameState;
-import server.model.BoardPosition;
-import server.model.Game;
-import server.model.Player;
-import server.model.Tile;
+import model.Player;
+import model.Tile;
 
 public class GameProtocol implements SocketProtocol {
 

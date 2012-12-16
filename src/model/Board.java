@@ -1,4 +1,4 @@
-package server.model;
+package model;
 
 import java.awt.Point;
 import java.util.ArrayList;

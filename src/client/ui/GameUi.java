@@ -39,8 +39,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import model.Game;
 import model.GameState;
-import server.model.Game;
 import server.net.GameProtocol;
 import server.net.MultiSocketServer;
 import client.model.ClientProtocol;

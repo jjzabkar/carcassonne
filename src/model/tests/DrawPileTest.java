@@ -1,12 +1,13 @@
-package server.tests;
+package model.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import model.DrawPile;
+import model.Player;
+import model.Tile;
+
 import org.junit.Test;
 
-import server.model.DrawPile;
-import server.model.Player;
-import server.model.Tile;
 
 public class DrawPileTest {
 

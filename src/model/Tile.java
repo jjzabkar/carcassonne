@@ -1,4 +1,4 @@
-package server.model;
+package model;
 
 public class Tile {
 	// A tile is stored as a 7x7 matrix, where the corner cells are null.
