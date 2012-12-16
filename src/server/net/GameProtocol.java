@@ -249,7 +249,10 @@ public class GameProtocol implements SocketProtocol {
 				+ xBoard + ";yBoard;" + yBoard + ";xTile;" + xTile + ";yTile;"
 				+ yTile + ";error;" + error;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String recipient = (error == 0) ? SocketProtocol.replyAll
+				: SocketProtocol.replySender;
+
+		String[] output = { recipient, message };
 
 		return output;
 	}
@@ -676,6 +679,8 @@ public class GameProtocol implements SocketProtocol {
 			return processInput(sender, input);
 		}
 
+		// Receive:
+		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
 		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
@@ -690,34 +695,25 @@ public class GameProtocol implements SocketProtocol {
 				}
 
 				// If everything is good; we're synchronized, continue.
-				int xBoard = 0;
-				int yBoard = 0;
-				int xTile = 0;
-				int yTile = 0;
-
-				if (parsedMessage.get(3).equals("xBoard")) {
-					xBoard = Integer.parseInt(parsedMessage.get(4));
-				}
-				if (parsedMessage.get(5).equals("yBoard")) {
-					yBoard = Integer.parseInt(parsedMessage.get(6));
-				}
-				if (parsedMessage.get(7).equals("xTile")) {
-					xTile = Integer.parseInt(parsedMessage.get(8));
-				}
-				if (parsedMessage.get(9).equals("yTile")) {
-					yTile = Integer.parseInt(parsedMessage.get(10));
-				}
+				int xBoard = Integer.parseInt(parsedMessage.get(4));
+				int yBoard = Integer.parseInt(parsedMessage.get(6));
+				int xTile = Integer.parseInt(parsedMessage.get(8));
+				int yTile = Integer.parseInt(parsedMessage.get(10));
 
 				Player player = game.getPlayers().get(currentPlayer);
 
 				int err;
 				err = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
 
+				// TODO: can this be simplified?
+				String ret[][];
+				String[] placeMeepleMsg = makePlaceMeepleMsg(currentPlayer,
+						xBoard, yBoard, xTile, yTile, err);
+
 				if (err == 0) {
 
-					// TODO: can this be simplified?
 					int numMessages = game.getNumPlayers() + 3;
-					String[][] ret = new String[numMessages][];
+					ret = new String[numMessages][];
 
 					boolean isGameOver = game.isDrawPileEmpty();
 
@@ -725,9 +721,7 @@ public class GameProtocol implements SocketProtocol {
 						gameState = GameState.END_GAME;
 					}
 
-					ret[0] = makePlaceMeepleMsg(currentPlayer, xBoard, yBoard,
-							xTile, yTile, err);
-
+					ret[0] = placeMeepleMsg;
 					ret[1] = makeScoreMsg(game.score(isGameOver));
 
 					for (int i = 0; i < game.getNumPlayers(); i++) {
@@ -739,11 +733,13 @@ public class GameProtocol implements SocketProtocol {
 					gameState = GameState.DRAW_TILE;
 					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 
-					return disseminateMessages(sender, ret);
-
 				} else {
-					return disseminateMessages(sender, makeErrorMsg());
+
+					ret = new String[1][];
+					ret[0] = placeMeepleMsg;
 				}
+
+				return disseminateMessages(sender, ret);
 			}
 		}
 

@@ -71,6 +71,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// Accessors & mutators for above variables.
 
+	// TODO
 	public void updateGameState(GameState state) {
 		gameState = state;
 	}
@@ -1192,7 +1193,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 */
 	public void placeTile(int currentPlayer, int xBoard, int yBoard, int error) {
 
-		if (error == 1) {
+		if (error != 0) {
 			showMessageDialog("Can't place tile there.");
 			return;
 		}
@@ -1229,7 +1230,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param yTile
 	 *            the y tile position to place the meeple.
 	 */
-	public void placeMeeple(int xBoard, int yBoard, int xTile, int yTile) {
+	// TODO
+	public void placeMeeple(int currentPlayer, int xBoard, int yBoard,
+			int xTile, int yTile, int error) {
+
+		if (error != 0) {
+			showMessageDialog("Can't place meeple there.");
+			return;
+		}
 
 		int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
 		int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
@@ -1239,6 +1247,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		gameBoardWindow.add(meepleUi);
 		gameBoardWindow.repaint();
+
+		// Update the game state.
+		gameState = GameState.SCORE_PLACE_MEEPLE;
 	}
 
 	/**

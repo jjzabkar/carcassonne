@@ -92,40 +92,17 @@ public class ClientProtocol implements SocketProtocol {
 			gameUi.placeTile(currentPlayer, xBoard, yBoard, err);
 		}
 
-		// Place meeple
+		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>;error;<int:(0|1)>
 		if (message.get(0).equals("PLACEMEEPLE")) {
 
-			int err = 0;
-			int xBoard = 0;
-			int yBoard = 0;
-			int xTile = 0;
-			int yTile = 0;
+			int currentPlayer = Integer.parseInt(message.get(2));
+			int xBoard = Integer.parseInt(message.get(4));
+			int yBoard = Integer.parseInt(message.get(6));
+			int xTile = Integer.parseInt(message.get(8));
+			int yTile = Integer.parseInt(message.get(10));
+			int err = Integer.parseInt(message.get(12));
 
-			if (message.get(3).equals("xBoard")) {
-				xBoard = Integer.parseInt(message.get(4));
-			}
-			if (message.get(5).equals("yBoard")) {
-				yBoard = Integer.parseInt(message.get(6));
-			}
-			if (message.get(7).equals("xTile")) {
-				xTile = Integer.parseInt(message.get(8));
-			}
-			if (message.get(9).equals("yTile")) {
-				yTile = Integer.parseInt(message.get(10));
-			}
-			if (message.get(11).equals("error")) {
-				err = Integer.parseInt(message.get(12));
-			}
-
-			if (err == 0) {
-
-				gameUi.placeMeeple(xBoard, yBoard, xTile, yTile);
-				gameUi.updateGameState(GameState.SCORE_PLACE_MEEPLE);
-
-			} else {
-				// TODO: better error handling
-				gameUi.showMessageDialog("Can't place meeple there");
-			}
+			gameUi.placeMeeple(currentPlayer, xBoard, yBoard, xTile, yTile, err);
 		}
 
 		if (gameUi.getGameState() == GameState.SCORE_PLACE_TILE
