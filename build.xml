@@ -14,7 +14,7 @@
     <property name="test.report.dir" location="${basedir}/tests" />
     
     <property name="name.jar" value="Carcassonne.jar" />
-    <property name="main.class" value="client.model.ClientMain" />
+    <property name="main.class" value="model.Main" />
 
     <path id="build.class.path">
         <pathelement location="${build.dir}" />

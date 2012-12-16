@@ -1,8 +1,8 @@
-package client.model;
+package model;
 
 import client.ui.GameUi;
 
-public class ClientMain {
+public class Main {
 
 	public static void main(String[] args) {
 
