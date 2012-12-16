@@ -7,8 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import net.client.SocketProtocol;
-
+import net.client.SocketClientProtocol;
 
 // We have 2 avenues to send/receive messages from the server. We can either
 // send a message and get a message back directly (sendMessage). Or we can
@@ -16,9 +15,9 @@ import net.client.SocketProtocol;
 class SocketClientThread extends Thread {
 
 	private Socket server = null;
-	private SocketProtocol protocol = null;
+	private SocketClientProtocol protocol = null;
 
-	public SocketClientThread(Socket server, SocketProtocol protocol) {
+	public SocketClientThread(Socket server, SocketClientProtocol protocol) {
 		super("SocketClientThread");
 		this.server = server;
 		this.protocol = protocol;
@@ -41,9 +40,9 @@ class SocketClientThread extends Thread {
 			while ((inputLine = reader.readLine()) != null) {
 
 				// Don't do anything with the response for now.
-				protocol.processInput(inputLine);
+				protocol.processInput(server, inputLine);
 
-				if (inputLine.equals(SocketProtocol.EXIT)) {
+				if (inputLine.equals(SocketClientProtocol.EXIT)) {
 
 					writer.close();
 					reader.close();

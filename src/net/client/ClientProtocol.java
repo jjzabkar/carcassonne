@@ -1,16 +1,16 @@
 package net.client;
 
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import ui.GameUi;
-
 import model.GameState;
+import ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to
 // update itself.
-public class ClientProtocol implements SocketProtocol {
+public class ClientProtocol implements SocketClientProtocol {
 
 	private GameUi gameUi = null;
 
@@ -27,7 +27,7 @@ public class ClientProtocol implements SocketProtocol {
 	// TODO; current player checking, error checking.
 	// Handle messages;
 	@Override
-	public String processInput(String input) {
+	public ArrayList<String> processInput(Socket sender, String input) {
 
 		// Do some coercion on the data.
 		ArrayList<String> message;
@@ -35,7 +35,7 @@ public class ClientProtocol implements SocketProtocol {
 
 		// PRE-GAME
 
-		if (message.get(0).equals(SocketProtocol.EXIT)) {
+		if (message.get(0).equals(SocketClientProtocol.EXIT)) {
 			gameUi.exit();
 		}
 

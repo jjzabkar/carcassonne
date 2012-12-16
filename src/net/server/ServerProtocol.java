@@ -18,12 +18,12 @@ import model.GameState;
 import model.Player;
 import model.Tile;
 
-public class ServerProtocol implements SocketProtocol {
+public class ServerProtocol implements SocketServerProtocol {
 
 	// Message format is as follows (client sends followed by server replies):
 	//
 	// Note: Any messages sent at the wrong time or other errors will cause the
-	// server to return SocketProtocol.NAK ("NAK").
+	// server to return SocketClientProtocol.NAK ("NAK").
 	//
 	// JOINLOBBY
 	//
@@ -95,7 +95,8 @@ public class ServerProtocol implements SocketProtocol {
 		}
 	}
 
-	private void removeSender(Socket socket) {
+	@Override
+	public void removeSender(Socket socket) {
 		writers.remove(socket);
 		// TODO: close socket/ writer connections
 	}
@@ -138,7 +139,7 @@ public class ServerProtocol implements SocketProtocol {
 	private String[] makeAssignPlayerMsg(int numberRep) {
 
 		String message = "ASSIGNPLAYER;player;" + numberRep;
-		String[] output = { SocketProtocol.replySender, message };
+		String[] output = { SocketServerProtocol.replySender, message };
 
 		return output;
 	}
@@ -158,7 +159,7 @@ public class ServerProtocol implements SocketProtocol {
 					+ ";color;" + player.color;
 		}
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -171,7 +172,7 @@ public class ServerProtocol implements SocketProtocol {
 		String message = "INFO;game;currentPlayer;" + currentPlayer
 				+ ";drawPileEmpty;" + isDrawPileEmpty;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -188,7 +189,7 @@ public class ServerProtocol implements SocketProtocol {
 				+ isCurrentPlayer + ";score;" + playerScore + ";meeplesPlaced;"
 				+ numMeeplesPlaced;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -199,7 +200,7 @@ public class ServerProtocol implements SocketProtocol {
 				+ game.getBoardWidth() + ";gameBoardHeight;"
 				+ game.getBoardHeight();
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -210,7 +211,7 @@ public class ServerProtocol implements SocketProtocol {
 		String message = "DRAWTILE;currentPlayer;" + player + ";identifier;"
 				+ identifier + ";orientation;" + orientation;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -224,8 +225,8 @@ public class ServerProtocol implements SocketProtocol {
 		String message = "PLACETILE;currentPlayer;" + player + ";xBoard;"
 				+ xBoard + ";yBoard;" + yBoard + ";error;" + error;
 
-		String recipient = (error == 0) ? SocketProtocol.replyAll
-				: SocketProtocol.replySender;
+		String recipient = (error == 0) ? SocketServerProtocol.replyAll
+				: SocketServerProtocol.replySender;
 
 		String[] output = { recipient, message };
 
@@ -237,7 +238,7 @@ public class ServerProtocol implements SocketProtocol {
 		String message = "ROTATETILE;currentPlayer;" + player + ";direction;"
 				+ direction;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
@@ -249,8 +250,8 @@ public class ServerProtocol implements SocketProtocol {
 				+ xBoard + ";yBoard;" + yBoard + ";xTile;" + xTile + ";yTile;"
 				+ yTile + ";error;" + error;
 
-		String recipient = (error == 0) ? SocketProtocol.replyAll
-				: SocketProtocol.replySender;
+		String recipient = (error == 0) ? SocketServerProtocol.replyAll
+				: SocketServerProtocol.replySender;
 
 		String[] output = { recipient, message };
 
@@ -274,33 +275,36 @@ public class ServerProtocol implements SocketProtocol {
 			}
 		}
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 
 		return output;
 	}
 
 	private String[] makeErrorMsg() {
 
-		String[] output = { SocketProtocol.replySender, SocketProtocol.NAK };
+		String[] output = { SocketServerProtocol.replySender,
+				SocketServerProtocol.NAK };
 		return output;
 	}
 
 	private String[] makeEndTurnMsg(int currentPlayer) {
 
 		String message = "ENDTURN;currentPlayer;" + currentPlayer;
-		String[] output = { SocketProtocol.replyAll, message };
+		String[] output = { SocketServerProtocol.replyAll, message };
 		return output;
 	}
 
 	private String[] makeEndGameMsg() {
 
-		String[] output = { SocketProtocol.replyAll, SocketProtocol.EXIT };
+		String[] output = { SocketServerProtocol.replyAll,
+				SocketServerProtocol.EXIT };
 		return output;
 	}
 
 	private String[] makeCloseClientMsg() {
 
-		String[] output = { SocketProtocol.replySender, SocketProtocol.EXIT };
+		String[] output = { SocketServerProtocol.replySender,
+				SocketServerProtocol.EXIT };
 		return output;
 	}
 
@@ -415,7 +419,7 @@ public class ServerProtocol implements SocketProtocol {
 			String currentMessage = processedMessages[i][1];
 			messages.add(currentMessage);
 
-			if (recipient.equals(SocketProtocol.replyAll)) {
+			if (recipient.equals(SocketServerProtocol.replyAll)) {
 
 				Iterator<Socket> sendersIter = writers.keySet().iterator();
 
@@ -459,7 +463,7 @@ public class ServerProtocol implements SocketProtocol {
 		parsedMessage.addAll(Arrays.asList(input.split(";")));
 
 		// Allow a player to exit the game (lobby).
-		if (parsedMessage.get(0).equals(SocketProtocol.EXIT)) {
+		if (parsedMessage.get(0).equals(SocketServerProtocol.EXIT)) {
 
 			String[] closeClientMsg = makeCloseClientMsg();
 			return disseminateMessages(sender, closeClientMsg);

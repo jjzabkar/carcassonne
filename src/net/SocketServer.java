@@ -3,13 +3,13 @@ package net;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import net.server.SocketProtocol;
+import net.server.SocketServerProtocol;
 
 
 public class SocketServer extends Thread {
 
 	private int port;
-	private Class<? extends SocketProtocol> protocol;
+	private Class<? extends SocketServerProtocol> protocol;
 
 	/**
 	 * Constructor for the Server.
@@ -22,7 +22,7 @@ public class SocketServer extends Thread {
 	 * @param protocol
 	 *            The protocol to run on the clients.
 	 */
-	public SocketServer(int port, Class<? extends SocketProtocol> protocol) {
+	public SocketServer(int port, Class<? extends SocketServerProtocol> protocol) {
 
 		this.port = port;
 		this.protocol = protocol;
@@ -32,7 +32,7 @@ public class SocketServer extends Thread {
 
 		try {
 			ServerSocket serverSocket = new ServerSocket(port);
-			SocketProtocol socketProtocol = protocol.newInstance();
+			SocketServerProtocol socketProtocol = protocol.newInstance();
 
 			while (true) {
 

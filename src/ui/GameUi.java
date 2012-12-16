@@ -44,7 +44,7 @@ import model.GameState;
 import net.SocketServer;
 import net.SocketClient;
 import net.client.ClientProtocol;
-import net.client.SocketProtocol;
+import net.client.SocketClientProtocol;
 import net.server.ServerProtocol;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
@@ -187,7 +187,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 					// send a different message depending on which is leaving?
 
 					// Close the socket client.
-					sendMessage(SocketProtocol.EXIT);
+					sendMessage(SocketClientProtocol.EXIT);
 				}
 			}
 		});
@@ -846,7 +846,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			sendMessage(msg);
 
 			// Close the socket client.
-			sendMessage(SocketProtocol.EXIT);
+			sendMessage(SocketClientProtocol.EXIT);
 
 			// Return to the main game screen.
 			setContentPane(titleScreenContentPane);

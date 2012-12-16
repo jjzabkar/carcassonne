@@ -1,16 +1,10 @@
 package net.server;
 
 import java.net.Socket;
-import java.util.ArrayList;
 
-public interface SocketProtocol {
+import net.client.SocketClientProtocol;
 
-	public static final String ACK = "ACK";
-	public static final String NAK = "NAK";
-	public static final String EXIT = "EXIT";
-
-	public static final String replyAll = "replyAll";
-	public static final String replySender = "replySender";
+public interface SocketServerProtocol extends SocketClientProtocol {
 
 	/**
 	 * Allow a sender to be added to the socket protocol's list of senders.
@@ -24,10 +18,12 @@ public interface SocketProtocol {
 	public void addSender(Socket sender);
 
 	/**
-	 * The sender provides a way to identify itself against the list of senders
-	 * which are added.
+	 * Allow a sender to be removed from the socket protocol's list of senders.
+	 * 
+	 * @param sender
+	 *            A Socket object which is tied to the sender object.
 	 */
-	public ArrayList<String> processInput(Socket sender, String input);
+	public void removeSender(Socket sender);
 
 	/**
 	 * Get the maximum number of allowed client connections to this protocol.

@@ -9,13 +9,13 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import net.server.SocketProtocol;
+import net.server.SocketServerProtocol;
 
 
 public class SocketServerThread extends Thread {
 
 	private Socket clientSocket = null;
-	private SocketProtocol protocol = null;
+	private SocketServerProtocol protocol = null;
 
 	private PrintWriter clientWriter = null;
 	private BufferedReader clientReader = null;
@@ -29,7 +29,7 @@ public class SocketServerThread extends Thread {
 	 * @param protocol
 	 *            The message protocol to be followed.
 	 */
-	public SocketServerThread(Socket clientSocket, SocketProtocol protocol) {
+	public SocketServerThread(Socket clientSocket, SocketServerProtocol protocol) {
 
 		super("SocketServerThread");
 
@@ -95,7 +95,7 @@ public class SocketServerThread extends Thread {
 
 					clientWriter.println(outLine);
 
-					if (outLine.equals(SocketProtocol.EXIT)) {
+					if (outLine.equals(SocketServerProtocol.EXIT)) {
 
 						removeClient();
 						return;

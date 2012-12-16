@@ -5,14 +5,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import net.client.SocketProtocol;
+import net.client.SocketClientProtocol;
 
 
 public class SocketClient {
 
 	private final String server;
 	private final int portNumber;
-	private SocketProtocol protocol;
+	private SocketClientProtocol protocol;
 
 	private Socket socket = null;
 	private PrintWriter writer = null;
@@ -25,7 +25,7 @@ public class SocketClient {
 	 * @param portNumber
 	 *            A port number for which to bind to the server on.
 	 */
-	public SocketClient(String server, int portNumber, SocketProtocol protocol) {
+	public SocketClient(String server, int portNumber, SocketClientProtocol protocol) {
 		this.server = server;
 		this.portNumber = portNumber;
 		this.protocol = protocol;
@@ -68,7 +68,7 @@ public class SocketClient {
 
 			writer.println(message);
 
-			if (message.equals(SocketProtocol.EXIT)) {
+			if (message.equals(SocketClientProtocol.EXIT)) {
 				writer.close();
 			}
 		}
