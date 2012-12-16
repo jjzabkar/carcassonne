@@ -215,13 +215,19 @@ public class GameProtocol implements SocketProtocol {
 		return output;
 	}
 
+	// Note that if an error has occurred we will not modify the game at all,
+	// and instead we'll just return the message to the sender indicating an
+	// error.
 	private String[] makePlaceTileMsg(int player, int xBoard, int yBoard,
 			int error) {
 
 		String message = "PLACETILE;currentPlayer;" + player + ";xBoard;"
 				+ xBoard + ";yBoard;" + yBoard + ";error;" + error;
 
-		String[] output = { SocketProtocol.replyAll, message };
+		String recipient = (error == 0) ? SocketProtocol.replyAll
+				: SocketProtocol.replySender;
+
+		String[] output = { recipient, message };
 
 		return output;
 	}
@@ -610,20 +616,17 @@ public class GameProtocol implements SocketProtocol {
 					Player player = game.getPlayers().get(currentPlayer);
 					int err = game.placeTile(player, xBoard, yBoard);
 
-					// TODO: instead of sending error message on error, we want
-					// to send back the placetile message indicating an error
-					// so that the user sees an error message. In this case,
-					// don't advance game state, and only send message back to
-					// sender; not all players.
+					// TODO: can this be simplified?
+					String[][] ret;
+					String[] placeTileMsg = makePlaceTileMsg(currentPlayer,
+							xBoard, yBoard, err);
+
 					if (err == 0) {
 
-						// TODO: can this be simplified?
 						int numMessages = game.getNumPlayers() + 3;
-						String[][] ret = new String[numMessages][];
+						ret = new String[numMessages][];
 
-						ret[0] = makePlaceTileMsg(currentPlayer, xBoard,
-								yBoard, err);
-
+						ret[0] = placeTileMsg;
 						ret[1] = makeScoreMsg(game.score(false));
 
 						for (int i = 0; i < game.getNumPlayers(); i++) {
@@ -633,12 +636,13 @@ public class GameProtocol implements SocketProtocol {
 						ret[numMessages - 1] = makeGameInfoMsg();
 
 						gameState = GameState.END_TURN;
-
-						return disseminateMessages(sender, ret);
-
 					} else {
-						return disseminateMessages(sender, makeErrorMsg());
+
+						ret = new String[1][];
+						ret[0] = placeTileMsg;
 					}
+
+					return disseminateMessages(sender, ret);
 				}
 			}
 		}
