@@ -39,14 +39,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import model.Game;
+import model.GameState;
 import net.MultiSocketServer;
 import net.SocketClient;
 import net.client.ClientProtocol;
 import net.client.SocketProtocol;
 import net.server.ServerProtocol;
-
-import model.Game;
-import model.GameState;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
 		DocumentListener, MessageSender {
@@ -118,7 +117,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// UI settings.
 	private String title = "Carcassonne";
-	private URL iconUrl = getClass().getResource("/client/resources/icon.png");
+	private String resourceLoc = "/ui/resources/";
+	private URL iconUrl = getClass().getResource(resourceLoc + "icon.png");
 	private Image iconImage = Toolkit.getDefaultToolkit().getImage(iconUrl);
 
 	private String[] windowedResolutions = { "800 x 600", "1024 x 768",
@@ -606,8 +606,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Create the buttons for tile manipulation & turn/window control.
 		// Draw Pile.
-		URL drawTileUrl = getClass().getResource(
-				"/client/resources/tile-back.jpg");
+		URL drawTileUrl = getClass().getResource(resourceLoc + "tile-back.jpg");
 		ImageIcon drawTileImage = new ImageIcon(drawTileUrl);
 
 		int drawTileWidth = drawTileImage.getIconWidth();
