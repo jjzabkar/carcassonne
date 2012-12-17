@@ -17,7 +17,6 @@
     
     <property name="main.class" value="model.Main"/>
 
-	<path id="src.class.path"><pathelement location="${src.dir}"/></path>
     <path id="bin.class.path"><pathelement location="${bin.dir}"/></path>
         
     <path id="junit.lib.path">
@@ -70,7 +69,7 @@
                 <path refid="emma.lib.path"/>
                 <pathelement location="${emma.instr.dir}"/>
             	<!-- Add uninstrumented classes, just for the junit test classes. -->
-            	<pathelement location="${bin.dir}"/>
+            	<path refid="bin.class.path"/>
             </classpath>
             
             <formatter type="xml"/>
@@ -115,7 +114,7 @@
     </target>
 
     <target name="build" depends="clean, compile"/>
-	<target name="main" depends="clean, compile, jar"/>
-	<target name="all" depends="clean, compile, docs, jar"/>
+	<target name="main" depends="clean, compile, junit, jar"/>
+	<target name="all" depends="clean, compile, junit, docs, jar"/>
 
 </project>
