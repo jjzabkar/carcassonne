@@ -1,149 +1,121 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project name="Carcassonne" default="main" basedir=".">
+<project name="carcassonne" default="main" basedir=".">
 
-    <property name="src.dir" location="${basedir}/src" />
-    <property name="build.dir" location="${basedir}/bin" />
+    <property name="src.dir" location="${basedir}/src"/>
+	<property name="lib.dir" location="${basedir}/lib"/>
+    <property name="resources.dir" value="ui/resources"/>
+	
+	<property name="build.dir" location="${basedir}/build"/>
+	
+    <property name="bin.dir" location="${build.dir}/bin"/>
+    <property name="docs.dir" location="${build.dir}/docs"/>
+    <property name="dist.dir" location="${build.dir}/dist"/>
 
-	<property name="resources.dir" value="client/resources" />
-    <property name="lib.dir" location="${basedir}/lib" />
-    <property name="docs.dir" location="${basedir}/docs" />
-    <property name="dist.dir" location="${basedir}/dist" />
-
-    <property name="emma.instr.dir" location="${basedir}/emma-instr" />
-    <property name="emma.report.dir" location="${basedir}/emma-report" />
-    <property name="test.report.dir" location="${basedir}/tests" />
+    <property name="emma.instr.dir" location="${build.dir}/instr"/>
+    <property name="emma.report.dir" location="${build.dir}/report/emma"/>
+    <property name="junit.report.dir" location="${build.dir}/report/junit"/>
     
-    <property name="name.jar" value="Carcassonne.jar" />
-    <property name="main.class" value="model.Main" />
+    <property name="main.class" value="model.Main"/>
 
-    <path id="build.class.path">
-        <pathelement location="${build.dir}" />
-    </path>
+	<path id="src.class.path"><pathelement location="${src.dir}"/></path>
+    <path id="bin.class.path"><pathelement location="${bin.dir}"/></path>
         
-    <path id="lib.class.path">
-        <fileset dir="${lib.dir}">
-            <include name="**/*.jar" />
-            <exclude name="emma/emma*.jar"/>
-        </fileset>
+    <path id="junit.lib.path">
+        <fileset dir="${lib.dir}"><include name="junit/*.jar"/></fileset>
     </path>
 
-    <path id="emma.class.path">
-        <fileset dir="${lib.dir}">
-           <include name="emma/emma*.jar"/>
-        </fileset>
+    <path id="emma.lib.path">
+    	<fileset dir="${lib.dir}"><include name="emma/*.jar"/></fileset>
     </path>
+	
+	<taskdef resource="emma_ant.properties" classpathref="emma.lib.path"/>
 
     <target name="clean">
-        <mkdir dir="${build.dir}" />
-        <mkdir dir="${docs.dir}" />
-        <mkdir dir="${dist.dir}" />
+        <delete includeemptydirs="true" failonerror="false">
+            <fileset dir="${build.dir}/" includes="**"/>
+            <fileset dir="." includes="*log*" casesensitive="no"/>
+        </delete>
+        <mkdir dir="${bin.dir}"/>
+        <mkdir dir="${docs.dir}"/>
+        <mkdir dir="${dist.dir}"/>
         <mkdir dir="${emma.instr.dir}"/>
         <mkdir dir="${emma.report.dir}"/>
-        <mkdir dir="${test.report.dir}" />
-        <delete includeemptydirs="true">
-            <fileset dir="${build.dir}/" includes="**/*" />
-            <fileset dir="${docs.dir}/" includes="**/*" />
-            <fileset dir="${dist.dir}/" includes="**/*.jar" />
-            <fileset dir="${emma.instr.dir}/" includes="**/*" />
-            <fileset dir="${emma.report.dir}/" includes="**/*" />
-            <fileset dir="${test.report.dir}/" includes="**/*" />
-            <fileset dir="." includes="*log*" casesensitive="no" />
-        </delete>
+        <mkdir dir="${junit.report.dir}"/>
     </target>
 
     <target name="compile">
-        <javac
-            debug="on"
-            includeantruntime="false"
-            srcdir="${src.dir}"
-            destdir="${build.dir}">
+        <javac debug="on" includeantruntime="false" srcdir="${src.dir}" destdir="${bin.dir}">
             <classpath>
-                <path refid="build.class.path" />
-                <path refid="lib.class.path" />
+                <path refid="bin.class.path"/>
+                <path refid="junit.lib.path"/>
             </classpath>
         </javac>
     </target>
-    
-    <target name="emma.enable">
-        <property name="emma.enabled" value="true" />
-        <taskdef
-            resource="emma_ant.properties"
-            classpathref="emma.class.path" />
-    </target>
-    
-    <target name="emma.instrument">
-        <emma enabled="${emma.enabled}">
-            <instr
-                instrpath="${build.dir}"
-                destdir="${emma.instr.dir}"
-                metadatafile="${emma.report.dir}/metadata.emma"
-                mode="copy"
-                merge="true">
-                <filter excludes="*Test*" />
-            </instr>
-        </emma>
-    </target>
 
     <target name="junit">
-        <junit
-            printsummary="on"
-            fork="true"
-            forkmode="once"
-            haltonfailure="yes"
-            haltonerror="yes">
+    	
+    	<!-- Instrument the class files (emma) -->
+        <emma>
+            <instr instrpath="${bin.dir}" destdir="${emma.instr.dir}" mode="copy"
+                metadatafile="${emma.report.dir}/metadata.emma" merge="true">
+                <filter excludes="*Test*"/>
+            </instr>
+        </emma>
+
+    	<!-- Run Junit tests -->
+        <junit printsummary="withOutAndErr" fork="true" forkmode="once" haltonfailure="yes" haltonerror="yes">
             
             <classpath>
-                <path refid="lib.class.path" />
-                <path refid="emma.class.path" />
-                <pathelement location="${emma.instr.dir}" />
-            	<!-- Add uninstrumented classes, just for the junit classes. -->
-            	<pathelement location="${build.dir}" />
+                <path refid="junit.lib.path"/>
+                <path refid="emma.lib.path"/>
+                <pathelement location="${emma.instr.dir}"/>
+            	<!-- Add uninstrumented classes, just for the junit test classes. -->
+            	<pathelement location="${bin.dir}"/>
             </classpath>
             
-            <formatter type="xml" />
+            <formatter type="xml"/>
             
-            <batchtest todir="${test.report.dir}">
+            <batchtest todir="${junit.report.dir}">
                 <fileset dir="${src.dir}">
-                    <include name="**/*Test*.java" />
-                    <exclude name="**/AllTests.java" />
+                    <include name="**/*Test*.java"/>
+                    <exclude name="**/AllTests.java"/>
                 </fileset>
             </batchtest>
             
-             <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma" />
-             <jvmarg value="-Demma.coverage.out.merge=true" />
+         <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.emma"/>
+         <jvmarg value="-Demma.coverage.out.merge=true"/>
             
         </junit>
-    </target>
-
-    <target name="emma.report">
-        <emma enabled="${emma.enabled}">
-           <report sourcepath="${src.dir}" depth="method">
-                <fileset dir="${emma.report.dir}">
-                    <include name="*.emma" />
-                </fileset>
-                <xml outfile="${emma.report.dir}/coverage.xml" />
-           </report>
-        </emma>
+    	
+    	<!-- Get the emma report -->
+    	<emma>
+            <report sourcepath="${src.dir}" depth="method">
+                 <fileset dir="${emma.report.dir}">
+                     <include name="*.emma"/>
+                 </fileset>
+                 <xml outfile="${emma.report.dir}/coverage.xml"/>
+            </report>
+    	</emma>
+    	
     </target>
 
     <target name="docs">
         <javadoc sourcepath="${src.dir}" destdir="${docs.dir}">
-            <excludepackage name="tests" />
+            <excludepackage name="*.tests"/>
         </javadoc>
     </target>
 
     <target name="jar">
-        <jar destfile="${dist.dir}/${name.jar}" basedir="${build.dir}"
-            excludes="**/tests/**">
-        	<fileset dir="${src.dir}" includes="${resources.dir}/**" />
+        <jar destfile="${dist.dir}/${ant.project.name}.jar" basedir="${bin.dir}" excludes="**/tests/**">
+        	<fileset dir="${src.dir}" includes="${resources.dir}/**"/>
             <manifest>
-                <attribute name="Main-Class" value="${main.class}" />
+                <attribute name="Main-Class" value="${main.class}"/>
             </manifest>
         </jar>
     </target>
 
-    <target name="main" depends="clean, compile, junit" />
-    <target name="emma" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report" />
-	<target name="all" depends="emma.enable, clean, compile, emma.instrument, junit, emma.report, docs, jar" />
+    <target name="build" depends="clean, compile"/>
+	<target name="main" depends="clean, compile, jar"/>
+	<target name="all" depends="clean, compile, docs, jar"/>
 
 </project>
