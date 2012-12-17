@@ -5,3 +5,6 @@
 # Package Files #
 *.war
 *.ear
+
+# Project Specific #
+build
