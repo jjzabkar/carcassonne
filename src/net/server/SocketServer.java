@@ -3,8 +3,6 @@ package net.server;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
-
 public class SocketServer extends Thread {
 
 	private int port;
@@ -27,6 +25,7 @@ public class SocketServer extends Thread {
 		this.protocol = protocol;
 	}
 
+	@Override
 	public void run() {
 
 		try {
