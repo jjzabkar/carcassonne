@@ -1161,8 +1161,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param direction
 	 *            the direction to rotate the tile. This can be "clockwise" or
 	 *            "counterClockwise".
-	 * @param error
-	 *            whether or not there has been an error.
 	 */
 	public void rotateTile(int currentPlayer, String direction) {
 
