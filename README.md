@@ -1,7 +1,5 @@
 # Carcassonne
 
-[![Build Status](https://awylie.ci.cloudbees.com/job/Carcassonne-GH/badge/icon)](https://awylie.ci.cloudbees.com/job/Carcassonne-GH/)
-
 ## Overview
 
 A somewhat broken, decently thought out software version of the popular game Carcassonne. Currently, the project is realized using a modified server/client architecture.
