@@ -3,13 +3,13 @@ package net.client;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import model.GameState;
 import ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to
-// update itself.
+// update itself in an appropriate manner.
 public class ClientProtocol implements SocketClientProtocol {
 
 	private GameUi gameUi = null;
@@ -18,35 +18,29 @@ public class ClientProtocol implements SocketClientProtocol {
 		this.gameUi = gameUi;
 	}
 
-	// Variables to keep track of scoring process; after all the player's scores
-	// are updated then we can end the current players turn if they don't have
-	// any meeples left.
-	private int numPlayerScoresUpdated = 0;
-	private boolean currentPlayerHasMeeplesLeft = true;
-
-	// TODO; current player checking, error checking.
-	// Handle messages;
 	@Override
 	public ArrayList<String> processInput(Socket sender, String input) {
 
-		// Do some coercion on the data.
-		ArrayList<String> message;
-		message = new ArrayList<String>(Arrays.asList(input.split(";")));
+		List<String> splitMessage = Arrays.asList(input.split(";"));
+		ArrayList<String> message = new ArrayList<String>(splitMessage);
 
-		// PRE-GAME
+		// Pre-game messages.
 
 		if (message.get(0).equals(SocketClientProtocol.EXIT)) {
 			gameUi.exit();
 		}
 
+		// ASSIGNPLAYER;player;<int>
 		if (message.get(0).equals("ASSIGNPLAYER")) {
 
-			if (message.get(1).equals("player")) {
-				gameUi.setPlayer(Integer.parseInt(message.get(2)));
-			}
+			int player = Integer.parseInt(message.get(2));
+
+			gameUi.assignPlayer(player);
 		}
 
+		// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
 		if (message.get(0).equals("UPDATELOBBY")) {
+
 			gameUi.updateLobby(message);
 		}
 
@@ -59,7 +53,7 @@ public class ClientProtocol implements SocketClientProtocol {
 			int width = Integer.parseInt(message.get(4));
 			int height = Integer.parseInt(message.get(6));
 
-			gameUi.startGame(currentPlayer, width, height);
+			gameUi.init(currentPlayer, width, height);
 		}
 
 		// DRAWTILE;currentPlayer;<int>;identifier;<string>;orientation;<int:[0-3]>
@@ -108,7 +102,14 @@ public class ClientProtocol implements SocketClientProtocol {
 		// Remove meeples.
 		// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 		if (message.get(0).equals("SCORE")) {
-			gameUi.scoreRemoveMeeples(message);
+			gameUi.score(message);
+		}
+
+		// ENDTURN;currentPlayer;<int>
+		if (message.get(0).equals("ENDTURN")) {
+
+			int currentPlayer = Integer.parseInt(message.get(2));
+			gameUi.endTurn(currentPlayer);
 		}
 
 		// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
@@ -119,48 +120,7 @@ public class ClientProtocol implements SocketClientProtocol {
 			int playerScore = Integer.parseInt(message.get(6));
 			int meeplesPlaced = Integer.parseInt(message.get(8));
 
-			gameUi.getPlayerStatusPanels().get(player).setScore(playerScore);
-
-			// Each players info is sent after a scoring action;
-			// after scoring all players, if the current player has no
-			// meeples to place then end their turn.
-			numPlayerScoresUpdated++;
-
-			if (meeplesPlaced == 7 && gameUi.getPlayer() == player) {
-				currentPlayerHasMeeplesLeft = false;
-			}
-
-			if (numPlayerScoresUpdated == gameUi.getNumPlayers()) {
-
-				numPlayerScoresUpdated = 0;
-
-				// Also end the player's turn if they are at the meeple
-				// scoring state.
-				if (!currentPlayerHasMeeplesLeft) {
-
-					currentPlayerHasMeeplesLeft = true;
-
-					String msg = "ENDTURN;currentPlayer;" + player;
-					gameUi.sendMessage(msg);
-
-					gameUi.updateGameState(GameState.DRAW_TILE);
-					gameUi.endTurn(gameUi.getCurrentPlayer());
-
-				} else {
-
-					gameUi.updateGameState(GameState.PLACE_MEEPLE);
-					gameUi.getEndTurnButton().setEnabled(true);
-				}
-			}
-		}
-
-		// ENDTURN;currentPlayer;<int>
-		if (message.get(0).equals("ENDTURN")) {
-
-			int currentPlayer = Integer.parseInt(message.get(2));
-
-			gameUi.updateGameState(GameState.DRAW_TILE);
-			gameUi.endTurn(currentPlayer);
+			gameUi.playerInfo(player, currentPlayer, playerScore, meeplesPlaced);
 		}
 
 		// INFO;game;currentPlayer;<int>;drawPileEmpty;<int:(0|1)>
@@ -168,11 +128,10 @@ public class ClientProtocol implements SocketClientProtocol {
 
 			int currentPlayer = Integer.parseInt(message.get(3));
 			int isDrawPileEmpty = Integer.parseInt(message.get(5));
+
 			boolean drawPileEmpty = (isDrawPileEmpty == 0) ? false : true;
 
-			if (drawPileEmpty) {
-				gameUi.updateGameState(GameState.END_GAME);
-			}
+			gameUi.gameInfo(currentPlayer, drawPileEmpty);
 		}
 
 		return null;

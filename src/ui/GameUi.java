@@ -84,7 +84,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameClient = null;
 	}
 
-	public void setPlayer(int player) {
+	public void assignPlayer(int player) {
 		this.player = player;
 	}
 
@@ -1095,7 +1095,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param height
 	 *            the height of the game board in tiles.
 	 */
-	public void startGame(int currentPlayer, int width, int height) {
+	public void init(int currentPlayer, int width, int height) {
 
 		if (gameState != GameState.START_GAME) {
 			return;
@@ -1265,6 +1265,61 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		endTurnButton.setEnabled(false);
 		drawTileButton.setEnabled(true);
+
+		gameState = GameState.DRAW_TILE;
+	}
+
+	public void gameInfo(int currentPlayer, boolean drawPileEmpty) {
+
+		if (drawPileEmpty) {
+			gameState = GameState.END_GAME;
+		}
+	}
+
+	public void playerInfo(int player, int currentPlayer, int playerScore,
+			int meeplesPlaced) {
+
+		// Variables to keep track of scoring process; after all the player's
+		// scores
+		// are updated then we can end the current players turn if they don't
+		// have
+		// any meeples left.
+		int numPlayerScoresUpdated = 0;
+		boolean currentPlayerHasMeeplesLeft = true;
+
+		getPlayerStatusPanels().get(player).setScore(playerScore);
+
+		// Each players info is sent after a scoring action;
+		// after scoring all players, if the current player has no
+		// meeples to place then end their turn.
+		numPlayerScoresUpdated++;
+
+		if (meeplesPlaced == 7 && getPlayer() == player) {
+			currentPlayerHasMeeplesLeft = false;
+		}
+
+		if (numPlayerScoresUpdated == getNumPlayers()) {
+
+			numPlayerScoresUpdated = 0;
+
+			// Also end the player's turn if they are at the meeple
+			// scoring state.
+			if (!currentPlayerHasMeeplesLeft) {
+
+				currentPlayerHasMeeplesLeft = true;
+
+				String msg = "ENDTURN;currentPlayer;" + player;
+				sendMessage(msg);
+
+				gameState = GameState.DRAW_TILE;
+				endTurn(getCurrentPlayer());
+
+			} else {
+
+				gameState = GameState.PLACE_MEEPLE;
+				getEndTurnButton().setEnabled(true);
+			}
+		}
 	}
 
 	/**
@@ -1274,7 +1329,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the semi-parsed message (split into an ArrayList at
 	 *            semi-colons).
 	 */
-	public void scoreRemoveMeeples(ArrayList<String> message) {
+	public void score(ArrayList<String> message) {
 
 		for (int i = 1; i < message.size(); i = i + 9) {
 

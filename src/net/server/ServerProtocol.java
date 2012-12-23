@@ -30,6 +30,7 @@ public class ServerProtocol implements SocketServerProtocol {
 	// LEAVELOBBY;player;<int>
 	//
 	// ASSIGNPLAYER;player;<int>
+	// ASSIGNPLAYER;player;<int>
 	//
 	// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
 	//
