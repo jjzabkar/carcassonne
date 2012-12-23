@@ -69,47 +69,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private int player = 0; // The player who this client represents.
 	private int currentPlayer = 0; // The player whose turn it currently is.
 
-	// Accessors & mutators for above variables.
-
-	// TODO
-	public void updateGameState(GameState state) {
-		gameState = state;
-	}
-
-	public GameState getGameState() {
-		return gameState;
-	}
-
-	public void exit() {
-		gameClient = null;
-	}
-
-	public void assignPlayer(int player) {
-		this.player = player;
-	}
-
-	public int getPlayer() {
-		return player;
-	}
-
-	public int getNumPlayers() {
-		return players.size();
-	}
-
-	public int getCurrentPlayer() {
-		return currentPlayer;
-	}
-
-	public JButton getEndTurnButton() {
-		return endTurnButton;
-	}
-
-	public void showMessageDialog(String text) {
+	private void showMessageDialog(String text) {
 		JOptionPane.showMessageDialog(this, text);
-	}
-
-	public HashMap<Integer, JPlayerStatusPanel> getPlayerStatusPanels() {
-		return playerStatusPanels;
 	}
 
 	// Each menu screen (including the game screen) is contained within their
@@ -1084,6 +1045,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return players;
 	}
 
+	public void exit() {
+		gameClient = null;
+	}
+
+	public void assignPlayer(int player) {
+		this.player = player;
+	}
+
 	/**
 	 * Start a game. This method receives all relevant info to move clients from
 	 * the lobby into a game which has just been started.
@@ -1287,18 +1256,18 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		int numPlayerScoresUpdated = 0;
 		boolean currentPlayerHasMeeplesLeft = true;
 
-		getPlayerStatusPanels().get(player).setScore(playerScore);
+		playerStatusPanels.get(player).setScore(playerScore);
 
 		// Each players info is sent after a scoring action;
 		// after scoring all players, if the current player has no
 		// meeples to place then end their turn.
 		numPlayerScoresUpdated++;
 
-		if (meeplesPlaced == 7 && getPlayer() == player) {
+		if (meeplesPlaced == 7 && this.player == player) {
 			currentPlayerHasMeeplesLeft = false;
 		}
 
-		if (numPlayerScoresUpdated == getNumPlayers()) {
+		if (numPlayerScoresUpdated == players.size()) {
 
 			numPlayerScoresUpdated = 0;
 
@@ -1312,12 +1281,12 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 				sendMessage(msg);
 
 				gameState = GameState.DRAW_TILE;
-				endTurn(getCurrentPlayer());
+				endTurn(currentPlayer);
 
 			} else {
 
 				gameState = GameState.PLACE_MEEPLE;
-				getEndTurnButton().setEnabled(true);
+				endTurnButton.setEnabled(true);
 			}
 		}
 	}
