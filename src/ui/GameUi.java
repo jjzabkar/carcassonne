@@ -1211,7 +1211,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		currentTilePanel.repaint();
 
 		// Update the game state.
-		gameState = GameState.SCORE_PLACE_TILE;
+		// gameState = GameState.SCORE_PLACE_TILE;
 	}
 
 	/**
@@ -1247,7 +1247,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameBoardWindow.repaint();
 
 		// Update the game state.
-		gameState = GameState.SCORE_PLACE_MEEPLE;
+		// gameState = GameState.SCORE_PLACE_MEEPLE;
 	}
 
 	/**

@@ -105,89 +105,72 @@ public class ClientProtocol implements SocketClientProtocol {
 			gameUi.placeMeeple(currentPlayer, xBoard, yBoard, xTile, yTile, err);
 		}
 
-		if (gameUi.getGameState() == GameState.SCORE_PLACE_TILE
-				|| gameUi.getGameState() == GameState.SCORE_PLACE_MEEPLE) {
+		// Remove meeples.
+		// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+		if (message.get(0).equals("SCORE")) {
+			gameUi.scoreRemoveMeeples(message);
+		}
 
-			// Remove meeples.
-			if (message.get(0).equals("SCORE")) {
-				gameUi.scoreRemoveMeeples(message);
+		// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
+		if (message.get(0).equals("INFO") && message.get(1).equals("player")) {
+
+			int player = Integer.parseInt(message.get(2));
+			int currentPlayer = Integer.parseInt(message.get(4));
+			int playerScore = Integer.parseInt(message.get(6));
+			int meeplesPlaced = Integer.parseInt(message.get(8));
+
+			gameUi.getPlayerStatusPanels().get(player).setScore(playerScore);
+
+			// Each players info is sent after a scoring action;
+			// after scoring all players, if the current player has no
+			// meeples to place then end their turn.
+			numPlayerScoresUpdated++;
+
+			if (meeplesPlaced == 7 && gameUi.getPlayer() == player) {
+				currentPlayerHasMeeplesLeft = false;
 			}
 
-			// Update player info.
-			if (message.get(0).equals("INFO")
-					&& message.get(1).equals("player")) {
+			if (numPlayerScoresUpdated == gameUi.getNumPlayers()) {
 
-				int player = 0;
-				int playerScore = 0;
-				int meeplesPlaced = 0;
+				numPlayerScoresUpdated = 0;
 
-				if (message.get(1).equals("player")) {
-					player = Integer.parseInt(message.get(2));
-				}
-				if (message.get(5).equals("score")) {
-					playerScore = Integer.parseInt(message.get(6));
-				}
-				if (message.get(7).equals("meeplesPlaced")) {
-					meeplesPlaced = Integer.parseInt(message.get(8));
-				}
+				// Also end the player's turn if they are at the meeple
+				// scoring state.
+				if (!currentPlayerHasMeeplesLeft) {
 
-				gameUi.getPlayerStatusPanels().get(player)
-						.setScore(playerScore);
+					currentPlayerHasMeeplesLeft = true;
 
-				// Each players info is sent after a scoring action;
-				// after scoring all players, if the current player has no
-				// meeples to place then end their turn.
-				numPlayerScoresUpdated++;
+					String msg = "ENDTURN;currentPlayer;" + player;
+					gameUi.sendMessage(msg);
 
-				if (meeplesPlaced == 7 && gameUi.getPlayer() == player) {
-					currentPlayerHasMeeplesLeft = false;
-				}
+					gameUi.updateGameState(GameState.DRAW_TILE);
+					gameUi.endTurn(gameUi.getCurrentPlayer());
 
-				if (numPlayerScoresUpdated == gameUi.getNumPlayers()) {
+				} else {
 
-					numPlayerScoresUpdated = 0;
-
-					// Also end the player's turn if they are at the meeple
-					// scoring state.
-					if (gameUi.getGameState() == GameState.SCORE_PLACE_MEEPLE
-							|| !currentPlayerHasMeeplesLeft) {
-
-						currentPlayerHasMeeplesLeft = true;
-
-						String msg = "ENDTURN;currentPlayer;" + player;
-						gameUi.sendMessage(msg);
-
-						gameUi.updateGameState(GameState.DRAW_TILE);
-						gameUi.endTurn(gameUi.getCurrentPlayer());
-
-					} else {
-
-						gameUi.updateGameState(GameState.PLACE_MEEPLE);
-						gameUi.getEndTurnButton().setEnabled(true);
-					}
+					gameUi.updateGameState(GameState.PLACE_MEEPLE);
+					gameUi.getEndTurnButton().setEnabled(true);
 				}
 			}
 		}
 
+		// ENDTURN;currentPlayer;<int>
 		if (message.get(0).equals("ENDTURN")) {
 
+			int currentPlayer = Integer.parseInt(message.get(2));
+
 			gameUi.updateGameState(GameState.DRAW_TILE);
-			gameUi.endTurn(Integer.parseInt(message.get(2)));
+			gameUi.endTurn(currentPlayer);
 		}
 
-		// Info
+		// INFO;game;currentPlayer;<int>;drawPileEmpty;<int:(0|1)>
 		if (message.get(0).equals("INFO") && message.get(1).equals("game")) {
 
-			boolean drawPileEmpty = false;
-
-			if (message.get(4).equals("drawPileEmpty")) {
-
-				int isDrawPileEmpty = Integer.parseInt(message.get(5));
-				drawPileEmpty = (isDrawPileEmpty == 0) ? false : true;
-			}
+			int currentPlayer = Integer.parseInt(message.get(3));
+			int isDrawPileEmpty = Integer.parseInt(message.get(5));
+			boolean drawPileEmpty = (isDrawPileEmpty == 0) ? false : true;
 
 			if (drawPileEmpty) {
-
 				gameUi.updateGameState(GameState.END_GAME);
 			}
 		}
