@@ -54,6 +54,9 @@ public class ServerProtocol extends SocketServerProtocol {
 	// SCORE
 	// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 	//
+	// ENDTURN;currentPlayer;<int>
+	// ENDTURN;currentPlayer;<int>
+	//
 	//
 	// INFO;player;<int>;
 	// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
