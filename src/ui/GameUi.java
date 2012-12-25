@@ -936,6 +936,22 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		}
 	}
 
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
 	// TODO: one client leaving only removes him from the game,
 
 	// TODO: game continues when a player leaves.. all their meeples are removed
@@ -1360,19 +1376,4 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerStatusPanels.get(player).setCurrentPlayer(true);
 	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
 }
