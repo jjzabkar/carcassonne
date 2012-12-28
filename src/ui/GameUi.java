@@ -1083,7 +1083,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 */
 	public void init(int currentPlayer, int width, int height) {
 
-		if (gameState != GameState.START_GAME) {
+		if (gameState != null) {
 			return;
 		}
 
@@ -1197,7 +1197,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		currentTilePanel.repaint();
 
 		// Update the game state.
-		// gameState = GameState.SCORE_PLACE_TILE;
+		// In the Place Meeple game state, we will allow the player to also
+		// end their turn.
+		gameState = GameState.PLACE_MEEPLE;
 	}
 
 	/**
@@ -1223,6 +1225,10 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			return;
 		}
 
+		if (gameState != GameState.PLACE_MEEPLE) {
+			return;
+		}
+
 		int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
 		int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
 
@@ -1233,7 +1239,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameBoardWindow.repaint();
 
 		// Update the game state.
-		// gameState = GameState.SCORE_PLACE_MEEPLE;
+		gameState = GameState.END_TURN;
 	}
 
 	/**
