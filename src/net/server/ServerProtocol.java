@@ -17,7 +17,6 @@ import model.GameState;
 import model.Player;
 import model.PlayerStruct;
 import model.Tile;
-import net.client.SocketClientProtocol;
 
 public class ServerProtocol extends SocketServerProtocol {
 
@@ -146,8 +145,7 @@ public class ServerProtocol extends SocketServerProtocol {
 			PlayerStruct player = lobbyPlayers.get(numberRep);
 
 			message += ";player;" + numberRep + ";name;" + player.getName()
-					+ ";color;"
-					+ SocketClientProtocol.colorToString(player.getColor());
+					+ ";color;" + player.getColorString();
 		}
 
 		String[] output = { SocketServerProtocol.replyAll, message };

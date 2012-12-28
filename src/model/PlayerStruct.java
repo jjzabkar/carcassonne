@@ -32,6 +32,10 @@ public class PlayerStruct {
 		return color;
 	}
 
+	public String getColorString() {
+		return SocketClientProtocol.colorToString(color);
+	}
+
 	public void setColor(String color) {
 		this.color = SocketClientProtocol.stringToColor(color);
 	}
