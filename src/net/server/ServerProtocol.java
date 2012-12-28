@@ -15,7 +15,9 @@ import model.BoardPosition;
 import model.Game;
 import model.GameState;
 import model.Player;
+import model.PlayerStruct;
 import model.Tile;
+import net.client.SocketClientProtocol;
 
 public class ServerProtocol extends SocketServerProtocol {
 
@@ -118,17 +120,6 @@ public class ServerProtocol extends SocketServerProtocol {
 	private ArrayList<Color> availablePlayerColors = new ArrayList<Color>(
 			Arrays.asList(colors));
 
-	class PlayerStruct {
-
-		PlayerStruct(String name, String color) {
-			this.name = name;
-			this.color = color;
-		}
-
-		private String name;
-		private String color;
-	}
-
 	// In-game variables.
 	private Game game;
 	private GameState gameState = GameState.START_GAME;
@@ -154,8 +145,9 @@ public class ServerProtocol extends SocketServerProtocol {
 			Integer numberRep = playersIter.next();
 			PlayerStruct player = lobbyPlayers.get(numberRep);
 
-			message += ";player;" + numberRep + ";name;" + player.name
-					+ ";color;" + player.color;
+			message += ";player;" + numberRep + ";name;" + player.getName()
+					+ ";color;"
+					+ SocketClientProtocol.colorToString(player.getColor());
 		}
 
 		String[] output = { SocketServerProtocol.replyAll, message };
@@ -316,7 +308,7 @@ public class ServerProtocol extends SocketServerProtocol {
 	 */
 	private void addPlayer(int numberRep) {
 
-		String rgb = colorToString(availablePlayerColors.remove(0));
+		Color rgb = availablePlayerColors.remove(0);
 		String name = "Player " + numberRep;
 		lobbyPlayers.put(numberRep, new PlayerStruct(name, rgb));
 	}
@@ -330,7 +322,7 @@ public class ServerProtocol extends SocketServerProtocol {
 	private void removePlayer(int numberRep) {
 
 		PlayerStruct player = lobbyPlayers.get(numberRep);
-		availablePlayerColors.add(0, stringToColor(player.color));
+		availablePlayerColors.add(0, player.getColor());
 		lobbyPlayers.remove(numberRep);
 	}
 
@@ -453,8 +445,8 @@ public class ServerProtocol extends SocketServerProtocol {
 
 			// Set the new values.
 			PlayerStruct player = lobbyPlayers.get(numberRep);
-			player.name = name;
-			player.color = color;
+			player.setName(name);
+			player.setColor(color);
 
 			String[] updateLobby = makeUpdateLobbyMsg();
 			return disseminateMessages(sender, updateLobby);

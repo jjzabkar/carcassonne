@@ -4,29 +4,40 @@ import java.awt.Color;
 
 import net.client.SocketClientProtocol;
 
-class PlayerStruct {
+public class PlayerStruct {
 
-	public String name;
-	public Color color;
-	public int score;
+	private String name;
+	private Color color;
+	private int score = 0;
 
-	PlayerStruct(String name, String color) {
+	public PlayerStruct(String name, String color) {
 		this.name = name;
 		this.color = SocketClientProtocol.stringToColor(color);
 	}
 
-	PlayerStruct(String name, Color color, int score) {
+	public PlayerStruct(String name, Color color) {
 		this.name = name;
 		this.color = color;
-		this.score = score;
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Color getColor() {
 		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = SocketClientProtocol.stringToColor(color);
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 	public int getScore() {

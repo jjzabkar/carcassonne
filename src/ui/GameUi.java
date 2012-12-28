@@ -41,6 +41,7 @@ import javax.swing.text.Document;
 
 import model.Game;
 import model.GameState;
+import model.PlayerStruct;
 import net.client.ClientProtocol;
 import net.client.SocketClient;
 import net.client.SocketClientProtocol;
@@ -64,7 +65,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private int gameBoardWidth = 0;
 	private int gameBoardHeight = 0;
 
-	private HashMap<Integer, PlayerUi> players = null;
+	private HashMap<Integer, PlayerStruct> players = null;
 
 	private int player = 0; // The player who this client represents.
 	private int currentPlayer = 0; // The player whose turn it currently is.
@@ -590,7 +591,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		while (playerRepsIter.hasNext()) {
 
 			Integer playerRep = playerRepsIter.next();
-			PlayerUi player = players.get(playerRep);
+			PlayerStruct player = players.get(playerRep);
 
 			String name = player.getName();
 			int score = player.getScore();
@@ -805,7 +806,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			// to begin the game. TODO for now; in the future the game will only
 			// start when all players are ready.
 
-			HashMap<Integer, PlayerUi> players = getPlayersFromLobby();
+			HashMap<Integer, PlayerStruct> players = getPlayersFromLobby();
 
 			// Check that we have a correct amount of players.
 			if (players.size() > Game.getMaxPlayers()) {
@@ -1035,7 +1036,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private void updateLobbyUi() {
 
 		// Clear our current ui player lists.
-		// (PlayerUi list is only populated @ game start; we can leave it be.
+		// (PlayerStruct list is only populated @ game start; we can leave it
+		// be.
 		playerSettingsPanelContainer.removeAll();
 
 		// Layout settings we need for the player settings panels.
@@ -1063,9 +1065,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerSettingsPanelContainer.repaint();
 	}
 
-	private HashMap<Integer, PlayerUi> getPlayersFromLobby() {
+	private HashMap<Integer, PlayerStruct> getPlayersFromLobby() {
 
-		HashMap<Integer, PlayerUi> players = new HashMap<Integer, PlayerUi>();
+		HashMap<Integer, PlayerStruct> players = new HashMap<Integer, PlayerStruct>();
 
 		Iterator<Integer> playerRepsIter;
 		playerRepsIter = playerSettingsPanels.keySet().iterator();
@@ -1078,7 +1080,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			String name = psp.getPlayerName();
 			Color color = psp.getPlayerColor();
 
-			players.put(playerRep, new PlayerUi(name, color, 0));
+			players.put(playerRep, new PlayerStruct(name, color));
 		}
 
 		return players;
