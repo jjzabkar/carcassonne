@@ -1268,7 +1268,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the semi-parsed message (split into an ArrayList at
 	 *            semi-colons).
 	 */
-	public void scoreRemoveMeeples(ArrayList<String> message) {
+	// TODO
+	public void scoreRemoveMeeples(List<String> message) {
 
 		for (int i = 1; i < message.size(); i = i + 9) {
 

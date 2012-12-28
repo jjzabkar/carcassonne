@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import model.GameState;
 import model.PlayerStruct;
@@ -26,14 +27,11 @@ public class ClientProtocol extends SocketClientProtocol {
 	private int numPlayerScoresUpdated = 0;
 	private boolean currentPlayerHasMeeplesLeft = true;
 
-	// TODO; current player checking, error checking.
-	// Handle messages;
 	@Override
 	public ArrayList<String> processInput(Socket sender, String input) {
 
-		// Do some coercion on the data.
-		ArrayList<String> message;
-		message = new ArrayList<String>(Arrays.asList(input.split(";")));
+		// Convert the input string into a list for processing.
+		List<String> message = Arrays.asList(input.split(";"));
 
 		// PRE-GAME
 
@@ -41,11 +39,12 @@ public class ClientProtocol extends SocketClientProtocol {
 			gameUi.exit();
 		}
 
+		// ASSIGNPLAYER;player;<int>
 		if (message.get(0).equals("ASSIGNPLAYER")) {
 
-			if (message.get(1).equals("player")) {
-				gameUi.setPlayer(Integer.parseInt(message.get(2)));
-			}
+			int playerId = Integer.parseInt(message.get(2));
+
+			gameUi.setPlayer(playerId);
 		}
 
 		// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
