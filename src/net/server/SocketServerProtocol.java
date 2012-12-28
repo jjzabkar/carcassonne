@@ -4,7 +4,7 @@ import java.net.Socket;
 
 import net.client.SocketClientProtocol;
 
-public interface SocketServerProtocol extends SocketClientProtocol {
+public abstract class SocketServerProtocol extends SocketClientProtocol {
 
 	/**
 	 * Allow a sender to be added to the socket protocol's list of senders.
@@ -15,7 +15,7 @@ public interface SocketServerProtocol extends SocketClientProtocol {
 	 * @param sender
 	 *            A Socket object which is tied to the sender object.
 	 */
-	public void addSender(Socket sender);
+	public abstract void addSender(Socket sender);
 
 	/**
 	 * Allow a sender to be removed from the socket protocol's list of senders.
@@ -23,7 +23,7 @@ public interface SocketServerProtocol extends SocketClientProtocol {
 	 * @param sender
 	 *            A Socket object which is tied to the sender object.
 	 */
-	public void removeSender(Socket sender);
+	public abstract void removeSender(Socket sender);
 
 	/**
 	 * Get the maximum number of allowed client connections to this protocol.
@@ -31,13 +31,13 @@ public interface SocketServerProtocol extends SocketClientProtocol {
 	 * @return an integer representing the maximum number of allowed
 	 *         connections.
 	 */
-	public int getMaxConnections();
+	public abstract int getMaxConnections();
 
 	/**
 	 * Get the current number of clients connected to this protocol.
 	 * 
 	 * @return an integer representing the current number of connections.
 	 */
-	public int getNumConnections();
+	public abstract int getNumConnections();
 
 }

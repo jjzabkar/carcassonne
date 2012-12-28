@@ -10,7 +10,7 @@ import ui.GameUi;
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to
 // update itself.
-public class ClientProtocol implements SocketClientProtocol {
+public class ClientProtocol extends SocketClientProtocol {
 
 	private GameUi gameUi = null;
 

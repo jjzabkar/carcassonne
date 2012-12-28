@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +17,7 @@ import model.GameState;
 import model.Player;
 import model.Tile;
 
-public class ServerProtocol implements SocketServerProtocol {
+public class ServerProtocol extends SocketServerProtocol {
 
 	// Message format is as follows (client sends followed by server replies):
 	//
@@ -333,47 +332,6 @@ public class ServerProtocol implements SocketServerProtocol {
 		PlayerStruct player = lobbyPlayers.get(numberRep);
 		availablePlayerColors.add(0, stringToColor(player.color));
 		lobbyPlayers.remove(numberRep);
-	}
-
-	/**
-	 * Convert a Color to a String of length nine consisting of an RGB value.
-	 * Each individual color value (R, G, B) is a string of length three,
-	 * containing a value from "000" to "255".
-	 * 
-	 * @param color
-	 *            A Color to be converted to a String representation.
-	 * 
-	 * @return A String representing the input Color.
-	 */
-	private String colorToString(Color color) {
-
-		DecimalFormat df = new DecimalFormat("000");
-
-		String r = df.format(color.getRed());
-		String g = df.format(color.getGreen());
-		String b = df.format(color.getBlue());
-		String rgb = r + g + b;
-
-		return rgb;
-	}
-
-	/**
-	 * Convert a String of length nine to a Color. The string consists of an RGB
-	 * value; with each being 3 characters each containing a value from "000" to
-	 * "255".
-	 * 
-	 * @param string
-	 *            The String to be converted to a Color.
-	 * 
-	 * @return A Color representing the input String.
-	 */
-	private Color stringToColor(String string) {
-
-		int r = Integer.parseInt(string.substring(0, 3));
-		int g = Integer.parseInt(string.substring(3, 6));
-		int b = Integer.parseInt(string.substring(6, 9));
-
-		return new Color(r, g, b);
 	}
 
 	/**
