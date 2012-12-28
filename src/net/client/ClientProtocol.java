@@ -3,8 +3,10 @@ package net.client;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import model.GameState;
+import model.PlayerStruct;
 import ui.GameUi;
 
 // Adapter class which receives the returned messages from the server.
@@ -46,8 +48,23 @@ public class ClientProtocol extends SocketClientProtocol {
 			}
 		}
 
+		// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
 		if (message.get(0).equals("UPDATELOBBY")) {
-			gameUi.updateLobby(message);
+
+			HashMap<Integer, PlayerStruct> players;
+			players = new HashMap<Integer, PlayerStruct>();
+
+			// Parse the message, and place each player in a map to pass on.
+			for (int i = 1; i < message.size(); i = i + 6) {
+
+				int rep = Integer.parseInt(message.get(i + 1));
+				String name = message.get(i + 3);
+				String color = message.get(i + 5);
+
+				players.put(rep, new PlayerStruct(name, color));
+			}
+
+			gameUi.updateLobby(players);
 		}
 
 		// In-game messages.

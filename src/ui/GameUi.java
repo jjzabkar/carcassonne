@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -991,43 +992,35 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	// TODO: incorrect state when player attempts to place meeple on claimed
 	// feature
 
-	public void updateLobby(ArrayList<String> message) {
+	/**
+	 * Update the game lobby. After updating the playerSettingsPanels, it calls
+	 * a corresponding function to update the ui component of the game lobby.
+	 * 
+	 * @param players
+	 *            A hashmap which maps the player id (representation) to a
+	 *            player structure.
+	 */
+	public void updateLobby(HashMap<Integer, PlayerStruct> players) {
 
-		HashMap<Integer, JPlayerSettingsPanel> receivedPlayers;
-		receivedPlayers = new HashMap<Integer, JPlayerSettingsPanel>();
+		playerSettingsPanels.clear();
 
-		// Parse the message, and place each player in the list.
-		for (int i = 1; i < message.size(); i = i + 6) {
+		List<Integer> playerRepList = new ArrayList<Integer>(players.keySet());
+		Collections.sort(playerRepList);
+		Iterator<Integer> playersIter = playerRepList.iterator();
 
-			int playerRep = 0;
-			String playerName = null;
-			String colorString = null;
+		while (playersIter.hasNext()) {
 
-			if (message.get(i).equals("player")) {
-				playerRep = Integer.parseInt(message.get(i + 1));
-			}
-			if (message.get(i + 2).equals("name")) {
-				playerName = message.get(i + 3);
-			}
-			if (message.get(i + 4).equals("color")) {
-				colorString = message.get(i + 5);
-			}
+			int rep = playersIter.next();
+			PlayerStruct player = players.get(rep);
 
-			// Extract the color.
-			int r = Integer.parseInt(colorString.substring(0, 3));
-			int g = Integer.parseInt(colorString.substring(3, 6));
-			int b = Integer.parseInt(colorString.substring(6, 9));
-			Color color = new Color(r, g, b);
+			String name = player.getName();
+			Color col = player.getColor();
 
 			// TODO remove numberrep from psp?
-			JPlayerSettingsPanel psp = new JPlayerSettingsPanel(playerRep,
-					playerName, color);
+			JPlayerSettingsPanel psp = new JPlayerSettingsPanel(rep, name, col);
 
-			receivedPlayers.put(playerRep, psp);
+			playerSettingsPanels.put(rep, psp);
 		}
-
-		// Set the list if there were no errors during message parsing.
-		playerSettingsPanels = receivedPlayers;
 
 		// Update ui to match.
 		updateLobbyUi();
@@ -1036,8 +1029,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private void updateLobbyUi() {
 
 		// Clear our current ui player lists.
-		// (PlayerStruct list is only populated @ game start; we can leave it
-		// be.
+		// PlayerStruct list is populated @ game start; we can leave it be.
 		playerSettingsPanelContainer.removeAll();
 
 		// Layout settings we need for the player settings panels.
@@ -1047,8 +1039,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gc.gridy = 0;
 
 		// Add all of the players to the ui lobby screen (in ascending order).
-		List<Integer> playerReps;
-		playerReps = new ArrayList<Integer>(playerSettingsPanels.keySet());
+		Set<Integer> playerRepsSet = playerSettingsPanels.keySet();
+		List<Integer> playerReps = new ArrayList<Integer>(playerRepsSet);
 		Collections.sort(playerReps);
 		Iterator<Integer> playerRepsIter = playerReps.iterator();
 
