@@ -1,6 +1,5 @@
 package net.client;
 
-import java.awt.Color;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,27 +8,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import model.MeepleStruct;
 import model.PlayerStruct;
 import ui.GameUi;
-import ui.MeepleUi;
-import ui.TileUi;
 
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to
 // update itself.
 public class ClientProtocol extends SocketClientProtocol {
 
-	private GameUi gameUi = null;
+	private GameUi gameUi;
 
 	public ClientProtocol(GameUi gameUi) {
 		this.gameUi = gameUi;
 	}
-
-	// Variables to keep track of scoring process; after all the player's scores
-	// are updated then we can end the current players turn if they don't have
-	// any meeples left.
-	private int numPlayerScoresUpdated = 0;
-	private boolean currentPlayerHasMeeplesLeft = true;
 
 	@Override
 	public ArrayList<String> processInput(Socket sender, String input) {
@@ -125,11 +117,10 @@ public class ClientProtocol extends SocketClientProtocol {
 			gameUi.placeMeeple(currentPlayer, xBoard, yBoard, xTile, yTile, err);
 		}
 
-		// Remove meeples.
 		// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 		if (message.get(0).equals("SCORE")) {
 
-			Set<MeepleUi> meeplePositions = new HashSet<MeepleUi>();
+			Set<MeepleStruct> meeplePositions = new HashSet<MeepleStruct>();
 
 			for (int i = 1; i < message.size(); i = i + 9) {
 
@@ -138,12 +129,8 @@ public class ClientProtocol extends SocketClientProtocol {
 				int xTile = Integer.parseInt(message.get(i + 6));
 				int yTile = Integer.parseInt(message.get(i + 8));
 
-				int tileSize = TileUi.tileSize * TileUi.tileTypeSize;
-
-				int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
-				int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
-
-				meeplePositions.add(new MeepleUi(new Color(0), mx, my));
+				MeepleStruct ms = new MeepleStruct(xBoard, yBoard, xTile, yTile);
+				meeplePositions.add(ms);
 			}
 
 			gameUi.score(meeplePositions);

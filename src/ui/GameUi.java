@@ -42,6 +42,7 @@ import javax.swing.text.Document;
 
 import model.Game;
 import model.GameState;
+import model.MeepleStruct;
 import model.PlayerStruct;
 import net.client.ClientProtocol;
 import net.client.SocketClient;
@@ -1315,13 +1316,29 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the semi-parsed message (split into an ArrayList at
 	 *            semi-colons).
 	 */
-	public void score(Set<MeepleUi> meeplePositions) {
+	public void score(Set<MeepleStruct> meeplePositions) {
 
-		Iterator<MeepleUi> meeples = meeplePositions.iterator();
+		Iterator<MeepleStruct> meeples = meeplePositions.iterator();
 
 		while (meeples.hasNext()) {
 
-			gameBoardWindow.remove(meeples.next());
+			MeepleStruct ms = meeples.next();
+
+			int msxb = ms.getxBoard();
+			int msxt = ms.getxTile();
+			int msyb = ms.getyBoard();
+			int msyt = ms.getyTile();
+
+			int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
+			int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
+
+			// Meeples are equal if they are located on the same tile, at
+			// the same position. So color we pass in doesn't matter. This
+			// is okay since we don't allow more than one meeple to be
+			// placed at the same position anyway.
+			MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
+
+			gameBoardWindow.remove(meeple);
 		}
 
 		gameBoardWindow.repaint();
