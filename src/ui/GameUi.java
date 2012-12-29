@@ -1033,6 +1033,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerSettingsPanelContainer.repaint();
 	}
 
+	// Generate the player list from the players which are in the lobby.
 	private HashMap<Integer, PlayerStruct> getPlayersFromLobby() {
 
 		HashMap<Integer, PlayerStruct> players = new HashMap<Integer, PlayerStruct>();
@@ -1260,21 +1261,19 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		}
 	}
 
+	// Variables to keep track of scoring process; after all the player's
+	// scores are updated then we can end the current player's turn if they
+	// don't have any meeples left.
+	int numPlayerScoresUpdated = 0;
+	boolean currentPlayerHasMeeplesLeft = true;
+
 	public void playerInfo(int player, int currentPlayer, int playerScore,
 			int meeplesPlaced) {
-
-		// Variables to keep track of scoring process; after all the player's
-		// scores
-		// are updated then we can end the current players turn if they don't
-		// have
-		// any meeples left.
-		int numPlayerScoresUpdated = 0;
-		boolean currentPlayerHasMeeplesLeft = true;
 
 		playerStatusPanels.get(player).setScore(playerScore);
 
 		// Each players info is sent after a scoring action;
-		// after scoring all players, if the current player has no
+		// after updating all player scores, if the current player has no
 		// meeples to place then end their turn.
 		numPlayerScoresUpdated++;
 
