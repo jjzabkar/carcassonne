@@ -61,7 +61,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 	// Game settings & info.
 	private TileUi currentTile = null;
-	private GameState gameState = GameState.START_GAME;
+	private GameState gameState = null;
 	private int tileSize = TileUi.tileSize * TileUi.tileTypeSize;
 	private int gameBoardWidth = 0;
 	private int gameBoardHeight = 0;
@@ -71,47 +71,8 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private int player = 0; // The player who this client represents.
 	private int currentPlayer = 0; // The player whose turn it currently is.
 
-	// Accessors & mutators for above variables.
-
-	// TODO
-	public void updateGameState(GameState state) {
-		gameState = state;
-	}
-
-	public GameState getGameState() {
-		return gameState;
-	}
-
-	public void exit() {
-		gameClient = null;
-	}
-
-	public void setPlayer(int player) {
-		this.player = player;
-	}
-
-	public int getPlayer() {
-		return player;
-	}
-
-	public int getNumPlayers() {
-		return players.size();
-	}
-
-	public int getCurrentPlayer() {
-		return currentPlayer;
-	}
-
-	public JButton getEndTurnButton() {
-		return endTurnButton;
-	}
-
-	public void showMessageDialog(String text) {
+	private void showMessageDialog(String text) {
 		JOptionPane.showMessageDialog(this, text);
-	}
-
-	public HashMap<Integer, JPlayerStatusPanel> getPlayerStatusPanels() {
-		return playerStatusPanels;
 	}
 
 	// Each menu screen (including the game screen) is contained within their
@@ -180,16 +141,20 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 
+				// Messages can only be sent if we are connected to a server.
+				// eg. In the lobby or in a game.
 				if (gameClient != null) {
-					// Send the message to notify we are leaving the game lobby.
-					String msg = "LEAVELOBBY;player;" + player;
-					sendMessage(msg);
 
-					// TODO: some sort of state to track in lobby or in game,
-					// send a different message depending on which is leaving?
-
-					// Close the socket client.
-					sendMessage(SocketClientProtocol.EXIT);
+					// If the game has not started yet then the player must be
+					// in the lobby. So we leave the lobby. Otherwise, send the
+					// exit message to leave the game.
+					if (gameState != null) {
+						String msg = "LEAVELOBBY;player;" + player;
+						sendMessage(msg);
+					} else {
+						// Close the socket client.
+						sendMessage(SocketClientProtocol.EXIT);
+					}
 				}
 			}
 		});
@@ -708,52 +673,58 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameContentPane.add(infoContainer, BorderLayout.EAST);
 	}
 
+	// Gameplay actions for non-current players are not allowed.
 	@Override
-	// TODO check state transitions; we should let a player's actions show on
-	// all clients, while keeping the non-current players in a state where they
-	// can't play themselves. (updating non-current player game)
 	public void actionPerformed(ActionEvent e) {
 
-		// Actions for gameplay.
-		if (gameState != GameState.END_GAME && currentPlayer == player) {
+		// Actions for gameplay (activated via buttons).
+		if (gameState != null && currentPlayer == player) {
 
 			// Event handlers for tile rotation.
-			if ("rotateCW".equals(e.getActionCommand()) && currentTile != null) {
+			if (gameState.equals(GameState.PLACE_TILE)) {
 
-				String message = "ROTATETILE;currentPlayer;" + player
-						+ ";direction;clockwise";
-				sendMessage(message);
-			}
+				if ("rotateCW".equals(e.getActionCommand())) {
 
-			if ("rotateCCW".equals(e.getActionCommand()) && currentTile != null) {
+					String message = "ROTATETILE;currentPlayer;" + player
+							+ ";direction;clockwise";
+					sendMessage(message);
+				}
 
-				String message = "ROTATETILE;currentPlayer;" + player
-						+ ";direction;counterClockwise";
-				sendMessage(message);
+				if ("rotateCCW".equals(e.getActionCommand())) {
+
+					String message = "ROTATETILE;currentPlayer;" + player
+							+ ";direction;counterClockwise";
+					sendMessage(message);
+				}
 			}
 
 			// Let a player end their turn if they don't want to place a meeple.
-			if ("endTurn".equals(e.getActionCommand())
-					&& gameState == GameState.PLACE_MEEPLE) {
+			if (gameState.equals(GameState.PLACE_MEEPLE)) {
 
-				String message = "ENDTURN;currentPlayer;" + player;
-				sendMessage(message);
+				if ("endTurn".equals(e.getActionCommand())) {
 
-				gameState = GameState.DRAW_TILE;
-				endTurn(currentPlayer);
+					String message = "ENDTURN;currentPlayer;" + player;
+					sendMessage(message);
+
+					gameState = GameState.DRAW_TILE;
+					endTurn(currentPlayer);
+				}
 			}
 
 			// Each turn begins with a player drawing a tile from the draw
-			// pile. Here we allow a player to draw the tile, and after they
-			// have we draw it to the screen on the current tile panel.
-			if ("drawTile".equals(e.getActionCommand())
-					&& gameState == GameState.DRAW_TILE) {
+			// pile. Here we allow a player to draw the tile. After they
+			// have, we draw it to the screen on the current tile panel.
+			if (gameState.equals(GameState.DRAW_TILE)) {
 
-				String message = "DRAWTILE;currentPlayer;" + player;
-				sendMessage(message);
+				if ("drawTile".equals(e.getActionCommand())) {
+
+					String message = "DRAWTILE;currentPlayer;" + player;
+					sendMessage(message);
+				}
 			}
 		}
 
+		// Non-gameplay actions.
 		// Main screen.
 		if ("showOptionsScreen".equals(e.getActionCommand())) {
 			// TODO allow screen size & options changes during game
@@ -785,9 +756,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			gameClient = new SocketClient(server, port, clientProtocol);
 
 			if (gameClient.bind() == 1) {
-				JOptionPane.showMessageDialog(this,
-						"Error connecting to server.");
-				System.exit(1);
+				showMessageDialog("Error connecting to server.");
 			}
 
 			// Send a message that we want to join the/a game.
@@ -804,15 +773,17 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			// The user who starts the game will check game start values such as
 			// checking for color and number of players. Then when the message
 			// returns from the server it is sent to all clients, telling them
-			// to begin the game. TODO for now; in the future the game will only
-			// start when all players are ready.
+			// to begin the game.
+
+			// TODO in the future the game will only start when all players are
+			// ready.
 
 			HashMap<Integer, PlayerStruct> players = getPlayersFromLobby();
 
 			// Check that we have a correct amount of players.
 			if (players.size() > Game.getMaxPlayers()) {
 
-				JOptionPane.showMessageDialog(this, "A game can have at most "
+				showMessageDialog("A game can have at most "
 						+ Game.getMaxPlayers() + " players.");
 
 				return;
@@ -829,9 +800,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 				if (usedColors.contains(color)) {
 
-					JOptionPane.showMessageDialog(this,
-							"Players need to be different colors.");
-
+					showMessageDialog("Players need to be different colors.");
 					return;
 				}
 				usedColors.add(color);
@@ -932,7 +901,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Detect if there has been a mouse click on the board canvas object.
 		if (e.getComponent() == gameBoardWindow && currentPlayer == player
-				&& gameState != GameState.END_GAME) {
+				&& gameState != null) {
 
 			// We'll do some click calculations outside of the state-specific
 			// checks to prevent code duplication. First get the clicked
@@ -951,30 +920,39 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			int xTile = (xPos % tileSize) / TileUi.tileTypeSize;
 			int yTile = (yPos % tileSize) / TileUi.tileTypeSize;
 
-			// Check that the proper game state is selected. Here we are
-			// looking for the tile placement state.
-			if (gameState == GameState.PLACE_TILE) {
+			// Check that we are in the proper game state.
+			// We are looking to place either a tile or a meeple.
+			if (gameState.equals(GameState.PLACE_TILE)) {
 
-				// Place the tile.
 				String message = "PLACETILE;currentPlayer;" + player
 						+ ";xBoard;" + xBoard + ";yBoard;" + yBoard;
 				sendMessage(message);
-
-				return;
 			}
 
-			// Here we are looking for the meeple placement state.
-			if (gameState == GameState.PLACE_MEEPLE) {
+			if (gameState.equals(GameState.PLACE_MEEPLE)) {
 
-				// Place the meeple.
 				String message = "PLACEMEEPLE;currentPlayer;" + player
 						+ ";xBoard;" + xBoard + ";yBoard;" + yBoard + ";xTile;"
 						+ xTile + ";yTile;" + yTile;
 				sendMessage(message);
-
-				return;
 			}
 		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
 	}
 
 	// TODO: one client leaving only removes him from the game,
@@ -1078,6 +1056,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		return players;
 	}
 
+	public void exit() {
+		gameClient = null;
+	}
+
+	public void assignPlayer(int player) {
+		this.player = player;
+	}
+
 	/**
 	 * Start a game. This method receives all relevant info to move clients from
 	 * the lobby into a game which has just been started.
@@ -1089,9 +1075,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 * @param height
 	 *            the height of the game board in tiles.
 	 */
-	public void startGame(int currentPlayer, int width, int height) {
+	public void init(int currentPlayer, int width, int height) {
 
-		if (gameState != GameState.START_GAME) {
+		if (gameState != null) {
 			return;
 		}
 
@@ -1205,7 +1191,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		currentTilePanel.repaint();
 
 		// Update the game state.
-		// gameState = GameState.SCORE_PLACE_TILE;
+		// In the Place Meeple game state, we will allow the player to also
+		// end their turn.
+		gameState = GameState.PLACE_MEEPLE;
 	}
 
 	/**
@@ -1231,6 +1219,10 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			return;
 		}
 
+		if (gameState != GameState.PLACE_MEEPLE) {
+			return;
+		}
+
 		int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
 		int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
 
@@ -1241,7 +1233,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameBoardWindow.repaint();
 
 		// Update the game state.
-		// gameState = GameState.SCORE_PLACE_MEEPLE;
+		gameState = GameState.END_TURN;
 	}
 
 	/**
@@ -1259,6 +1251,61 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		endTurnButton.setEnabled(false);
 		drawTileButton.setEnabled(true);
+
+		gameState = GameState.DRAW_TILE;
+	}
+
+	public void gameInfo(int currentPlayer, boolean drawPileEmpty) {
+
+		if (drawPileEmpty) {
+			gameState = GameState.END_GAME;
+		}
+	}
+
+	public void playerInfo(int player, int currentPlayer, int playerScore,
+			int meeplesPlaced) {
+
+		// Variables to keep track of scoring process; after all the player's
+		// scores
+		// are updated then we can end the current players turn if they don't
+		// have
+		// any meeples left.
+		int numPlayerScoresUpdated = 0;
+		boolean currentPlayerHasMeeplesLeft = true;
+
+		playerStatusPanels.get(player).setScore(playerScore);
+
+		// Each players info is sent after a scoring action;
+		// after scoring all players, if the current player has no
+		// meeples to place then end their turn.
+		numPlayerScoresUpdated++;
+
+		if (meeplesPlaced == 7 && this.player == player) {
+			currentPlayerHasMeeplesLeft = false;
+		}
+
+		if (numPlayerScoresUpdated == players.size()) {
+
+			numPlayerScoresUpdated = 0;
+
+			// Also end the player's turn if they are at the meeple
+			// scoring state.
+			if (!currentPlayerHasMeeplesLeft) {
+
+				currentPlayerHasMeeplesLeft = true;
+
+				String msg = "ENDTURN;currentPlayer;" + player;
+				sendMessage(msg);
+
+				gameState = GameState.DRAW_TILE;
+				endTurn(currentPlayer);
+
+			} else {
+
+				gameState = GameState.PLACE_MEEPLE;
+				endTurnButton.setEnabled(true);
+			}
+		}
 	}
 
 	/**
@@ -1268,8 +1315,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 *            the semi-parsed message (split into an ArrayList at
 	 *            semi-colons).
 	 */
-	// TODO
-	public void scoreRemoveMeeples(List<String> message) {
+	public void score(List<String> message) {
 
 		for (int i = 1; i < message.size(); i = i + 9) {
 
@@ -1331,19 +1377,4 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerStatusPanels.get(player).setCurrentPlayer(true);
 	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
 }

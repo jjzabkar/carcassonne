@@ -30,6 +30,7 @@ public class ServerProtocol extends SocketServerProtocol {
 	// LEAVELOBBY;player;<int>
 	//
 	// ASSIGNPLAYER;player;<int>
+	// ASSIGNPLAYER;player;<int>
 	//
 	// UPDATELOBBY[;player;<int>;name;<string>;color;<string:(RGB)>]+
 	//
@@ -57,6 +58,9 @@ public class ServerProtocol extends SocketServerProtocol {
 	// ENDTURN;currentPlayer;<int>
 	// ENDTURN;currentPlayer;<int>
 	//
+	// ENDTURN;currentPlayer;<int>
+	// ENDTURN;currentPlayer;<int>
+	//
 	//
 	// INFO;player;<int>;
 	// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
@@ -64,21 +68,6 @@ public class ServerProtocol extends SocketServerProtocol {
 	// INFO;game;
 	// INFO;game;currentPlayer;<int>;drawPileEmpty;<int:(0|1)>
 	//
-
-	// State layout:
-	//
-	// START_GAME
-	// DRAW_TILE
-	// PLACE_TILE
-	// SCORE_PLAYERS --> END_TURN
-	// PLACE_MEEPLE
-	// SCORE_PLAYERS --> DRAW_TILE
-	// END_GAME
-	//
-	// Each state advances to the state below it, or to the state pointed to on
-	// the right. End turn state is just a placeholder state which changes the
-	// game state to a proper state based on a few properties of our game. This
-	// allows us to not over-complicate the message passing protocol.
 
 	private HashMap<Socket, PrintWriter> writers = new HashMap<Socket, PrintWriter>();
 	private ArrayList<String> parsedMessage = new ArrayList<String>();
