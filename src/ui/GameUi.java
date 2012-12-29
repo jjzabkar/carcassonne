@@ -961,9 +961,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	// TODO: game continues when a player leaves.. all their meeples are removed
 	// & they are removed from the game.
 
-	// TODO: change start to ready button; once all players are ready then send
-	// start/init message.
-
 	// TODO: some sort of bug w/ endturn
 
 	// TODO: disable end turn button on non-current player
