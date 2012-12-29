@@ -969,6 +969,23 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	// feature
 
 	/**
+	 * Exit the game.
+	 */
+	public void exit() {
+		gameClient = null;
+	}
+
+	/**
+	 * Assign this player an identifier.
+	 * 
+	 * @param player
+	 *            The identifier for the player (this client).
+	 */
+	public void assignPlayer(int player) {
+		this.player = player;
+	}
+
+	/**
 	 * Update the game lobby. After updating the playerSettingsPanels, it calls
 	 * a corresponding function to update the ui component of the game lobby.
 	 * 
@@ -1033,36 +1050,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerSettingsPanelContainer.repaint();
 	}
 
-	// Generate the player list from the players which are in the lobby.
-	private HashMap<Integer, PlayerStruct> getPlayersFromLobby() {
-
-		HashMap<Integer, PlayerStruct> players = new HashMap<Integer, PlayerStruct>();
-
-		Iterator<Integer> playerRepsIter;
-		playerRepsIter = playerSettingsPanels.keySet().iterator();
-
-		while (playerRepsIter.hasNext()) {
-
-			int playerRep = playerRepsIter.next();
-			JPlayerSettingsPanel psp = playerSettingsPanels.get(playerRep);
-
-			String name = psp.getPlayerName();
-			Color color = psp.getPlayerColor();
-
-			players.put(playerRep, new PlayerStruct(name, color));
-		}
-
-		return players;
-	}
-
-	public void exit() {
-		gameClient = null;
-	}
-
-	public void assignPlayer(int player) {
-		this.player = player;
-	}
-
 	/**
 	 * Start a game. This method receives all relevant info to move clients from
 	 * the lobby into a game which has just been started.
@@ -1098,6 +1085,28 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// Update the game state.
 		gameState = GameState.DRAW_TILE;
+	}
+
+	// Generate the player list from the players which are in the lobby.
+	private HashMap<Integer, PlayerStruct> getPlayersFromLobby() {
+
+		HashMap<Integer, PlayerStruct> players = new HashMap<Integer, PlayerStruct>();
+
+		Iterator<Integer> playerRepsIter;
+		playerRepsIter = playerSettingsPanels.keySet().iterator();
+
+		while (playerRepsIter.hasNext()) {
+
+			int playerRep = playerRepsIter.next();
+			JPlayerSettingsPanel psp = playerSettingsPanels.get(playerRep);
+
+			String name = psp.getPlayerName();
+			Color color = psp.getPlayerColor();
+
+			players.put(playerRep, new PlayerStruct(name, color));
+		}
+
+		return players;
 	}
 
 	/**
@@ -1236,6 +1245,41 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	}
 
 	/**
+	 * Main method called to handle the SCORE message.
+	 * 
+	 * @param message
+	 *            the semi-parsed message (split into an ArrayList at
+	 *            semi-colons).
+	 */
+	public void score(Set<MeepleStruct> meeplePositions) {
+
+		Iterator<MeepleStruct> meeples = meeplePositions.iterator();
+
+		while (meeples.hasNext()) {
+
+			MeepleStruct ms = meeples.next();
+
+			int msxb = ms.getxBoard();
+			int msxt = ms.getxTile();
+			int msyb = ms.getyBoard();
+			int msyt = ms.getyTile();
+
+			int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
+			int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
+
+			// Meeples are equal if they are located on the same tile, at
+			// the same position. So color we pass in doesn't matter. This
+			// is okay since we don't allow more than one meeple to be
+			// placed at the same position anyway.
+			MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
+
+			gameBoardWindow.remove(meeple);
+		}
+
+		gameBoardWindow.repaint();
+	}
+
+	/**
 	 * End the turn. This method advances the current player, as well as
 	 * updating the ui to match. Any other ui related actions are done, such as
 	 * enabling or disabling controls.
@@ -1254,11 +1298,25 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameState = GameState.DRAW_TILE;
 	}
 
-	public void gameInfo(int currentPlayer, boolean drawPileEmpty) {
+	/**
+	 * Update the UI to show which player's turn it is.
+	 * 
+	 * @param player
+	 *            an integer representing the current player (numberRep).
+	 */
+	private void showCurrentPlayer(int player) {
 
-		if (drawPileEmpty) {
-			gameState = GameState.END_GAME;
+		// Reset all players to not be the current player wrt/ the ui.
+		Iterator<Integer> playerRepsIter;
+		playerRepsIter = playerStatusPanels.keySet().iterator();
+
+		while (playerRepsIter.hasNext()) {
+			int playerRep = playerRepsIter.next();
+			playerStatusPanels.get(playerRep).setCurrentPlayer(false);
 		}
+
+		// Set the current player wrt/ the ui.
+		playerStatusPanels.get(player).setCurrentPlayer(true);
 	}
 
 	// Variables to keep track of scoring process; after all the player's
@@ -1306,59 +1364,19 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	}
 
 	/**
-	 * Main method called to handle the SCORE message.
+	 * Actions to be taken after receiving a game info message.
 	 * 
-	 * @param message
-	 *            the semi-parsed message (split into an ArrayList at
-	 *            semi-colons).
-	 */
-	public void score(Set<MeepleStruct> meeplePositions) {
-
-		Iterator<MeepleStruct> meeples = meeplePositions.iterator();
-
-		while (meeples.hasNext()) {
-
-			MeepleStruct ms = meeples.next();
-
-			int msxb = ms.getxBoard();
-			int msxt = ms.getxTile();
-			int msyb = ms.getyBoard();
-			int msyt = ms.getyTile();
-
-			int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
-			int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
-
-			// Meeples are equal if they are located on the same tile, at
-			// the same position. So color we pass in doesn't matter. This
-			// is okay since we don't allow more than one meeple to be
-			// placed at the same position anyway.
-			MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
-
-			gameBoardWindow.remove(meeple);
-		}
-
-		gameBoardWindow.repaint();
-	}
-
-	/**
-	 * Update the UI to show which player's turn it is.
+	 * @param currentPlayer
+	 *            The player whose turn it is.
 	 * 
-	 * @param player
-	 *            an integer representing the current player (numberRep).
+	 * @param drawPileEmpty
+	 *            Whether the draw pile is empty.
 	 */
-	private void showCurrentPlayer(int player) {
+	public void gameInfo(int currentPlayer, boolean drawPileEmpty) {
 
-		// Reset all players to not be the current player wrt/ the ui.
-		Iterator<Integer> playerRepsIter;
-		playerRepsIter = playerStatusPanels.keySet().iterator();
-
-		while (playerRepsIter.hasNext()) {
-			int playerRep = playerRepsIter.next();
-			playerStatusPanels.get(playerRep).setCurrentPlayer(false);
+		if (drawPileEmpty) {
+			gameState = GameState.END_GAME;
 		}
-
-		// Set the current player wrt/ the ui.
-		playerStatusPanels.get(player).setCurrentPlayer(true);
 	}
 
 }
