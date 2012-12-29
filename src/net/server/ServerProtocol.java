@@ -113,8 +113,8 @@ public class ServerProtocol extends SocketServerProtocol {
 
 	// In-game variables.
 	private Game game;
-	private GameState gameState = GameState.START_GAME;
-	private int currentPlayer = 0;
+	private GameState gameState = null;
+	private int currentPlayer;
 
 	// Pre-game messages.
 	private String[] makeAssignPlayerMsg(int numberRep) {
@@ -456,19 +456,12 @@ public class ServerProtocol extends SocketServerProtocol {
 		// If the game is just starting then we need to send over initialization
 		// info. The gameboard width, height (# of tiles), the player whose turn
 		// it is, &c.
-		if (GameState.START_GAME == gameState) {
+		if (parsedMessage.get(0).equals("INIT")) {
 
-			int numPlayers = 0;
+			gameState = GameState.START_GAME;
+			int numPlayers = Integer.parseInt(parsedMessage.get(2));
 
-			if (!parsedMessage.get(0).equals("INIT")) {
-				return disseminateMessages(sender, makeErrorMsg());
-			}
-
-			if (parsedMessage.get(1).equals("numPlayers")) {
-				numPlayers = Integer.parseInt(parsedMessage.get(2));
-			}
-
-			// TODO
+			// TODO .. what?
 			game = new Game(numPlayers);
 			gameState = GameState.DRAW_TILE;
 
@@ -476,9 +469,9 @@ public class ServerProtocol extends SocketServerProtocol {
 			return disseminateMessages(sender, initMsg);
 		}
 
-		if (GameState.DRAW_TILE == gameState) {
+		if (parsedMessage.get(0).equals("DRAWTILE")) {
 
-			if (!parsedMessage.get(0).equals("DRAWTILE")) {
+			if (GameState.DRAW_TILE != gameState) {
 				return disseminateMessages(sender, makeErrorMsg());
 			}
 
@@ -582,7 +575,7 @@ public class ServerProtocol extends SocketServerProtocol {
 
 						ret[numMessages - 1] = makeGameInfoMsg();
 
-						gameState = GameState.END_TURN;
+						gameState = GameState.PLACE_MEEPLE;
 					} else {
 
 						ret = new String[1][];
@@ -594,7 +587,9 @@ public class ServerProtocol extends SocketServerProtocol {
 			}
 		}
 
-		if (GameState.END_TURN == gameState) {
+		// Receive:
+		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
+		if (GameState.PLACE_MEEPLE == gameState) {
 
 			if (parsedMessage.get(0).equals("ENDTURN")) {
 
@@ -603,87 +598,71 @@ public class ServerProtocol extends SocketServerProtocol {
 				}
 
 				String[] endTurnMsg = makeEndTurnMsg(currentPlayer);
+				currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
+				gameState = GameState.DRAW_TILE;
+				// TODO return scoring and info messages too
 
 				return disseminateMessages(sender, endTurnMsg);
 			}
 
-			// The player decided to end their turn after placing a tile.
-			if (parsedMessage.get(0).equals("DRAWTILE")) {
-
-				currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
-				gameState = GameState.DRAW_TILE;
-			}
-
-			// Or they decided to place a meeple.
 			if (parsedMessage.get(0).equals("PLACEMEEPLE")) {
 
-				gameState = GameState.PLACE_MEEPLE;
-			}
+				if (parsedMessage.get(1).equals("currentPlayer")) {
 
-			return processInput(sender, input);
-		}
-
-		// Receive:
-		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>
-		if (GameState.PLACE_MEEPLE == gameState) {
-
-			if (!parsedMessage.get(0).equals("PLACEMEEPLE")) {
-				return disseminateMessages(sender, makeErrorMsg());
-			}
-
-			if (parsedMessage.get(1).equals("currentPlayer")) {
-
-				// Again, check the client is synchronized wrt/ player turn.
-				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, makeErrorMsg());
-				}
-
-				// If everything is good; we're synchronized, continue.
-				int xBoard = Integer.parseInt(parsedMessage.get(4));
-				int yBoard = Integer.parseInt(parsedMessage.get(6));
-				int xTile = Integer.parseInt(parsedMessage.get(8));
-				int yTile = Integer.parseInt(parsedMessage.get(10));
-
-				Player player = game.getPlayers().get(currentPlayer);
-
-				int err;
-				err = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
-
-				// TODO: can this be simplified?
-				String ret[][];
-				String[] placeMeepleMsg = makePlaceMeepleMsg(currentPlayer,
-						xBoard, yBoard, xTile, yTile, err);
-
-				if (err == 0) {
-
-					int numMessages = game.getNumPlayers() + 3;
-					ret = new String[numMessages][];
-
-					boolean isGameOver = game.isDrawPileEmpty();
-
-					if (isGameOver) {
-						gameState = GameState.END_GAME;
+					// Again, check the client is synchronized wrt/ player turn.
+					if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+						return disseminateMessages(sender, makeErrorMsg());
 					}
 
-					ret[0] = placeMeepleMsg;
-					ret[1] = makeScoreMsg(game.score(isGameOver));
+					// If everything is good; we're synchronized, continue.
+					int xBoard = Integer.parseInt(parsedMessage.get(4));
+					int yBoard = Integer.parseInt(parsedMessage.get(6));
+					int xTile = Integer.parseInt(parsedMessage.get(8));
+					int yTile = Integer.parseInt(parsedMessage.get(10));
 
-					for (int i = 0; i < game.getNumPlayers(); i++) {
-						ret[i + 2] = makePlayerInfoMsg(i);
+					Player player = game.getPlayers().get(currentPlayer);
+
+					int err;
+					err = game
+							.placeMeeple(player, xBoard, yBoard, xTile, yTile);
+
+					// TODO: can this be simplified?
+					String ret[][];
+					String[] placeMeepleMsg = makePlaceMeepleMsg(currentPlayer,
+							xBoard, yBoard, xTile, yTile, err);
+
+					if (err == 0) {
+
+						int numMessages = game.getNumPlayers() + 3;
+						ret = new String[numMessages][];
+
+						boolean isGameOver = game.isDrawPileEmpty();
+
+						if (isGameOver) {
+							gameState = GameState.END_GAME;
+						}
+
+						ret[0] = placeMeepleMsg;
+						ret[1] = makeScoreMsg(game.score(isGameOver));
+
+						for (int i = 0; i < game.getNumPlayers(); i++) {
+							ret[i + 2] = makePlayerInfoMsg(i);
+						}
+
+						ret[numMessages - 1] = makeGameInfoMsg();
+
+						gameState = GameState.DRAW_TILE;
+						currentPlayer = (currentPlayer + 1)
+								% game.getNumPlayers();
+
+					} else {
+
+						ret = new String[1][];
+						ret[0] = placeMeepleMsg;
 					}
 
-					ret[numMessages - 1] = makeGameInfoMsg();
-
-					gameState = GameState.DRAW_TILE;
-					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
-
-				} else {
-
-					ret = new String[1][];
-					ret[0] = placeMeepleMsg;
+					return disseminateMessages(sender, ret);
 				}
-
-				return disseminateMessages(sender, ret);
 			}
 		}
 
