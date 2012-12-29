@@ -136,17 +136,6 @@ public class ClientProtocol extends SocketClientProtocol {
 			gameUi.score(meeplePositions);
 		}
 
-		// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
-		if (message.get(0).equals("INFO") && message.get(1).equals("player")) {
-
-			int player = Integer.parseInt(message.get(2));
-			int currentPlayer = Integer.parseInt(message.get(4));
-			int playerScore = Integer.parseInt(message.get(6));
-			int meeplesPlaced = Integer.parseInt(message.get(8));
-
-			gameUi.playerInfo(player, currentPlayer, playerScore, meeplesPlaced);
-		}
-
 		// ENDTURN;currentPlayer;<int>
 		if (message.get(0).equals("ENDTURN")) {
 
