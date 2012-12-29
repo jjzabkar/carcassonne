@@ -1,14 +1,18 @@
 package net.client;
 
+import java.awt.Color;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import model.GameState;
 import model.PlayerStruct;
 import ui.GameUi;
+import ui.MeepleUi;
+import ui.TileUi;
 
 // Adapter class which receives the returned messages from the server.
 // The received messages are processed, followed by the client being told to
@@ -124,10 +128,27 @@ public class ClientProtocol extends SocketClientProtocol {
 		// Remove meeples.
 		// SCORE[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
 		if (message.get(0).equals("SCORE")) {
-			gameUi.score(message);
+
+			Set<MeepleUi> meeplePositions = new HashSet<MeepleUi>();
+
+			for (int i = 1; i < message.size(); i = i + 9) {
+
+				int xBoard = Integer.parseInt(message.get(i + 2));
+				int yBoard = Integer.parseInt(message.get(i + 4));
+				int xTile = Integer.parseInt(message.get(i + 6));
+				int yTile = Integer.parseInt(message.get(i + 8));
+
+				int tileSize = TileUi.tileSize * TileUi.tileTypeSize;
+
+				int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
+				int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
+
+				meeplePositions.add(new MeepleUi(new Color(0), mx, my));
+			}
+
+			gameUi.score(meeplePositions);
 		}
 
-		/*
 		// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
 		if (message.get(0).equals("INFO") && message.get(1).equals("player")) {
 
@@ -136,41 +157,8 @@ public class ClientProtocol extends SocketClientProtocol {
 			int playerScore = Integer.parseInt(message.get(6));
 			int meeplesPlaced = Integer.parseInt(message.get(8));
 
-			gameUi.getPlayerStatusPanels().get(player).setScore(playerScore);
-
-			// Each players info is sent after a scoring action;
-			// after scoring all players, if the current player has no
-			// meeples to place then end their turn.
-			numPlayerScoresUpdated++;
-
-			if (meeplesPlaced == 7 && gameUi.getPlayer() == player) {
-				currentPlayerHasMeeplesLeft = false;
-			}
-
-			if (numPlayerScoresUpdated == gameUi.getNumPlayers()) {
-
-				numPlayerScoresUpdated = 0;
-
-				// Also end the player's turn if they are at the meeple
-				// scoring state.
-				if (!currentPlayerHasMeeplesLeft) {
-
-					currentPlayerHasMeeplesLeft = true;
-
-					String msg = "ENDTURN;currentPlayer;" + player;
-					gameUi.sendMessage(msg);
-
-					gameUi.updateGameState(GameState.DRAW_TILE);
-					gameUi.endTurn(gameUi.getCurrentPlayer());
-
-				} else {
-
-					gameUi.updateGameState(GameState.PLACE_MEEPLE);
-					gameUi.getEndTurnButton().setEnabled(true);
-				}
-			}
+			gameUi.playerInfo(player, currentPlayer, playerScore, meeplesPlaced);
 		}
-		*/
 
 		// ENDTURN;currentPlayer;<int>
 		if (message.get(0).equals("ENDTURN")) {
