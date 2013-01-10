@@ -458,6 +458,10 @@ public class ServerProtocol extends SocketServerProtocol {
 		// it is, &c.
 		if (parsedMessage.get(0).equals("INIT")) {
 
+			if (!parsedMessage.get(1).equals("numPlayers")) {
+				return disseminateMessages(sender, makeErrorMsg());
+			}
+
 			gameState = GameState.START_GAME;
 			int numPlayers = Integer.parseInt(parsedMessage.get(2));
 
@@ -475,29 +479,28 @@ public class ServerProtocol extends SocketServerProtocol {
 				return disseminateMessages(sender, makeErrorMsg());
 			}
 
-			if (parsedMessage.get(1).equals("currentPlayer")) {
-
-				// The client is telling us that a different player is taking
-				// a tile than we told them. This is incorrect.
-				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-					return disseminateMessages(sender, makeErrorMsg());
-				}
-
-				// Otherwise continue the game by drawing a tile for the current
-				// player and letting the client know what the result was.
-				Player player = game.getPlayers().get(currentPlayer);
-				game.drawTile(player);
-				gameState = GameState.PLACE_TILE;
-
-				// Get variables to make the message & return it.
-				Tile tile = player.getCurrentTile();
-				String identifier = tile.getIdentifier();
-				int orientation = tile.getOrientation();
-
-				String[] drawTileMsg = makeDrawTileMsg(currentPlayer,
-						identifier, orientation);
-				return disseminateMessages(sender, drawTileMsg);
+			if (!parsedMessage.get(1).equals("currentPlayer")) {
+				return disseminateMessages(sender, makeErrorMsg());
 			}
+
+			if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+				return disseminateMessages(sender, makeErrorMsg());
+			}
+
+			// Otherwise continue the game by drawing a tile for the current
+			// player and letting the client know what the result was.
+			Player player = game.getPlayers().get(currentPlayer);
+			game.drawTile(player);
+			gameState = GameState.PLACE_TILE;
+
+			// Get variables to make the message & return it.
+			Tile tile = player.getCurrentTile();
+			String identifier = tile.getIdentifier();
+			int orientation = tile.getOrientation();
+
+			String[] drawTileMsg = makeDrawTileMsg(currentPlayer, identifier,
+					orientation);
+			return disseminateMessages(sender, drawTileMsg);
 		}
 
 		if (GameState.PLACE_TILE == gameState) {
@@ -507,83 +510,67 @@ public class ServerProtocol extends SocketServerProtocol {
 				return disseminateMessages(sender, makeErrorMsg());
 			}
 
-			if (parsedMessage.get(1).equals("currentPlayer")) {
+			if (!parsedMessage.get(1).equals("currentPlayer")) {
+				return disseminateMessages(sender, makeErrorMsg());
+			}
 
-				// Again, check the player the client is telling us that's
-				// playing is actually the player whose turn it is.
-				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+			if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+				return disseminateMessages(sender, makeErrorMsg());
+			}
+
+			// Check what the client wants us to do.
+			if (parsedMessage.get(0).equals("ROTATETILE")) {
+
+				if (!parsedMessage.get(3).equals("direction")) {
 					return disseminateMessages(sender, makeErrorMsg());
 				}
 
-				// Check what the client wants us to do.
-				if (parsedMessage.get(0).equals("ROTATETILE")) {
+				String direction = parsedMessage.get(4);
+				Player player = game.getPlayers().get(currentPlayer);
 
-					String direction = "clockwise";
-
-					if (parsedMessage.get(3).equals("direction")) {
-						direction = parsedMessage.get(4);
-					}
-
-					Player player = game.getPlayers().get(currentPlayer);
-
-					if (direction.equals("clockwise")) {
-						player.getCurrentTile().rotateClockwise();
-					}
-
-					if (direction.equals("counterClockwise")) {
-						player.getCurrentTile().rotateCounterClockwise();
-					}
-
-					String[] rotateTileMsg = makeRotateTileMsg(currentPlayer,
-							direction);
-					return disseminateMessages(sender, rotateTileMsg);
+				if (direction.equals("clockwise")) {
+					player.getCurrentTile().rotateClockwise();
 				}
 
-				if (parsedMessage.get(0).equals("PLACETILE")) {
-
-					// If not we continue on with the game; place the tile and
-					// advance to the next game state.
-					int xBoard = 0;
-					int yBoard = 0;
-
-					if (parsedMessage.get(3).equals("xBoard")) {
-						xBoard = Integer.parseInt(parsedMessage.get(4));
-					}
-					if (parsedMessage.get(5).equals("yBoard")) {
-						yBoard = Integer.parseInt(parsedMessage.get(6));
-					}
-
-					Player player = game.getPlayers().get(currentPlayer);
-					int err = game.placeTile(player, xBoard, yBoard);
-
-					// TODO: can this be simplified?
-					String[][] ret;
-					String[] placeTileMsg = makePlaceTileMsg(currentPlayer,
-							xBoard, yBoard, err);
-
-					if (err == 0) {
-
-						int numMessages = game.getNumPlayers() + 3;
-						ret = new String[numMessages][];
-
-						ret[0] = placeTileMsg;
-						ret[1] = makeScoreMsg(game.score(false));
-
-						for (int i = 0; i < game.getNumPlayers(); i++) {
-							ret[i + 2] = makePlayerInfoMsg(i);
-						}
-
-						ret[numMessages - 1] = makeGameInfoMsg();
-
-						gameState = GameState.PLACE_MEEPLE;
-					} else {
-
-						ret = new String[1][];
-						ret[0] = placeTileMsg;
-					}
-
-					return disseminateMessages(sender, ret);
+				if (direction.equals("counterClockwise")) {
+					player.getCurrentTile().rotateCounterClockwise();
 				}
+
+				String[] rotateTileMsg = makeRotateTileMsg(currentPlayer,
+						direction);
+				return disseminateMessages(sender, rotateTileMsg);
+			}
+
+			if (parsedMessage.get(0).equals("PLACETILE")) {
+
+				if (!parsedMessage.get(3).equals("xBoard")
+						|| !parsedMessage.get(5).equals("yBoard")) {
+					return disseminateMessages(sender, makeErrorMsg());
+				}
+
+				int xBoard = Integer.parseInt(parsedMessage.get(4));
+				int yBoard = Integer.parseInt(parsedMessage.get(6));
+
+				Player player = game.getPlayers().get(currentPlayer);
+				int error = game.placeTile(player, xBoard, yBoard);
+
+				String[][] ret;
+				String[] placeTileMsg = makePlaceTileMsg(currentPlayer, xBoard,
+						yBoard, error);
+
+				// Advance play if we don't encounter any errors.
+				if (error == 0) {
+
+					gameState = GameState.PLACE_MEEPLE;
+					ret = addGameUpdateInfo(placeTileMsg);
+
+				} else {
+
+					ret = new String[1][];
+					ret[0] = placeTileMsg;
+				}
+
+				return disseminateMessages(sender, ret);
 			}
 		}
 
@@ -593,76 +580,63 @@ public class ServerProtocol extends SocketServerProtocol {
 
 			if (parsedMessage.get(0).equals("ENDTURN")) {
 
+				if (!parsedMessage.get(1).equals("currentPlayer")) {
+					return disseminateMessages(sender, makeErrorMsg());
+				}
+
 				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
 					return disseminateMessages(sender, makeErrorMsg());
 				}
 
 				String[] endTurnMsg = makeEndTurnMsg(currentPlayer);
+
 				currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 				gameState = GameState.DRAW_TILE;
-				// TODO return scoring and info messages too
 
-				return disseminateMessages(sender, endTurnMsg);
+				String ret[][] = addGameUpdateInfo(endTurnMsg);
+
+				return disseminateMessages(sender, ret);
 			}
 
 			if (parsedMessage.get(0).equals("PLACEMEEPLE")) {
 
-				if (parsedMessage.get(1).equals("currentPlayer")) {
-
-					// Again, check the client is synchronized wrt/ player turn.
-					if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
-						return disseminateMessages(sender, makeErrorMsg());
-					}
-
-					// If everything is good; we're synchronized, continue.
-					int xBoard = Integer.parseInt(parsedMessage.get(4));
-					int yBoard = Integer.parseInt(parsedMessage.get(6));
-					int xTile = Integer.parseInt(parsedMessage.get(8));
-					int yTile = Integer.parseInt(parsedMessage.get(10));
-
-					Player player = game.getPlayers().get(currentPlayer);
-
-					int err;
-					err = game
-							.placeMeeple(player, xBoard, yBoard, xTile, yTile);
-
-					// TODO: can this be simplified?
-					String ret[][];
-					String[] placeMeepleMsg = makePlaceMeepleMsg(currentPlayer,
-							xBoard, yBoard, xTile, yTile, err);
-
-					if (err == 0) {
-
-						int numMessages = game.getNumPlayers() + 3;
-						ret = new String[numMessages][];
-
-						boolean isGameOver = game.isDrawPileEmpty();
-
-						if (isGameOver) {
-							gameState = GameState.END_GAME;
-						}
-
-						ret[0] = placeMeepleMsg;
-						ret[1] = makeScoreMsg(game.score(isGameOver));
-
-						for (int i = 0; i < game.getNumPlayers(); i++) {
-							ret[i + 2] = makePlayerInfoMsg(i);
-						}
-
-						ret[numMessages - 1] = makeGameInfoMsg();
-
-						gameState = GameState.DRAW_TILE;
-						currentPlayer = (currentPlayer + 1)
-								% game.getNumPlayers();
-
-					} else {
-
-						ret = new String[1][];
-						ret[0] = placeMeepleMsg;
-					}
-
-					return disseminateMessages(sender, ret);
+				if (!parsedMessage.get(1).equals("currentPlayer")) {
+					return disseminateMessages(sender, makeErrorMsg());
 				}
+
+				if (Integer.parseInt(parsedMessage.get(2)) != currentPlayer) {
+					return disseminateMessages(sender, makeErrorMsg());
+				}
+
+				// If everything is good; we're synchronized, continue.
+				int xBoard = Integer.parseInt(parsedMessage.get(4));
+				int yBoard = Integer.parseInt(parsedMessage.get(6));
+				int xTile = Integer.parseInt(parsedMessage.get(8));
+				int yTile = Integer.parseInt(parsedMessage.get(10));
+
+				Player player = game.getPlayers().get(currentPlayer);
+
+				int e = game.placeMeeple(player, xBoard, yBoard, xTile, yTile);
+
+				String ret[][];
+				String[] placeMeepleMsg = makePlaceMeepleMsg(currentPlayer,
+						xBoard, yBoard, xTile, yTile, e);
+
+				// With no errors, we advance gameplay, along with adding more
+				// messages to be returned to the clients to update them.
+				if (e == 0) {
+
+					gameState = GameState.DRAW_TILE;
+					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
+					ret = addGameUpdateInfo(placeMeepleMsg);
+
+				} else {
+
+					ret = new String[1][];
+					ret[0] = placeMeepleMsg;
+				}
+
+				return disseminateMessages(sender, ret);
 			}
 		}
 
@@ -672,5 +646,39 @@ public class ServerProtocol extends SocketServerProtocol {
 		}
 
 		return disseminateMessages(sender, makeErrorMsg());
+	}
+
+	// Add game update info messages to the passed in message.
+	// This function will determine if the game is over (needed to determine
+	// scoring rules). While doing this it will create a message list which
+	// begins with the passed-in message, and is followed by the score message,
+	// player information messages, and a game information message.
+	private String[][] addGameUpdateInfo(String[] message) {
+
+		// We'll have a player information message for each player, along with
+		// a score message, game info message, and the passed-in message.
+		int numMessages = game.getNumPlayers() + 3;
+		String ret[][] = new String[numMessages][];
+
+		boolean isGameOver = false;
+
+		// This method can be called during many game states; we don't want to
+		// end the game unless we are in the last stage of play with no turns
+		// left (no tiles left to draw).
+		if (game.isDrawPileEmpty() && GameState.PLACE_MEEPLE == gameState) {
+			gameState = GameState.END_GAME;
+			isGameOver = true;
+		}
+
+		ret[0] = message;
+		ret[1] = makeScoreMsg(game.score(isGameOver));
+
+		for (int i = 0; i < game.getNumPlayers(); i++) {
+			ret[i + 2] = makePlayerInfoMsg(i);
+		}
+
+		ret[numMessages - 1] = makeGameInfoMsg();
+
+		return ret;
 	}
 }
