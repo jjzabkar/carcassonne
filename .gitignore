@@ -8,3 +8,4 @@
 
 # Project Specific #
 build
+.settings/*
