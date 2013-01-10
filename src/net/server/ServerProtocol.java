@@ -58,10 +58,6 @@ public class ServerProtocol extends SocketServerProtocol {
 	// ENDTURN;currentPlayer;<int>
 	// ENDTURN;currentPlayer;<int>
 	//
-	// ENDTURN;currentPlayer;<int>
-	// ENDTURN;currentPlayer;<int>
-	//
-	//
 	// INFO;player;<int>;
 	// INFO;player;<int>;currentPlayer;<int:(0|1)>;score;<int>;meeplesPlaced;<int>
 	//
@@ -626,8 +622,6 @@ public class ServerProtocol extends SocketServerProtocol {
 				// messages to be returned to the clients to update them.
 				if (e == 0) {
 
-					gameState = GameState.DRAW_TILE;
-					currentPlayer = (currentPlayer + 1) % game.getNumPlayers();
 					ret = addGameUpdateInfo(placeMeepleMsg);
 
 				} else {
