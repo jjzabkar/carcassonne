@@ -958,12 +958,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	// TODO: game continues when a player leaves.. all their meeples are removed
 	// & they are removed from the game.
 
-	// TODO: some sort of bug w/ endturn
-
 	// TODO: disable end turn button on non-current player
-
-	// TODO: incorrect state when player attempts to place meeple on claimed
-	// feature
 
 	/**
 	 * Exit the game.
@@ -1319,6 +1314,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		playerStatusPanels.get(player).setCurrentPlayer(true);
 	}
 
+	// Handler for the playerInfo message. We'll update the player's score.
 	public void playerInfo(int player, int currentPlayer, int playerScore,
 			int meeplesPlaced) {
 
