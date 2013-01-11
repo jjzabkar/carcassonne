@@ -29,6 +29,9 @@ public class ServerProtocol extends SocketServerProtocol {
 	//
 	// LEAVELOBBY;player;<int>
 	//
+	// LEAVEGAME;player;<int>
+	// LEAVEGAME;player;<int>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+	//
 	// ASSIGNPLAYER;player;<int>
 	// ASSIGNPLAYER;player;<int>
 	//
@@ -142,6 +145,40 @@ public class ServerProtocol extends SocketServerProtocol {
 	}
 
 	// In-game messages.
+	// TODO: EXITGAME
+	private String[] makeLeaveGameMsg(int playerId,
+			ArrayList<BoardPosition> meeplesToRemove) {
+
+		String message = "LEAVEGAME;player;" + playerId
+				+ parseBoardPositionArray(meeplesToRemove);
+
+		String[] output = { SocketServerProtocol.replyAll, message };
+
+		return output;
+	}
+
+	// TODO: EXITGAME
+	private String parseBoardPositionArray(
+			ArrayList<BoardPosition> removedMeeples) {
+
+		String output = "";
+
+		for (int i = 0; i < removedMeeples.size(); i++) {
+
+			BoardPosition meeplePosition = removedMeeples.get(i);
+
+			if (meeplePosition != null) {
+				output = output.concat(";meeple;xBoard;"
+						+ meeplePosition.xBoard + ";yBoard;"
+						+ meeplePosition.yBoard + ";xTile;"
+						+ meeplePosition.xTile + ";yTile;"
+						+ meeplePosition.yTile);
+			}
+		}
+
+		return output;
+	}
+
 	private String[] makeGameInfoMsg() {
 
 		int isDrawPileEmpty = game.isDrawPileEmpty() ? 1 : 0;
@@ -447,6 +484,21 @@ public class ServerProtocol extends SocketServerProtocol {
 			String[] updateLobbyMsg = makeUpdateLobbyMsg();
 
 			return disseminateMessages(sender, updateLobbyMsg);
+		}
+
+		// TODO investigate if SCORE is really just REMOVEMEEPLES
+		// TODO: EXITGAME
+		if (parsedMessage.get(0).equals("LEAVEGAME")) {
+
+			// Remove the player from the game.
+			int playerSlot = Integer.parseInt(parsedMessage.get(2));
+			Player player = game.getPlayers().get(playerSlot);
+			ArrayList<BoardPosition> meeplesToRemove = game.exitGame(player);
+
+			// Return the message to update the client ui's.
+			String[] leaveGameMsg = makeLeaveGameMsg(playerSlot,
+					meeplesToRemove);
+			return disseminateMessages(sender, leaveGameMsg);
 		}
 
 		// If the game is just starting then we need to send over initialization

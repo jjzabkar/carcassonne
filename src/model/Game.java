@@ -131,19 +131,21 @@ public class Game {
 	 * 
 	 * The player which is leaving the game will have their score set to zero,
 	 * their meeples removed from the board, and they will be removed from turn
-	 * rotation.
+	 * rotation/the game.
 	 * 
 	 * @param player
 	 *            The player that is leaving the game.
 	 */
-	public void exitGame(Player player) {
-
-		gameBoard.removeMeeples(player);
+	// TODO: EXITGAME
+	public ArrayList<BoardPosition> exitGame(Player player) {
 
 		// This is going to be interesting; the game protocol uses the player's
 		// position in the array to identify them. Perhaps this should be
 		// converted to a hash map. (this was already done in gameui for ui
 		// elements bound to a specific user).
+		player.setScore(0);
+		players.remove(player);
+		return gameBoard.removeMeeples(player);
 	}
 
 	public ArrayList<Player> getPlayers() {

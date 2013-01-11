@@ -232,9 +232,31 @@ public class Board {
 		return 1;
 	}
 
-	// TODO: this.
-	public int removeMeeples(Player player) {
-		return 0;
+	/**
+	 * Remove a player's meeples from the game board, returning their positions.
+	 * 
+	 * @param player
+	 *            The player whose meeples to remove from the game board.
+	 * 
+	 * @return An ArrayList of BoardPositon representing the meeple positions.
+	 */
+	// TODO: EXITGAME
+	public ArrayList<BoardPosition> removeMeeples(Player player) {
+
+		ArrayList<BoardPosition> meeplePositions = new ArrayList<BoardPosition>();
+		Iterator<Meeple> playerMeeples = player.getMeeples().iterator();
+
+		while (playerMeeples.hasNext()) {
+
+			Meeple meeple = playerMeeples.next();
+
+			if (meeple != null) {
+				meeplePositions.add(meeplePlacement.get(meeple));
+				meeplePlacement.remove(meeple);
+			}
+		}
+
+		return meeplePositions;
 	}
 
 	/**
