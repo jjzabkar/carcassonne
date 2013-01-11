@@ -154,7 +154,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 						sendMessage(msg);
 					} else {
 						// Close the socket client.
-						sendMessage(SocketClientProtocol.EXIT);
+						// TODO: EXITGAME
+						String msg = "LEAVEGAME;player;" + player;
+						sendMessage(msg);
 					}
 				}
 			}
