@@ -46,7 +46,6 @@ import model.MeepleStruct;
 import model.PlayerStruct;
 import net.client.ClientProtocol;
 import net.client.SocketClient;
-import net.client.SocketClientProtocol;
 import net.server.ServerProtocol;
 import net.server.SocketServer;
 
@@ -815,9 +814,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			// Send the message to notify we are leaving the game lobby.
 			String msg = "LEAVELOBBY;player;" + player;
 			sendMessage(msg);
-
-			// Close the socket client.
-			sendMessage(SocketClientProtocol.EXIT);
 
 			// Return to the main game screen.
 			setContentPane(titleScreenContentPane);
