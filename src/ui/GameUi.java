@@ -1025,16 +1025,14 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		Set<Integer> playerRepsSet = playerSettingsPanels.keySet();
 		List<Integer> playerReps = new ArrayList<Integer>(playerRepsSet);
 		Collections.sort(playerReps);
-		Iterator<Integer> playerRepsIter = playerReps.iterator();
 
-		while (playerRepsIter.hasNext()) {
+        for (Integer playerRep : playerReps) {
 
-			int playerRep = playerRepsIter.next();
-			JPlayerSettingsPanel psp = playerSettingsPanels.get(playerRep);
+            JPlayerSettingsPanel psp = playerSettingsPanels.get(playerRep);
 
-			playerSettingsPanelContainer.add(psp, gc);
-			gc.gridy++;
-		}
+            playerSettingsPanelContainer.add(psp, gc);
+            gc.gridy++;
+        }
 
 		playerSettingsPanelContainer.revalidate();
 		playerSettingsPanelContainer.repaint();
