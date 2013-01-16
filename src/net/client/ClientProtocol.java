@@ -104,7 +104,8 @@ public class ClientProtocol extends SocketClientProtocol {
 			gameUi.placeTile(currentPlayer, xBoard, yBoard, err);
 		}
 
-		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>;error;<int:(0|1)>
+		// PLACEMEEPLE;currentPlayer;<int>;xBoard;<int>;yBoard;<int>;
+		// xTile;<int>;yTile;<int>;error;<int:(0|1)>
 		if (message.get(0).equals("PLACEMEEPLE")) {
 
 			int currentPlayer = Integer.parseInt(message.get(2));

@@ -1239,9 +1239,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	/**
 	 * Main method called to handle the SCORE message.
 	 * 
-	 * @param message
-	 *            the semi-parsed message (split into an ArrayList at
-	 *            semi-colons).
+	 * @param meeplePositions
+     *              a set of MeepleStruct objects which represent the positions
+     *              of the meeples which are to be removed after scoring.
 	 */
 	public void score(Set<MeepleStruct> meeplePositions) {
 
