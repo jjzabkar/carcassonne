@@ -5,8 +5,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
-
 public class SocketClient {
 
 	private final String server;

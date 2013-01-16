@@ -23,8 +23,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -40,7 +50,7 @@ import net.server.ServerProtocol;
 import net.server.SocketServer;
 
 public class GameUi extends JFrame implements ActionListener, MouseListener,
-		DocumentListener, MessageSender {
+        DocumentListener, MessageSender {
 
 	private static final long serialVersionUID = 1L;
 

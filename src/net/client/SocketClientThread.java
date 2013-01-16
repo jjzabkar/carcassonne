@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-
 // We have 2 avenues to send/receive messages from the server. We can either
 // send a message and get a message back directly (sendMessage). Or we can
 // receive messages from the server without sending a message.

@@ -9,8 +9,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
-
-
 public class SocketServerThread extends Thread {
 
 	private Socket clientSocket = null;
