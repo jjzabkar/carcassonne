@@ -1290,7 +1290,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		gameState = GameState.DRAW_TILE;
 	}
 
-	// TODO hideCurrentPlayer / showCurrentPlayer cleanup
 	/**
 	 * Update the UI to show which player's turn it is.
 	 * 
@@ -1300,13 +1299,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private void showCurrentPlayer(int player) {
 
 		// Reset all players to not be the current player wrt/ the ui.
-		Iterator<Integer> playerRepsIter;
-		playerRepsIter = playerStatusPanels.keySet().iterator();
-
-		while (playerRepsIter.hasNext()) {
-			int playerRep = playerRepsIter.next();
-			playerStatusPanels.get(playerRep).setCurrentPlayer(false);
-		}
+        for (Integer playerId : playerStatusPanels.keySet()) {
+            playerStatusPanels.get(playerId).setCurrentPlayer(false);
+        }
 
 		// Set the current player wrt/ the ui.
 		playerStatusPanels.get(player).setCurrentPlayer(true);
