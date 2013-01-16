@@ -987,23 +987,22 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		playerSettingsPanels.clear();
 
-		List<Integer> playerRepList = new ArrayList<Integer>(players.keySet());
-		Collections.sort(playerRepList);
-		Iterator<Integer> playersIter = playerRepList.iterator();
+		List<Integer> playerReps = new ArrayList<Integer>(players.keySet());
+		Collections.sort(playerReps);
 
-		while (playersIter.hasNext()) {
+        for (Integer playerRep : playerReps) {
 
-			int rep = playersIter.next();
-			PlayerStruct player = players.get(rep);
+            PlayerStruct player = players.get(playerRep);
 
-			String name = player.getName();
-			Color col = player.getColor();
+            String name = player.getName();
+            Color col = player.getColor();
 
-			// TODO remove numberrep from psp?
-			JPlayerSettingsPanel psp = new JPlayerSettingsPanel(rep, name, col);
+            // TODO remove numberrep from psp?
+            JPlayerSettingsPanel psp;
+            psp = new JPlayerSettingsPanel(playerRep, name, col);
 
-			playerSettingsPanels.put(rep, psp);
-		}
+            playerSettingsPanels.put(playerRep, psp);
+        }
 
 		// Update ui to match.
 		updateLobbyUi();
