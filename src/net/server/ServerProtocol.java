@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import model.BoardPosition;
 import model.Game;
@@ -119,29 +118,23 @@ public class ServerProtocol extends SocketServerProtocol {
 	private String[] makeAssignPlayerMsg(int numberRep) {
 
 		String message = "ASSIGNPLAYER;player;" + numberRep;
-		String[] output = { SocketServerProtocol.replySender, message };
 
-		return output;
+        return new String[] {SocketServerProtocol.replySender, message};
 	}
 
 	private String[] makeUpdateLobbyMsg() {
 
 		String message = "UPDATELOBBY";
 
-		Iterator<Integer> playersIter = lobbyPlayers.keySet().iterator();
+        for (Integer numberRep : lobbyPlayers.keySet()) {
 
-		while (playersIter.hasNext()) {
+            PlayerStruct player = lobbyPlayers.get(numberRep);
 
-			Integer numberRep = playersIter.next();
-			PlayerStruct player = lobbyPlayers.get(numberRep);
+            message += ";player;" + numberRep + ";name;" + player.getName()
+                    + ";color;" + player.getColorString();
+        }
 
-			message += ";player;" + numberRep + ";name;" + player.getName()
-					+ ";color;" + player.getColorString();
-		}
-
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	// In-game messages.
@@ -152,9 +145,7 @@ public class ServerProtocol extends SocketServerProtocol {
 		String message = "LEAVEGAME;player;" + playerId
 				+ parseBoardPositionArray(meeplesToRemove);
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	// TODO: EXITGAME
@@ -163,18 +154,16 @@ public class ServerProtocol extends SocketServerProtocol {
 
 		String output = "";
 
-		for (int i = 0; i < removedMeeples.size(); i++) {
+        for (BoardPosition meeplePosition : removedMeeples) {
 
-			BoardPosition meeplePosition = removedMeeples.get(i);
-
-			if (meeplePosition != null) {
-				output = output.concat(";meeple;xBoard;"
-						+ meeplePosition.xBoard + ";yBoard;"
-						+ meeplePosition.yBoard + ";xTile;"
-						+ meeplePosition.xTile + ";yTile;"
-						+ meeplePosition.yTile);
-			}
-		}
+            if (meeplePosition != null) {
+                output = output.concat(";meeple;xBoard;"
+                        + meeplePosition.xBoard + ";yBoard;"
+                        + meeplePosition.yBoard + ";xTile;"
+                        + meeplePosition.xTile + ";yTile;"
+                        + meeplePosition.yTile);
+            }
+        }
 
 		return output;
 	}
@@ -186,9 +175,7 @@ public class ServerProtocol extends SocketServerProtocol {
 		String message = "INFO;game;currentPlayer;" + currentPlayer
 				+ ";drawPileEmpty;" + isDrawPileEmpty;
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makePlayerInfoMsg(int player) {
@@ -203,9 +190,7 @@ public class ServerProtocol extends SocketServerProtocol {
 				+ isCurrentPlayer + ";score;" + playerScore + ";meeplesPlaced;"
 				+ numMeeplesPlaced;
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makeInitMsg(int player) {
@@ -214,9 +199,7 @@ public class ServerProtocol extends SocketServerProtocol {
 				+ game.getBoardWidth() + ";gameBoardHeight;"
 				+ game.getBoardHeight();
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makeDrawTileMsg(int player, String identifier,
@@ -225,9 +208,7 @@ public class ServerProtocol extends SocketServerProtocol {
 		String message = "DRAWTILE;currentPlayer;" + player + ";identifier;"
 				+ identifier + ";orientation;" + orientation;
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	// Note that if an error has occurred we will not modify the game at all,
@@ -242,9 +223,7 @@ public class ServerProtocol extends SocketServerProtocol {
 		String recipient = (error == 0) ? SocketServerProtocol.replyAll
 				: SocketServerProtocol.replySender;
 
-		String[] output = { recipient, message };
-
-		return output;
+        return new String[] {recipient, message};
 	}
 
 	private String[] makeRotateTileMsg(int player, String direction) {
@@ -252,9 +231,7 @@ public class ServerProtocol extends SocketServerProtocol {
 		String message = "ROTATETILE;currentPlayer;" + player + ";direction;"
 				+ direction;
 
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makePlaceMeepleMsg(int player, int xBoard, int yBoard,
@@ -267,59 +244,49 @@ public class ServerProtocol extends SocketServerProtocol {
 		String recipient = (error == 0) ? SocketServerProtocol.replyAll
 				: SocketServerProtocol.replySender;
 
-		String[] output = { recipient, message };
-
-		return output;
+        return new String[] {recipient, message};
 	}
 
 	private String[] makeScoreMsg(ArrayList<BoardPosition> removedMeeples) {
 
 		String message = "SCORE";
 
-		for (int i = 0; i < removedMeeples.size(); i++) {
+        for (BoardPosition meeplePosition : removedMeeples) {
 
-			BoardPosition meeplePosition = removedMeeples.get(i);
+            if (meeplePosition != null) {
+                message = message.concat(";meeple;xBoard;"
+                        + meeplePosition.xBoard + ";yBoard;"
+                        + meeplePosition.yBoard + ";xTile;"
+                        + meeplePosition.xTile + ";yTile;"
+                        + meeplePosition.yTile);
+            }
+        }
 
-			if (meeplePosition != null) {
-				message = message.concat(";meeple;xBoard;"
-						+ meeplePosition.xBoard + ";yBoard;"
-						+ meeplePosition.yBoard + ";xTile;"
-						+ meeplePosition.xTile + ";yTile;"
-						+ meeplePosition.yTile);
-			}
-		}
-
-		String[] output = { SocketServerProtocol.replyAll, message };
-
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makeErrorMsg() {
 
-		String[] output = { SocketServerProtocol.replySender,
-				SocketServerProtocol.NAK };
-		return output;
+        return new String[] {SocketServerProtocol.replySender,
+                SocketServerProtocol.NAK};
 	}
 
 	private String[] makeEndTurnMsg(int currentPlayer) {
 
 		String message = "ENDTURN;currentPlayer;" + currentPlayer;
-		String[] output = { SocketServerProtocol.replyAll, message };
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makeEndGameMsg() {
 
-		String[] output = { SocketServerProtocol.replyAll,
-				SocketServerProtocol.EXIT };
-		return output;
+        return new String[] {SocketServerProtocol.replyAll,
+                SocketServerProtocol.EXIT};
 	}
 
 	private String[] makeCloseClientMsg() {
 
-		String[] output = { SocketServerProtocol.replySender,
-				SocketServerProtocol.EXIT };
-		return output;
+        return new String[] {SocketServerProtocol.replySender,
+                SocketServerProtocol.EXIT};
 	}
 
 	// Utility functions.
@@ -359,17 +326,16 @@ public class ServerProtocol extends SocketServerProtocol {
 		// Find which player slot is not used. To do this record all used slots,
 		// sort them, and then run through until we find a slot (number) which
 		// is not used.
-		ArrayList<Integer> usedPlayerSlots;
-		usedPlayerSlots = new ArrayList<Integer>(lobbyPlayers.keySet());
-		Collections.sort(usedPlayerSlots);
+		ArrayList<Integer> usedSlots = new ArrayList<Integer>(lobbyPlayers.keySet());
+		Collections.sort(usedSlots);
 
 		int candidateSlot = 0;
 
-		for (int i = 0; i < usedPlayerSlots.size(); i++) {
-			if (usedPlayerSlots.get(i).intValue() == candidateSlot) {
-				candidateSlot++;
-			}
-		}
+        for (Integer usedSlot : usedSlots) {
+            if (usedSlot == candidateSlot) {
+                candidateSlot++;
+            }
+        }
 
 		return candidateSlot;
 	}
@@ -386,26 +352,22 @@ public class ServerProtocol extends SocketServerProtocol {
 
 		ArrayList<String> messages = new ArrayList<String>();
 
-		for (int i = 0; i < processedMessages.length; i++) {
+        for (String[] processedMessage : processedMessages) {
 
-			String recipient = processedMessages[i][0];
-			String currentMessage = processedMessages[i][1];
-			messages.add(currentMessage);
+            String recipient = processedMessage[0];
+            String currentMessage = processedMessage[1];
+            messages.add(currentMessage);
 
-			if (recipient.equals(SocketServerProtocol.replyAll)) {
+            if (recipient.equals(SocketServerProtocol.replyAll)) {
 
-				Iterator<Socket> sendersIter = writers.keySet().iterator();
+                for (Socket receiver : writers.keySet()) {
 
-				while (sendersIter.hasNext()) {
-
-					Socket aSender = sendersIter.next();
-
-					if (!aSender.equals(sender)) {
-						writers.get(aSender).println(currentMessage);
-					}
-				}
-			}
-		}
+                    if (!receiver.equals(sender)) {
+                        writers.get(receiver).println(currentMessage);
+                    }
+                }
+            }
+        }
 
 		return messages;
 	}
