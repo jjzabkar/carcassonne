@@ -538,41 +538,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		// Add mouse listener for game window.
 		gameBoardWindow.addMouseListener(this);
 
-		// Top part of the info window has the score information.
-		JPanel playerInfoPanel = new JPanel(new GridBagLayout());
-
-		// Create the player status panels, and fill the info panel with them.
-		gc = new GridBagConstraints();
-		gc.insets = insets;
-		gc.fill = GridBagConstraints.HORIZONTAL;
-		gc.anchor = GridBagConstraints.LINE_START;
-		gc.weightx = 1;
-		gc.weighty = 1 / players.size();
-		gc.gridx = 0;
-		gc.gridy = 0;
-
-		// Add the players to the status panel (in ascending order).
-		List<Integer> playerReps = new ArrayList<Integer>(players.keySet());
-		Collections.sort(playerReps);
-		Iterator<Integer> playerRepsIter = playerReps.iterator();
-
-		while (playerRepsIter.hasNext()) {
-
-			Integer playerRep = playerRepsIter.next();
-			PlayerStruct player = players.get(playerRep);
-
-			String name = player.getName();
-			int score = player.getScore();
-			Color color = player.getColor();
-
-			JPlayerStatusPanel playerStatusPanel;
-			playerStatusPanel = new JPlayerStatusPanel(name, score, color);
-
-			playerStatusPanels.put(playerRep, playerStatusPanel);
-			playerInfoPanel.add(playerStatusPanel, gc);
-			gc.gridy++;
-		}
-
 		// Create the buttons for tile manipulation & turn/window control.
 		// Draw Pile.
 		URL drawTileUrl = getClass().getResource(resourceLoc + "tile-back.jpg");
@@ -667,13 +632,51 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		// Add the player info and game controls to the info container.
 		JPanel infoContainer = new JPanel(new BorderLayout());
 
-		infoContainer.add(playerInfoPanel, BorderLayout.NORTH);
+		infoContainer.add(createPlayerStatusPanelContainer(), BorderLayout.NORTH);
 		infoContainer.add(playerControlsPanel, BorderLayout.SOUTH);
 
 		// Add the game board canvas and info container to the content pane.
 		gameContentPane.add(gameBoardWindowScrollPane, BorderLayout.CENTER);
 		gameContentPane.add(infoContainer, BorderLayout.EAST);
 	}
+
+    // Creates the container which holds the JPlayerStatusPanel objects.
+    // Uses globals: playerStatusPanels, players.
+    private JPanel createPlayerStatusPanelContainer() {
+
+        // Create the container, and set up it's layout.
+        JPanel container = new JPanel(new GridBagLayout());
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.insets = new Insets(2, 2, 2, 2);
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.anchor = GridBagConstraints.LINE_START;
+		gc.weightx = 1;
+		gc.weighty = 1 / players.size();
+		gc.gridx = 0;
+		gc.gridy = 0;
+
+		// Add the players to the status panel (in ascending order).
+		List<Integer> playerReps = new ArrayList<Integer>(players.keySet());
+		Collections.sort(playerReps);
+
+        for (Integer playerRep : playerReps) {
+
+            PlayerStruct player = players.get(playerRep);
+
+            String name = player.getName();
+            int score = player.getScore();
+            Color color = player.getColor();
+
+            JPlayerStatusPanel playerStatusPanel;
+            playerStatusPanel = new JPlayerStatusPanel(name, score, color);
+
+            playerStatusPanels.put(playerRep, playerStatusPanel);
+            container.add(playerStatusPanel, gc);
+            gc.gridy++;
+        }
+
+        return container;
+    }
 
 	// Gameplay actions for non-current players are not allowed.
 	@Override
