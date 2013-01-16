@@ -1245,28 +1245,24 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	 */
 	public void score(Set<MeepleStruct> meeplePositions) {
 
-		Iterator<MeepleStruct> meeples = meeplePositions.iterator();
+        for (MeepleStruct ms : meeplePositions) {
 
-		while (meeples.hasNext()) {
+            int msxb = ms.getxBoard();
+            int msxt = ms.getxTile();
+            int msyb = ms.getyBoard();
+            int msyt = ms.getyTile();
 
-			MeepleStruct ms = meeples.next();
+            int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
+            int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
 
-			int msxb = ms.getxBoard();
-			int msxt = ms.getxTile();
-			int msyb = ms.getyBoard();
-			int msyt = ms.getyTile();
+            // Meeples are equal if they are located on the same tile, at
+            // the same position. So color we pass in doesn't matter. This
+            // is okay since we don't allow more than one meeple to be
+            // placed at the same position anyway.
+            MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
 
-			int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
-			int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
-
-			// Meeples are equal if they are located on the same tile, at
-			// the same position. So color we pass in doesn't matter. This
-			// is okay since we don't allow more than one meeple to be
-			// placed at the same position anyway.
-			MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
-
-			gameBoardWindow.remove(meeple);
-		}
+            gameBoardWindow.remove(meeple);
+        }
 
 		gameBoardWindow.repaint();
 	}
