@@ -46,6 +46,7 @@ import model.MeepleStruct;
 import model.PlayerStruct;
 import net.client.ClientProtocol;
 import net.client.SocketClient;
+import net.client.SocketClientProtocol;
 import net.server.ServerProtocol;
 import net.server.SocketServer;
 
@@ -108,10 +109,12 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	private JButton drawTileButton;
 	private JButton endTurnButton;
 
-	// Variables to keep track of players in the game lobby, and in the game.
+	// Keep track of players in the game lobby, and in the game. (respectively)
 	private HashMap<Integer, JPlayerSettingsPanel> playerSettingsPanels = new HashMap<Integer, JPlayerSettingsPanel>();
-	private HashMap<Integer, JPlayerStatusPanel> playerStatusPanels = new HashMap<Integer, JPlayerStatusPanel>();
-	private JPanel playerSettingsPanelContainer;
+	private JPanel playerSettingsPanelContainer = new JPanel(new GridBagLayout());
+
+    private HashMap<Integer, JPlayerStatusPanel> playerStatusPanels = new HashMap<Integer, JPlayerStatusPanel>();
+    private JPanel playerStatusPanelContainer = new JPanel(new GridBagLayout());
 
 	/**
 	 * Constructor for the game Ui.
@@ -146,16 +149,18 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 				if (gameClient != null) {
 
 					// If the game has not started yet then the player must be
-					// in the lobby. So we leave the lobby. Otherwise, send the
-					// exit message to leave the game.
+					// in the lobby. So we leave the lobby. Otherwise, leave the
+					// game.
+                    // The protocol exit messages deal with the network layer,
+                    // closing the sockets/readers/writers.
 					if (gameState == null) {
 						String msg = "LEAVELOBBY;player;" + player;
 						sendMessage(msg);
+                        sendMessage(SocketClientProtocol.EXIT);
 					} else {
-						// Close the socket client.
-						// TODO: EXITGAME
 						String msg = "LEAVEGAME;player;" + player;
 						sendMessage(msg);
+                        sendMessage(SocketClientProtocol.EXIT);
 					}
 				}
 			}
@@ -437,10 +442,6 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		JPanel chatContainer = new JPanel();
 		chatContainer.setBorder(BorderFactory.createLineBorder(Color.black));
 
-		// Player list.
-		// It is updated as other players join & leave.
-		playerSettingsPanelContainer = new JPanel(new GridBagLayout());
-
 		// Back button
 		JButton backButton = new JButton("Quit");
 		backButton.setVerticalTextPosition(AbstractButton.CENTER);
@@ -538,6 +539,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		// Add mouse listener for game window.
 		gameBoardWindow.addMouseListener(this);
 
+        // Add the player status jpanel.
+        updatePlayerStatusPanelContainer();
+
 		// Create the buttons for tile manipulation & turn/window control.
 		// Draw Pile.
 		URL drawTileUrl = getClass().getResource(resourceLoc + "tile-back.jpg");
@@ -632,7 +636,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 		// Add the player info and game controls to the info container.
 		JPanel infoContainer = new JPanel(new BorderLayout());
 
-		infoContainer.add(createPlayerStatusPanelContainer(), BorderLayout.NORTH);
+		infoContainer.add(playerStatusPanelContainer, BorderLayout.NORTH);
 		infoContainer.add(playerControlsPanel, BorderLayout.SOUTH);
 
 		// Add the game board canvas and info container to the content pane.
@@ -642,10 +646,12 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
     // Creates the container which holds the JPlayerStatusPanel objects.
     // Uses globals: playerStatusPanels, players.
-    private JPanel createPlayerStatusPanelContainer() {
+    private void updatePlayerStatusPanelContainer() {
+
+        // Empty the container.
+        playerStatusPanelContainer.removeAll();
 
         // Create the container, and set up it's layout.
-        JPanel container = new JPanel(new GridBagLayout());
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.insets = new Insets(2, 2, 2, 2);
 		gc.fill = GridBagConstraints.HORIZONTAL;
@@ -671,11 +677,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
             playerStatusPanel = new JPlayerStatusPanel(name, score, color);
 
             playerStatusPanels.put(playerRep, playerStatusPanel);
-            container.add(playerStatusPanel, gc);
+            playerStatusPanelContainer.add(playerStatusPanel, gc);
             gc.gridy++;
         }
-
-        return container;
     }
 
 	// Gameplay actions for non-current players are not allowed.
@@ -1243,17 +1247,18 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
      *              a set of MeepleStruct objects which represent the positions
      *              of the meeples which are to be removed after scoring.
 	 */
+    // TODO this and leavegame have same code for removing meeples
 	public void score(Set<MeepleStruct> meeplePositions) {
 
-        for (MeepleStruct ms : meeplePositions) {
+        for (MeepleStruct meeplePosition : meeplePositions) {
 
-            int msxb = ms.getxBoard();
-            int msxt = ms.getxTile();
-            int msyb = ms.getyBoard();
-            int msyt = ms.getyTile();
+            int xBoard = meeplePosition.getxBoard();
+            int yBoard = meeplePosition.getyBoard();
+            int xTile = meeplePosition.getxTile();
+            int yTile = meeplePosition.getyTile();
 
-            int mx = (msxb * tileSize) + (msxt * TileUi.tileTypeSize);
-            int my = (msyb * tileSize) + (msyt * TileUi.tileTypeSize);
+            int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
+            int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
 
             // Meeples are equal if they are located on the same tile, at
             // the same position. So color we pass in doesn't matter. This
@@ -1327,5 +1332,40 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 
 		// TODO score screen or something
 	}
+
+    // Apparently, leaving the game is the same as scoring. Well, kind of.
+    // For the client that clicked the exit button, their client will close as
+    // a result of the close button click... after sending the LEAVEGAME message.
+    // For the other clients, we need to remove the meeples of the player which
+    // left, along with removing them from the scoreboard and removing them from
+    // turn rotation.
+    public void leaveGame(int player, Set<MeepleStruct> meeplePositions) {
+
+        // Remove the player from the scoreboard & turn rotation.
+        playerStatusPanels.remove(player);
+        updatePlayerStatusPanelContainer();
+
+        // Remove the player's meeples.
+        for (MeepleStruct meeplePosition : meeplePositions) {
+
+            int xBoard = meeplePosition.getxBoard();
+            int yBoard = meeplePosition.getyBoard();
+            int xTile = meeplePosition.getxTile();
+            int yTile = meeplePosition.getyTile();
+
+            int mx = (xBoard * tileSize) + (xTile * TileUi.tileTypeSize);
+            int my = (yBoard * tileSize) + (yTile * TileUi.tileTypeSize);
+
+            // Meeples are equal if they are located on the same tile, at
+            // the same position. So color we pass in doesn't matter. This
+            // is okay since we don't allow more than one meeple to be
+            // placed at the same position anyway.
+            MeepleUi meeple = new MeepleUi(new Color(0), mx, my);
+
+            gameBoardWindow.remove(meeple);
+        }
+
+		gameBoardWindow.repaint();
+    }
 
 }

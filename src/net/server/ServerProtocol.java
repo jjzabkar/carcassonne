@@ -87,8 +87,12 @@ public class ServerProtocol extends SocketServerProtocol {
 
 	@Override
 	public void removeSender(Socket socket) {
+        // First retrieve the writer so that we can close it.
+        // TODO this may already be done? I don't think so. Check during testing.
+        writers.get(socket).close();
+
+        // Remove the socket from our list.
 		writers.remove(socket);
-		// TODO: close socket/ writer connections
 	}
 
 	@Override
@@ -142,22 +146,12 @@ public class ServerProtocol extends SocketServerProtocol {
 	private String[] makeLeaveGameMsg(int playerId,
 			ArrayList<BoardPosition> meeplesToRemove) {
 
-		String message = "LEAVEGAME;player;" + playerId
-				+ parseBoardPositionArray(meeplesToRemove);
+		String message = "LEAVEGAME;player;" + playerId;
 
-        return new String[] {SocketServerProtocol.replyAll, message};
-	}
-
-	// TODO: EXITGAME
-	private String parseBoardPositionArray(
-			ArrayList<BoardPosition> removedMeeples) {
-
-		String output = "";
-
-        for (BoardPosition meeplePosition : removedMeeples) {
+	    for (BoardPosition meeplePosition : meeplesToRemove) {
 
             if (meeplePosition != null) {
-                output = output.concat(";meeple;xBoard;"
+                message = message.concat(";meeple;xBoard;"
                         + meeplePosition.xBoard + ";yBoard;"
                         + meeplePosition.yBoard + ";xTile;"
                         + meeplePosition.xTile + ";yTile;"
@@ -165,7 +159,7 @@ public class ServerProtocol extends SocketServerProtocol {
             }
         }
 
-		return output;
+        return new String[] {SocketServerProtocol.replyAll, message};
 	}
 
 	private String[] makeGameInfoMsg() {
@@ -283,12 +277,6 @@ public class ServerProtocol extends SocketServerProtocol {
                 SocketServerProtocol.EXIT};
 	}
 
-	private String[] makeCloseClientMsg() {
-
-        return new String[] {SocketServerProtocol.replySender,
-                SocketServerProtocol.EXIT};
-	}
-
 	// Utility functions.
 	/**
 	 * Add a player to the list of players in the lobby.
@@ -344,9 +332,6 @@ public class ServerProtocol extends SocketServerProtocol {
 	// The String arrays contained in processedMessages are two elements each.
 	// The first element is the message recipient, and the second element is the
 	// message itself.
-	// TODO: I want to make this simpler. Perhaps move String[]... to
-	// ArrayList<String>... to make it easier to split apart the recipient and
-	// message.
 	private ArrayList<String> disseminateMessages(Socket sender,
 			String[]... processedMessages) {
 
@@ -397,11 +382,13 @@ public class ServerProtocol extends SocketServerProtocol {
 		parsedMessage.clear();
 		parsedMessage.addAll(Arrays.asList(input.split(";")));
 
-		// Allow a player to exit the game (lobby).
+		// Exit message is sent with the LEAVEGAME and LEAVELOBBY messages;
+        // it is a generic message meant to be used for network layer management.
 		if (parsedMessage.get(0).equals(SocketServerProtocol.EXIT)) {
 
-			String[] closeClientMsg = makeCloseClientMsg();
-			return disseminateMessages(sender, closeClientMsg);
+			String[] exitMsg = {SocketServerProtocol.replySender,
+                SocketServerProtocol.EXIT};
+			return disseminateMessages(sender, exitMsg);
 		}
 
 		if (parsedMessage.get(0).equals("JOINLOBBY")) {
@@ -448,7 +435,6 @@ public class ServerProtocol extends SocketServerProtocol {
 			return disseminateMessages(sender, updateLobbyMsg);
 		}
 
-		// TODO investigate if SCORE is really just REMOVEMEEPLES
 		// TODO: EXITGAME
 		if (parsedMessage.get(0).equals("LEAVEGAME")) {
 
@@ -456,6 +442,9 @@ public class ServerProtocol extends SocketServerProtocol {
 			int playerSlot = Integer.parseInt(parsedMessage.get(2));
 			Player player = game.getPlayers().get(playerSlot);
 			ArrayList<BoardPosition> meeplesToRemove = game.exitGame(player);
+
+            // Remove the player from the network server/client list.
+            removeSender(sender);
 
 			// Return the message to update the client ui's.
 			String[] leaveGameMsg = makeLeaveGameMsg(playerSlot,
