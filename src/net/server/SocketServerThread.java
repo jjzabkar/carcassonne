@@ -75,7 +75,6 @@ public class SocketServerThread extends Thread {
 
 		String inputLine;
 		ArrayList<String> outputLines;
-		String outLine;
 
 		createMessagers();
 
@@ -86,18 +85,16 @@ public class SocketServerThread extends Thread {
 
 				outputLines = protocol.processInput(clientSocket, inputLine);
 
-				for (int i = 0; i < outputLines.size(); i++) {
+                for (String outputLine : outputLines) {
 
-					outLine = outputLines.get(i);
+                    clientWriter.println(outputLine);
 
-					clientWriter.println(outLine);
+                    if (outputLine.equals(SocketServerProtocol.EXIT)) {
 
-					if (outLine.equals(SocketServerProtocol.EXIT)) {
-
-						removeClient();
-						return;
-					}
-				}
+                        removeClient();
+                        return;
+                    }
+                }
 			}
 
 		} catch (IOException io) {
