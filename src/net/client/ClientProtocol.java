@@ -50,7 +50,7 @@ public class ClientProtocol extends SocketClientProtocol {
 			players = new HashMap<Integer, PlayerStruct>();
 
 			// Parse the message, and place each player in a map to pass on.
-			for (int i = 1; i < message.size(); i = i + 6) {
+			for (int i = 1; i < message.size(); i += 6) {
 
 				int rep = Integer.parseInt(message.get(i + 1));
 				String name = message.get(i + 3);
@@ -123,7 +123,7 @@ public class ClientProtocol extends SocketClientProtocol {
 
 			Set<MeepleStruct> meeplePositions = new HashSet<MeepleStruct>();
 
-			for (int i = 1; i < message.size(); i = i + 9) {
+			for (int i = 1; i < message.size(); i += 9) {
 
 				int xBoard = Integer.parseInt(message.get(i + 2));
 				int yBoard = Integer.parseInt(message.get(i + 4));
@@ -161,10 +161,30 @@ public class ClientProtocol extends SocketClientProtocol {
 
 			int currentPlayer = Integer.parseInt(message.get(3));
 			int isDrawPileEmpty = Integer.parseInt(message.get(5));
-			boolean drawPileEmpty = (isDrawPileEmpty == 0) ? false : true;
+			boolean drawPileEmpty = !(isDrawPileEmpty == 0);
 
 			gameUi.gameInfo(currentPlayer, drawPileEmpty);
 		}
+
+        // LEAVEGAME;player;<int>[;meeple;xBoard;<int>;yBoard;<int>;xTile;<int>;yTile;<int>]*
+        if (message.get(0).equals("LEAVEGAME")) {
+
+            int player = Integer.parseInt(message.get(2));
+            Set<MeepleStruct> meeplePositions = new HashSet<MeepleStruct>();
+
+            for (int i = 3; i < message.size(); i += 9) {
+
+                int xBoard = Integer.parseInt(message.get(i + 2));
+				int yBoard = Integer.parseInt(message.get(i + 4));
+				int xTile = Integer.parseInt(message.get(i + 6));
+				int yTile = Integer.parseInt(message.get(i + 8));
+
+				MeepleStruct ms = new MeepleStruct(xBoard, yBoard, xTile, yTile);
+				meeplePositions.add(ms);
+            }
+
+            gameUi.leaveGame(player, meeplePositions);
+        }
 
 		return null;
 	}
