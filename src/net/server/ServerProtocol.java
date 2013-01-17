@@ -428,6 +428,7 @@ public class ServerProtocol extends SocketServerProtocol {
 			// Free the player which left the lobby.
 			int playerSlot = Integer.parseInt(parsedMessage.get(2));
 			removePlayer(playerSlot);
+            removeSender(sender);
 
 			// Send all the clients a message to update their lobbies.
 			String[] updateLobbyMsg = makeUpdateLobbyMsg();

@@ -821,6 +821,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 			// Send the message to notify we are leaving the game lobby.
 			String msg = "LEAVELOBBY;player;" + player;
 			sendMessage(msg);
+            sendMessage(SocketClientProtocol.EXIT);
 
 			// Return to the main game screen.
 			setContentPane(titleScreenContentPane);
