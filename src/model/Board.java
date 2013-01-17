@@ -244,17 +244,14 @@ public class Board {
 	public ArrayList<BoardPosition> removeMeeples(Player player) {
 
 		ArrayList<BoardPosition> meeplePositions = new ArrayList<BoardPosition>();
-		Iterator<Meeple> playerMeeples = player.getMeeples().iterator();
 
-		while (playerMeeples.hasNext()) {
+        for (Meeple meeple : player.getMeeples()) {
 
-			Meeple meeple = playerMeeples.next();
-
-			if (meeple != null) {
-				meeplePositions.add(meeplePlacement.get(meeple));
-				meeplePlacement.remove(meeple);
-			}
-		}
+            if (meeple != null) {
+                meeplePositions.add(meeplePlacement.get(meeple));
+                meeplePlacement.remove(meeple);
+            }
+        }
 
 		return meeplePositions;
 	}
@@ -270,13 +267,13 @@ public class Board {
 	public int getNumMeeplesPlaced(Player player) {
 
 		int numMeeplesPlaced = 0;
-		ArrayList<Meeple> meeples = player.getMeeples();
 
-		for (int i = 0; i < meeples.size(); i++) {
-			if (meeplePlacement.get(meeples.get(i)) != null) {
-				numMeeplesPlaced++;
-			}
-		}
+        for (Meeple meeple : player.getMeeples()) {
+
+            if (meeplePlacement.get(meeple) != null) {
+                numMeeplesPlaced++;
+            }
+        }
 
 		return numMeeplesPlaced;
 	}

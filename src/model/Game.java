@@ -139,10 +139,6 @@ public class Game {
 	// TODO: EXITGAME
 	public ArrayList<BoardPosition> exitGame(Player player) {
 
-		// This is going to be interesting; the game protocol uses the player's
-		// position in the array to identify them. Perhaps this should be
-		// converted to a hash map. (this was already done in gameui for ui
-		// elements bound to a specific user).
 		player.setScore(0);
 		players.remove(player);
 		return gameBoard.removeMeeples(player);
