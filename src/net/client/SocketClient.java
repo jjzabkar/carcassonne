@@ -11,8 +11,7 @@ public class SocketClient {
 	private final int portNumber;
 	private SocketClientProtocol protocol;
 
-	private Socket socket = null;
-	private PrintWriter writer = null;
+    private PrintWriter writer = null;
 
 	/**
 	 * Constructor for the GameClient.
@@ -36,7 +35,7 @@ public class SocketClient {
 	 */
 	public int bind() {
 		try {
-			socket = new Socket(server, portNumber);
+            Socket socket = new Socket(server, portNumber);
 			writer = new PrintWriter(socket.getOutputStream(), true);
 
 			// Start a separate thread listening for events from the server;

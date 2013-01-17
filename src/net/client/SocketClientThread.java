@@ -38,7 +38,8 @@ class SocketClientThread extends Thread {
 			while ((inputLine = reader.readLine()) != null) {
 
 				// Don't do anything with the response for now.
-				protocol.processInput(server, inputLine);
+                // Nor does the client protocol use the socket.
+				protocol.processInput(null, inputLine);
 
 				if (inputLine.equals(SocketClientProtocol.EXIT)) {
 
@@ -47,7 +48,12 @@ class SocketClientThread extends Thread {
 
 					// Close the socket here instead of in the parent
 					// 'socketClient' so that we can pass back the 'exit'
-					// message & allow the game client to act on it.
+					// message & allow the client application to act on it.
+
+                    // Socket client is attached to the app and sends messages
+                    // from the app to the server, while the Socket client
+                    // thread listens for returned messages from the server
+                    // which it forwards to the app. They share the socket.
 					server.close();
 
 					return;
