@@ -648,8 +648,11 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
     // Uses globals: playerStatusPanels, players.
     private void updatePlayerStatusPanelContainer() {
 
-        // Empty the container.
+        // Empty the containers. Both hold the playerStatusPanels, though one
+        // is a UI container and the other is a Data Structure, which allows
+        // us to modify the data (and then reflect changes in the ui element).
         playerStatusPanelContainer.removeAll();
+        playerStatusPanels.clear();
 
         // Create the container, and set up it's layout.
 		GridBagConstraints gc = new GridBagConstraints();
@@ -680,6 +683,9 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
             playerStatusPanelContainer.add(playerStatusPanel, gc);
             gc.gridy++;
         }
+
+        playerStatusPanelContainer.revalidate();
+        playerStatusPanelContainer.repaint();
     }
 
 	// Gameplay actions for non-current players are not allowed.
@@ -959,12 +965,11 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
 	public void mouseExited(MouseEvent e) {
 	}
 
-	// TODO: one client leaving only removes him from the game,
+    // TODO when leaving, redraw scoreboard also highlights current player
+    // TODO when leaving, check: current player leaving
+    // TODO when leaving, check: host leaving
 
-	// TODO: game continues when a player leaves.. all their meeples are removed
-	// & they are removed from the game.
-
-	// TODO: disable end turn button on non-current player
+	// TODO disable end turn button on non-current player, other controls too
 
 	/**
 	 * Exit the game.
@@ -1343,7 +1348,7 @@ public class GameUi extends JFrame implements ActionListener, MouseListener,
     public void leaveGame(int player, Set<MeepleStruct> meeplePositions) {
 
         // Remove the player from the scoreboard & turn rotation.
-        playerStatusPanels.remove(player);
+        players.remove(player);
         updatePlayerStatusPanelContainer();
 
         // Remove the player's meeples.
