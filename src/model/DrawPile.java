@@ -29,7 +29,7 @@ public class DrawPile {
 	 */
 	private void initDrawPile() {
 
-		char[][] tile = new char[7][7];
+		char[][] tile;
 
 		// See http://en.wikipedia.org/wiki/File:CarcassonneTiles.svg,
 		// the tiles are created beginning at the top left, and going
