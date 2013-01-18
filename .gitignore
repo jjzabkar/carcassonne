@@ -9,5 +9,5 @@
 # Project Specific #
 build
 .settings/*
+.idea/*
 *.iml
-.idea
