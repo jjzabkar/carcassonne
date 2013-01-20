@@ -1028,7 +1028,7 @@ public class Board {
 		// city in the cities array.
 		ArrayList<Integer> incompleteCities = new ArrayList<Integer>();
 
-		boolean newCity = true;
+		boolean newCity;
 		HashSet<BoardPosition> searched;
 		HashSet<BoardPosition> toSearch;
 
@@ -1056,11 +1056,11 @@ public class Board {
 							BoardPosition currentTile;
 							currentTile = new BoardPosition(j, i, l, k);
 
-							for (int m = 0; m < cities.size(); m++) {
-								if (cities.get(m).contains(currentTile)) {
-									newCity = false;
-								}
-							}
+                            for (HashSet<BoardPosition> city : cities) {
+                                if (city.contains(currentTile)) {
+                                    newCity = false;
+                                }
+                            }
 
 							if (newCity) {
 								searched = new HashSet<BoardPosition>();
@@ -1143,38 +1143,38 @@ public class Board {
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map,
 		// and is of the same tile type.
-		for (int i = 0; i < neighborTiles.length; i++) {
-			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
+        for (BoardPosition neighborTile : neighborTiles) {
+            // Check the tile is not null.
+            Tile tile = gameBoard[neighborTile.yBoard][neighborTile.xBoard];
 
-			if (tile != null) {
+            if (tile != null) {
 
-				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
-						neighborTiles[i].yTile);
+                // Check that the tile has the same tile type.
+                TileType tileType = tile.getTileType(neighborTile.xTile,
+                        neighborTile.yTile);
 
-				if (tileType == currentTileType) {
+                if (tileType == currentTileType) {
 
-					BoardPosition toAdd = new BoardPosition(
-							neighborTiles[i].xBoard, neighborTiles[i].yBoard,
-							neighborTiles[i].xTile, neighborTiles[i].yTile);
+                    BoardPosition toAdd = new BoardPosition(
+                            neighborTile.xBoard, neighborTile.yBoard,
+                            neighborTile.xTile, neighborTile.yTile);
 
-					// Check the tile is not already in searched or toSearch.
-					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
-						toSearch.add(toAdd);
-					}
-				}
+                    // Check the tile is not already in searched or toSearch.
+                    if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
+                        toSearch.add(toAdd);
+                    }
+                }
 
-			} else {
-				// If we find a null tile, add the city's index to
-				// incompleteCities.
-				// Do not subtract 1, as the city has yet to be added;
-				// Once the city is added to cities, the index will be correct.
-				if (!incompleteCities.contains(cities.size())) {
-					incompleteCities.add(cities.size());
-				}
-			}
-		}
+            } else {
+                // If we find a null tile, add the city's index to
+                // incompleteCities.
+                // Do not subtract 1, as the city has yet to be added;
+                // Once the city is added to cities, the index will be correct.
+                if (!incompleteCities.contains(cities.size())) {
+                    incompleteCities.add(cities.size());
+                }
+            }
+        }
 
 		// If toSearch is empty, the add searched to cities. Otherwise recurse.
 		if (!toSearch.isEmpty()) {
@@ -1216,7 +1216,7 @@ public class Board {
 
 		// Take a position from the toSearch map to search.
 		Iterator<BoardPosition> toSearchIterator = toSearch.iterator();
-		BoardPosition boardPosition = null;
+		BoardPosition boardPosition;
 
 		if (toSearchIterator.hasNext()) {
 			boardPosition = toSearchIterator.next();
@@ -1246,53 +1246,53 @@ public class Board {
 
 		// Add valid neighbors of position to toSearch map.
 		// A neighbor is valid if it is in neither map, and is a field.
-		for (int i = 0; i < neighborTiles.length; i++) {
+        for (BoardPosition neighborTile : neighborTiles) {
 
-			// Check the tile is not null.
-			Tile tile = gameBoard[neighborTiles[i].yBoard][neighborTiles[i].xBoard];
+            // Check the tile is not null.
+            Tile tile = gameBoard[neighborTile.yBoard][neighborTile.xBoard];
 
-			if (tile != null) {
+            if (tile != null) {
 
-				// Add the tile to the toSearch set.
-				BoardPosition toAdd = new BoardPosition(
-						neighborTiles[i].xBoard, neighborTiles[i].yBoard,
-						neighborTiles[i].xTile, neighborTiles[i].yTile);
+                // Add the tile to the toSearch set.
+                BoardPosition toAdd = new BoardPosition(
+                        neighborTile.xBoard, neighborTile.yBoard,
+                        neighborTile.xTile, neighborTile.yTile);
 
-				// Check that the tile has the same tile type.
-				TileType tileType = tile.getTileType(neighborTiles[i].xTile,
-						neighborTiles[i].yTile);
+                // Check that the tile has the same tile type.
+                TileType tileType = tile.getTileType(neighborTile.xTile,
+                        neighborTile.yTile);
 
-				// Add the tile to be searched if it is also a field.
-				if (tileType == TileType.FIELD) {
+                // Add the tile to be searched if it is also a field.
+                if (tileType == TileType.FIELD) {
 
-					// Check the tile is not already in searched or toSearch.
-					if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
-						toSearch.add(toAdd);
-					}
+                    // Check the tile is not already in searched or toSearch.
+                    if (!toSearch.contains(toAdd) && !searched.contains(toAdd)) {
+                        toSearch.add(toAdd);
+                    }
 
-				} else if (tileType == TileType.CITY) {
+                } else if (tileType == TileType.CITY) {
 
-					// If the neighboring tile is a city tile, find the city
-					// that it belongs to and add that city to our adjacent
-					// cities (only if not already in the adjacent cities).
-					boolean newCity = true;
+                    // If the neighboring tile is a city tile, find the city
+                    // that it belongs to and add that city to our adjacent
+                    // cities (only if not already in the adjacent cities).
+                    boolean newCity = true;
 
-					for (int j = 0; j < adjacentCities.size(); j++) {
-						if (adjacentCities.get(j).contains(toAdd)) {
-							newCity = false;
-						}
-					}
+                    for (HashSet<BoardPosition> adjacentCity : adjacentCities) {
+                        if (adjacentCity.contains(toAdd)) {
+                            newCity = false;
+                        }
+                    }
 
-					if (newCity) {
-						for (int j = 0; j < allCities.size(); j++) {
-							if (allCities.get(j).contains(toAdd)) {
-								adjacentCities.add(allCities.get(j));
-							}
-						}
-					}
-				}
-			}
-		}
+                    if (newCity) {
+                        for (HashSet<BoardPosition> allCity : allCities) {
+                            if (allCity.contains(toAdd)) {
+                                adjacentCities.add(allCity);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 		// If there are still tiles in toSearch then continue searching.
 		if (!toSearch.isEmpty()) {
