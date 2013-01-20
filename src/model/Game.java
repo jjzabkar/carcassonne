@@ -156,11 +156,6 @@ public class Game {
 		return 5;
 	}
 
-	// Pass this off to the gameboard as it keeps track of positioning.
-	public Meeple getMeeple(int xBoard, int yBoard, int xTile, int yTile) {
-		return gameBoard.getMeeple(xBoard, yBoard, xTile, yTile);
-	}
-
 	// Pass off info about the board, used for ui to calculate the canvas size.
 	public int getBoardWidth() {
 		return gameBoard.getWidth();

@@ -25,9 +25,9 @@ class JCanvas extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		for (int i = 0; i < components.size(); i++) {
-			components.get(i).draw(g);
-		}
+        for (DrawableInterface component : components) {
+            component.draw(g);
+        }
 	}
 
 	public void add(DrawableInterface o) {

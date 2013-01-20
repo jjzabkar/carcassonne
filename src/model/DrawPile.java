@@ -23,9 +23,8 @@ public class DrawPile {
 	}
 
 	/**
-	 * Initialize the draw pile for a basic game. The starting tile is already
-	 * removed from the draw pile upon creation, and is automatically added to
-	 * the board during the {@link #initGameBoard()} method.
+	 * Initialize the draw pile for a basic game. The starting tile is
+     * automatically assigned on first draw in the {@link #draw(Player)} method.
 	 */
 	private void initDrawPile() {
 

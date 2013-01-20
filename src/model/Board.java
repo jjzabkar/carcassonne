@@ -655,8 +655,8 @@ public class Board {
 	 * Generic scoring function used to score roads & cities. The function runs
 	 * through each meeple, determining if each is on a tile of the specified
 	 * type. If so, another helper function
-	 * {@link #genericScoreRecursive(HashSet, HashSet, Object[])} is called to
-	 * assist by finding all the meeples on that feature, whether the feature is
+	 * {@link #genericScoreRecursive(HashSet, HashSet, ArrayList, Object[])}
+	 * assists by finding all the meeples on that feature, if the feature is
 	 * complete, and the number of tiles taken by the feature. This information
 	 * is then used to complete scoring. Scoring is done by finding the
 	 * player(s) which has the maximum number of meeples on the feature and then
@@ -873,19 +873,7 @@ public class Board {
 					featureProperties);
 		} else {
 			// Get the number of tiles searched.
-			HashSet<BoardPosition> searchedTiles = new HashSet<BoardPosition>();
-
-            for (BoardPosition searchedBoardPosition : searched) {
-
-                BoardPosition tilePosition = new BoardPosition(
-                        searchedBoardPosition.xBoard,
-                        searchedBoardPosition.yBoard, 0, 0);
-
-                searchedTiles.add(tilePosition);
-            }
-
-			// Set the number of tiles searched.
-			featureProperties[0] = searchedTiles.size();
+            featureProperties[0] = searched.size();
 		}
 	}
 
@@ -1002,7 +990,9 @@ public class Board {
 	/**
 	 * This function returns a list of the completed cities which exist. This is
 	 * the first of two helper functions which are used by
-	 * {@link #scoreFields()}. The other is the {@link #fieldScoreRecursive()}.
+	 * {@link #scoreFields(ArrayList)}. The other is the
+     * {@link #fieldScoreRecursive(HashSet, HashSet, ArrayList, ArrayList,
+     * ArrayList)}.
 	 * 
 	 * It searches through the game board position by position testing if each
 	 * is a city tile. If the position is a city tile and is not already part of
@@ -1090,7 +1080,7 @@ public class Board {
 	/**
 	 * This function uses recursion to find all board positions of a city. This
 	 * function is similar to
-	 * {@link #genericScoreRecursive(HashSet, HashSet, Object[])} and
+	 * {@link #genericScoreRecursive(HashSet, HashSet, ArrayList, Object[])} and
 	 * {@link #isNewFeatureRecursive(HashSet, HashSet)} in the way that it
 	 * searches the game board feature. It recursively records a city by finding
 	 * the neighbor tile positions of an initial position (passed in in
@@ -1204,9 +1194,6 @@ public class Board {
 	 * @param adjacentCities
 	 *            A list of the adjacent completed cities to the feature being
 	 *            searched (sets of coordinates).
-	 * @param featureProperties
-	 *            An object array used to hold the number of cities adjacent to
-	 *            the searched feature.
 	 */
 	private void fieldScoreRecursive(HashSet<BoardPosition> searched,
 			HashSet<BoardPosition> toSearch,
@@ -1363,10 +1350,8 @@ public class Board {
 		sBoardPosition = new BoardPosition(sStr[0], sStr[1], sStr[2], sStr[3]);
 		wBoardPosition = new BoardPosition(wStr[0], wStr[1], wStr[2], wStr[3]);
 
-		BoardPosition[] neighborTiles = { nBoardPosition, eBoardPosition,
-				sBoardPosition, wBoardPosition };
-
-		return neighborTiles;
+        return new BoardPosition[]{nBoardPosition, eBoardPosition,
+                sBoardPosition, wBoardPosition};
 	}
 
 	// Used for the ui; return the size of the board array.

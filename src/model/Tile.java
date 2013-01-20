@@ -50,8 +50,8 @@ public class Tile {
 	/**
 	 * Constructor
 	 * 
-	 * @param tile
-	 * @param identifier
+	 * @param tile a character array describing the layout of land types.
+	 * @param identifier an identifier to associate with the tile.
 	 */
 	public Tile(char[][] tile, String identifier) {
 		this();
