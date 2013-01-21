@@ -870,10 +870,23 @@ public class Board {
 		// If there are still tiles in toSearch then continue searching.
 		if (!toSearch.isEmpty()) {
 			genericScoreRecursive(searched, toSearch, meeplesOnFeature,
-					featureProperties);
-		} else {
-			// Get the number of tiles searched.
-            featureProperties[0] = searched.size();
+                    featureProperties);
+        } else {
+            // Get the number of tiles searched.
+            HashSet<BoardPosition> searchedTiles = new HashSet<BoardPosition>();
+
+            // Filter out multiple tiles by excluding the xTile & yTile values.
+            for (BoardPosition searchedPosition : searched) {
+
+                BoardPosition tilePosition = new BoardPosition(
+                        searchedPosition.xBoard,
+                        searchedPosition.yBoard, 0, 0);
+
+                searchedTiles.add(tilePosition);
+            }
+
+            // Set the number of tiles searched.
+            featureProperties[0] = searchedTiles.size();
 		}
 	}
 
