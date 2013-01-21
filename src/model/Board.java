@@ -70,14 +70,13 @@ public class Board {
 	/**
 	 * Check if it is possible for a tile to be placed on the board.
 	 * 
-	 * @param player
-	 *            The player which is placing the tile.
+	 * @param tile
+	 *            The tile which is to be placed.
 	 * 
 	 * @return false if the tile can not be placed, true otherwise.
 	 */
-	public boolean canPlaceTile(Player player) {
+	public boolean canPlaceTile(Tile tile) {
 
-		Tile tile = player.getCurrentTile();
 		boolean canPlaceTile = false;
 
 		if (tile == null) {
