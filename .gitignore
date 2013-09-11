@@ -8,6 +8,8 @@
 
 # Project Specific #
 build
+.settings
 .settings/*
 .idea/*
 *.iml
+/target
