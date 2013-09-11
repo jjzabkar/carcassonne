@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.awylie</groupId>
+	<artifactId>carcassonne</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.BUILD-SNAPSHOT</version>
+	<name>carcassonne</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<type>jar</type>
+			<scope>test</scope>
+			<version>${junit.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Adds eclipse support (What does this do)? -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${maven-eclipse-plugin.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${maven-compiler-plugin.source.version}</source>
+					<target>${maven-compiler-plugin.target.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${maven-failsafe-plugin.version}</version>
+			</plugin>
+			<plugin>
+				<!-- jacoco: see http://www.eclemma.org/jacoco/trunk/doc/check-mojo.html -->
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin.version}</version>
+				<configuration>
+					<check>
+						<classRatio>${jacoco-maven-plugin.classRatio}</classRatio>
+						<instructionRatio>${jacoco-maven-plugin.instructionRatio}</instructionRatio>
+						<methodRatio>${jacoco-maven-plugin.methodRatio}</methodRatio>
+						<branchRatio>${jacoco-maven-plugin.branchRatio}</branchRatio>
+						<complexityRatio>${jacoco-maven-plugin.complexityRatio}</complexityRatio>
+						<lineRatio>${jacoco-maven-plugin.lineRatio}</lineRatio>
+					</check>
+					<excludes>
+						<exclude>${jacoco-maven-plugin.excludes}</exclude>
+					</excludes>
+					<haltOnFailure>false</haltOnFailure>
+				</configuration>
+				<executions>
+					<execution>
+						<id>prepare-surefire</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<!-- dependency versions -->
+		<junit.version>4.11</junit.version>
+
+		<!-- plugin versions -->
+		<jacoco-maven-plugin.classRatio>95</jacoco-maven-plugin.classRatio>
+		<jacoco-maven-plugin.instructionRatio>95</jacoco-maven-plugin.instructionRatio>
+		<jacoco-maven-plugin.branchRatio>90</jacoco-maven-plugin.branchRatio>
+		<jacoco-maven-plugin.lineRatio>95</jacoco-maven-plugin.lineRatio>
+		<jacoco-maven-plugin.complexityRatio>100</jacoco-maven-plugin.complexityRatio>
+		<jacoco-maven-plugin.methodRatio>100</jacoco-maven-plugin.methodRatio>
+		<jacoco-maven-plugin.excludes></jacoco-maven-plugin.excludes>
+		<jacoco-maven-plugin.version>0.6.2.201302030002</jacoco-maven-plugin.version>
+		<maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
+		<maven-compiler-plugin.source.version>1.6</maven-compiler-plugin.source.version>
+		<maven-compiler-plugin.target.version>1.6</maven-compiler-plugin.target.version>
+		<maven-eclipse-plugin.version>2.9</maven-eclipse-plugin.version>
+		<maven-failsafe-plugin.version>2.15</maven-failsafe-plugin.version>
+	</properties>
+
+</project>
